@@ -2,12 +2,12 @@
 
 InfiniTAM 7
 
-simplifies MemoryBlock to use managed memory instead of explicit synchronization
+* simplifies MemoryBlock to use managed memory instead of explicit synchronization
+* removes rendering and tracking
+* Compiles with and without CUDA (make it a C++ file to compile as c++).
 
 All cpu functionality is not thread-safe.
-Compiles with and without CUDA (make it a C++ file to compile as c++).
-
-For vs13/15 and CUDA 7.0, sm50
+For vs13/15 x64 and optionally CUDA 7.0, sm50.
 
 */
 
@@ -152,11 +152,18 @@ CPU_FUNCTION(bool, cudaSafeCallImpl, (cudaError err, const char * const expr, co
 // Device agnostic atomics
 
 
-FUNCTION(void, _atomicAdd,(_Inout_ unsigned int* target, const unsigned int x), "") {
+FUNCTION(
+    unsigned int
+    ,_atomicAdd
+    , (_Inout_ unsigned int* const address, const unsigned int val)
+    , "reads the 32-bit word old located at the address address in global or shared memory, computes (old + val) [as unsigned int, undefined when this overflows], and stores the result back to memory at the same address. These three operations are performed in one atomic transaction (in CUDA). Returns old."
+    ) {
 #if GPU_CODE
-    atomicAdd(target, x);
+    return atomicAdd(address, val);
 #else
-    *target += x;
+    auto old = *address;
+    *address += val;
+    return old;
     // TODO this needs to change when CPU multithreading is to be used
 #endif
 }
@@ -1583,13 +1590,22 @@ namespace vecmath {
 		CPU_AND_GPU explicit Vector2(const Vector4_<T> &u) { this->x = u.x; this->y = u.y; }
 
 		CPU_AND_GPU inline Vector2<int> toInt() const {
+            assert(this->x <= INT_MAX && this->x >= INT_MIN);
+            assert(this->y <= INT_MAX && this->y >= INT_MIN);
 			return Vector2<int>((int)ROUND(this->x), (int)ROUND(this->y));
 		}
+
+        CPU_AND_GPU inline Vector2<unsigned int> toUInt() const {
+            assert(this->x <= UINT_MAX && this->x >= 0);
+            assert(this->y <= UINT_MAX && this->y >= 0);
+            return Vector2<unsigned int>((unsigned int)ROUND(this->x), (unsigned int)ROUND(this->y));
+        }
 
 		CPU_AND_GPU inline Vector2<int> toIntFloor() const {
 			return Vector2<int>((int)floor(this->x), (int)floor(this->y));
 		}
 
+        // Clamped
 		CPU_AND_GPU inline Vector2<unsigned char> toUChar() const {
 			Vector2<int> vi = toInt(); return Vector2<unsigned char>((unsigned char)CLAMP(vi.x, 0, 255), (unsigned char)CLAMP(vi.y, 0, 255));
 		}
@@ -7813,6 +7829,842 @@ namespace TestScene {
 
 
 
+namespace meshing {
+
+    CONSTANTD int edgeTable[256] = {0x0, 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c, 0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09, 0xf00,
+        0x190, 0x99, 0x393, 0x29a, 0x596, 0x49f, 0x795, 0x69c, 0x99c, 0x895, 0xb9f, 0xa96, 0xd9a, 0xc93, 0xf99, 0xe90, 0x230, 0x339, 0x33, 0x13a,
+        0x636, 0x73f, 0x435, 0x53c, 0xa3c, 0xb35, 0x83f, 0x936, 0xe3a, 0xf33, 0xc39, 0xd30, 0x3a0, 0x2a9, 0x1a3, 0xaa, 0x7a6, 0x6af, 0x5a5, 0x4ac,
+        0xbac, 0xaa5, 0x9af, 0x8a6, 0xfaa, 0xea3, 0xda9, 0xca0, 0x460, 0x569, 0x663, 0x76a, 0x66, 0x16f, 0x265, 0x36c, 0xc6c, 0xd65, 0xe6f, 0xf66,
+        0x86a, 0x963, 0xa69, 0xb60, 0x5f0, 0x4f9, 0x7f3, 0x6fa, 0x1f6, 0xff, 0x3f5, 0x2fc, 0xdfc, 0xcf5, 0xfff, 0xef6, 0x9fa, 0x8f3, 0xbf9, 0xaf0,
+        0x650, 0x759, 0x453, 0x55a, 0x256, 0x35f, 0x55, 0x15c, 0xe5c, 0xf55, 0xc5f, 0xd56, 0xa5a, 0xb53, 0x859, 0x950, 0x7c0, 0x6c9, 0x5c3, 0x4ca,
+        0x3c6, 0x2cf, 0x1c5, 0xcc, 0xfcc, 0xec5, 0xdcf, 0xcc6, 0xbca, 0xac3, 0x9c9, 0x8c0, 0x8c0, 0x9c9, 0xac3, 0xbca, 0xcc6, 0xdcf, 0xec5, 0xfcc,
+        0xcc, 0x1c5, 0x2cf, 0x3c6, 0x4ca, 0x5c3, 0x6c9, 0x7c0, 0x950, 0x859, 0xb53, 0xa5a, 0xd56, 0xc5f, 0xf55, 0xe5c, 0x15c, 0x55, 0x35f, 0x256,
+        0x55a, 0x453, 0x759, 0x650, 0xaf0, 0xbf9, 0x8f3, 0x9fa, 0xef6, 0xfff, 0xcf5, 0xdfc, 0x2fc, 0x3f5, 0xff, 0x1f6, 0x6fa, 0x7f3, 0x4f9, 0x5f0,
+        0xb60, 0xa69, 0x963, 0x86a, 0xf66, 0xe6f, 0xd65, 0xc6c, 0x36c, 0x265, 0x16f, 0x66, 0x76a, 0x663, 0x569, 0x460, 0xca0, 0xda9, 0xea3, 0xfaa,
+        0x8a6, 0x9af, 0xaa5, 0xbac, 0x4ac, 0x5a5, 0x6af, 0x7a6, 0xaa, 0x1a3, 0x2a9, 0x3a0, 0xd30, 0xc39, 0xf33, 0xe3a, 0x936, 0x83f, 0xb35, 0xa3c,
+        0x53c, 0x435, 0x73f, 0x636, 0x13a, 0x33, 0x339, 0x230, 0xe90, 0xf99, 0xc93, 0xd9a, 0xa96, 0xb9f, 0x895, 0x99c, 0x69c, 0x795, 0x49f, 0x596,
+        0x29a, 0x393, 0x99, 0x190, 0xf00, 0xe09, 0xd03, 0xc0a, 0xb06, 0xa0f, 0x905, 0x80c, 0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203, 0x109, 0x0};
+
+    // edge number 0 to 11, or -1 for unused
+    CONSTANTD int triangleTable[256][16] = {{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {0, 1, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {1, 8, 3, 9, 8, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {1, 2, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {0, 8, 3, 1, 2, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {9, 2, 10, 0, 2, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {2, 8, 3, 2, 10, 8, 10, 9, 8, -1, -1, -1, -1, -1, -1, -1}, {3, 11, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {0, 11, 2, 8, 11, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {1, 9, 0, 2, 3, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {1, 11, 2, 1, 9, 11, 9, 8, 11, -1, -1, -1, -1, -1, -1, -1}, {3, 10, 1, 11, 10, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {0, 10, 1, 0, 8, 10, 8, 11, 10, -1, -1, -1, -1, -1, -1, -1}, {3, 9, 0, 3, 11, 9, 11, 10, 9, -1, -1, -1, -1, -1, -1, -1},
+    {9, 8, 10, 10, 8, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {4, 7, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {4, 3, 0, 7, 3, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {0, 1, 9, 8, 4, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {4, 1, 9, 4, 7, 1, 7, 3, 1, -1, -1, -1, -1, -1, -1, -1}, {1, 2, 10, 8, 4, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {3, 4, 7, 3, 0, 4, 1, 2, 10, -1, -1, -1, -1, -1, -1, -1}, {9, 2, 10, 9, 0, 2, 8, 4, 7, -1, -1, -1, -1, -1, -1, -1},
+    {2, 10, 9, 2, 9, 7, 2, 7, 3, 7, 9, 4, -1, -1, -1, -1}, {8, 4, 7, 3, 11, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {11, 4, 7, 11, 2, 4, 2, 0, 4, -1, -1, -1, -1, -1, -1, -1}, {9, 0, 1, 8, 4, 7, 2, 3, 11, -1, -1, -1, -1, -1, -1, -1},
+    {4, 7, 11, 9, 4, 11, 9, 11, 2, 9, 2, 1, -1, -1, -1, -1}, {3, 10, 1, 3, 11, 10, 7, 8, 4, -1, -1, -1, -1, -1, -1, -1},
+    {1, 11, 10, 1, 4, 11, 1, 0, 4, 7, 11, 4, -1, -1, -1, -1}, {4, 7, 8, 9, 0, 11, 9, 11, 10, 11, 0, 3, -1, -1, -1, -1},
+    {4, 7, 11, 4, 11, 9, 9, 11, 10, -1, -1, -1, -1, -1, -1, -1}, {9, 5, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {9, 5, 4, 0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {0, 5, 4, 1, 5, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {8, 5, 4, 8, 3, 5, 3, 1, 5, -1, -1, -1, -1, -1, -1, -1}, {1, 2, 10, 9, 5, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {3, 0, 8, 1, 2, 10, 4, 9, 5, -1, -1, -1, -1, -1, -1, -1}, {5, 2, 10, 5, 4, 2, 4, 0, 2, -1, -1, -1, -1, -1, -1, -1},
+    {2, 10, 5, 3, 2, 5, 3, 5, 4, 3, 4, 8, -1, -1, -1, -1}, {9, 5, 4, 2, 3, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {0, 11, 2, 0, 8, 11, 4, 9, 5, -1, -1, -1, -1, -1, -1, -1}, {0, 5, 4, 0, 1, 5, 2, 3, 11, -1, -1, -1, -1, -1, -1, -1},
+    {2, 1, 5, 2, 5, 8, 2, 8, 11, 4, 8, 5, -1, -1, -1, -1}, {10, 3, 11, 10, 1, 3, 9, 5, 4, -1, -1, -1, -1, -1, -1, -1},
+    {4, 9, 5, 0, 8, 1, 8, 10, 1, 8, 11, 10, -1, -1, -1, -1}, {5, 4, 0, 5, 0, 11, 5, 11, 10, 11, 0, 3, -1, -1, -1, -1},
+    {5, 4, 8, 5, 8, 10, 10, 8, 11, -1, -1, -1, -1, -1, -1, -1}, {9, 7, 8, 5, 7, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {9, 3, 0, 9, 5, 3, 5, 7, 3, -1, -1, -1, -1, -1, -1, -1}, {0, 7, 8, 0, 1, 7, 1, 5, 7, -1, -1, -1, -1, -1, -1, -1},
+    {1, 5, 3, 3, 5, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {9, 7, 8, 9, 5, 7, 10, 1, 2, -1, -1, -1, -1, -1, -1, -1},
+    {10, 1, 2, 9, 5, 0, 5, 3, 0, 5, 7, 3, -1, -1, -1, -1}, {8, 0, 2, 8, 2, 5, 8, 5, 7, 10, 5, 2, -1, -1, -1, -1},
+    {2, 10, 5, 2, 5, 3, 3, 5, 7, -1, -1, -1, -1, -1, -1, -1}, {7, 9, 5, 7, 8, 9, 3, 11, 2, -1, -1, -1, -1, -1, -1, -1},
+    {9, 5, 7, 9, 7, 2, 9, 2, 0, 2, 7, 11, -1, -1, -1, -1}, {2, 3, 11, 0, 1, 8, 1, 7, 8, 1, 5, 7, -1, -1, -1, -1},
+    {11, 2, 1, 11, 1, 7, 7, 1, 5, -1, -1, -1, -1, -1, -1, -1}, {9, 5, 8, 8, 5, 7, 10, 1, 3, 10, 3, 11, -1, -1, -1, -1},
+    {5, 7, 0, 5, 0, 9, 7, 11, 0, 1, 0, 10, 11, 10, 0, -1}, {11, 10, 0, 11, 0, 3, 10, 5, 0, 8, 0, 7, 5, 7, 0, -1},
+    {11, 10, 5, 7, 11, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {10, 6, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {0, 8, 3, 5, 10, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {9, 0, 1, 5, 10, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {1, 8, 3, 1, 9, 8, 5, 10, 6, -1, -1, -1, -1, -1, -1, -1}, {1, 6, 5, 2, 6, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {1, 6, 5, 1, 2, 6, 3, 0, 8, -1, -1, -1, -1, -1, -1, -1}, {9, 6, 5, 9, 0, 6, 0, 2, 6, -1, -1, -1, -1, -1, -1, -1},
+    {5, 9, 8, 5, 8, 2, 5, 2, 6, 3, 2, 8, -1, -1, -1, -1}, {2, 3, 11, 10, 6, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {11, 0, 8, 11, 2, 0, 10, 6, 5, -1, -1, -1, -1, -1, -1, -1}, {0, 1, 9, 2, 3, 11, 5, 10, 6, -1, -1, -1, -1, -1, -1, -1},
+    {5, 10, 6, 1, 9, 2, 9, 11, 2, 9, 8, 11, -1, -1, -1, -1}, {6, 3, 11, 6, 5, 3, 5, 1, 3, -1, -1, -1, -1, -1, -1, -1},
+    {0, 8, 11, 0, 11, 5, 0, 5, 1, 5, 11, 6, -1, -1, -1, -1}, {3, 11, 6, 0, 3, 6, 0, 6, 5, 0, 5, 9, -1, -1, -1, -1},
+    {6, 5, 9, 6, 9, 11, 11, 9, 8, -1, -1, -1, -1, -1, -1, -1}, {5, 10, 6, 4, 7, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {4, 3, 0, 4, 7, 3, 6, 5, 10, -1, -1, -1, -1, -1, -1, -1}, {1, 9, 0, 5, 10, 6, 8, 4, 7, -1, -1, -1, -1, -1, -1, -1},
+    {10, 6, 5, 1, 9, 7, 1, 7, 3, 7, 9, 4, -1, -1, -1, -1}, {6, 1, 2, 6, 5, 1, 4, 7, 8, -1, -1, -1, -1, -1, -1, -1},
+    {1, 2, 5, 5, 2, 6, 3, 0, 4, 3, 4, 7, -1, -1, -1, -1}, {8, 4, 7, 9, 0, 5, 0, 6, 5, 0, 2, 6, -1, -1, -1, -1},
+    {7, 3, 9, 7, 9, 4, 3, 2, 9, 5, 9, 6, 2, 6, 9, -1}, {3, 11, 2, 7, 8, 4, 10, 6, 5, -1, -1, -1, -1, -1, -1, -1},
+    {5, 10, 6, 4, 7, 2, 4, 2, 0, 2, 7, 11, -1, -1, -1, -1}, {0, 1, 9, 4, 7, 8, 2, 3, 11, 5, 10, 6, -1, -1, -1, -1},
+    {9, 2, 1, 9, 11, 2, 9, 4, 11, 7, 11, 4, 5, 10, 6, -1}, {8, 4, 7, 3, 11, 5, 3, 5, 1, 5, 11, 6, -1, -1, -1, -1},
+    {5, 1, 11, 5, 11, 6, 1, 0, 11, 7, 11, 4, 0, 4, 11, -1}, {0, 5, 9, 0, 6, 5, 0, 3, 6, 11, 6, 3, 8, 4, 7, -1},
+    {6, 5, 9, 6, 9, 11, 4, 7, 9, 7, 11, 9, -1, -1, -1, -1}, {10, 4, 9, 6, 4, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {4, 10, 6, 4, 9, 10, 0, 8, 3, -1, -1, -1, -1, -1, -1, -1}, {10, 0, 1, 10, 6, 0, 6, 4, 0, -1, -1, -1, -1, -1, -1, -1},
+    {8, 3, 1, 8, 1, 6, 8, 6, 4, 6, 1, 10, -1, -1, -1, -1}, {1, 4, 9, 1, 2, 4, 2, 6, 4, -1, -1, -1, -1, -1, -1, -1},
+    {3, 0, 8, 1, 2, 9, 2, 4, 9, 2, 6, 4, -1, -1, -1, -1}, {0, 2, 4, 4, 2, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {8, 3, 2, 8, 2, 4, 4, 2, 6, -1, -1, -1, -1, -1, -1, -1}, {10, 4, 9, 10, 6, 4, 11, 2, 3, -1, -1, -1, -1, -1, -1, -1},
+    {0, 8, 2, 2, 8, 11, 4, 9, 10, 4, 10, 6, -1, -1, -1, -1}, {3, 11, 2, 0, 1, 6, 0, 6, 4, 6, 1, 10, -1, -1, -1, -1},
+    {6, 4, 1, 6, 1, 10, 4, 8, 1, 2, 1, 11, 8, 11, 1, -1}, {9, 6, 4, 9, 3, 6, 9, 1, 3, 11, 6, 3, -1, -1, -1, -1},
+    {8, 11, 1, 8, 1, 0, 11, 6, 1, 9, 1, 4, 6, 4, 1, -1}, {3, 11, 6, 3, 6, 0, 0, 6, 4, -1, -1, -1, -1, -1, -1, -1},
+    {6, 4, 8, 11, 6, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {7, 10, 6, 7, 8, 10, 8, 9, 10, -1, -1, -1, -1, -1, -1, -1},
+    {0, 7, 3, 0, 10, 7, 0, 9, 10, 6, 7, 10, -1, -1, -1, -1}, {10, 6, 7, 1, 10, 7, 1, 7, 8, 1, 8, 0, -1, -1, -1, -1},
+    {10, 6, 7, 10, 7, 1, 1, 7, 3, -1, -1, -1, -1, -1, -1, -1}, {1, 2, 6, 1, 6, 8, 1, 8, 9, 8, 6, 7, -1, -1, -1, -1},
+    {2, 6, 9, 2, 9, 1, 6, 7, 9, 0, 9, 3, 7, 3, 9, -1}, {7, 8, 0, 7, 0, 6, 6, 0, 2, -1, -1, -1, -1, -1, -1, -1},
+    {7, 3, 2, 6, 7, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {2, 3, 11, 10, 6, 8, 10, 8, 9, 8, 6, 7, -1, -1, -1, -1},
+    {2, 0, 7, 2, 7, 11, 0, 9, 7, 6, 7, 10, 9, 10, 7, -1}, {1, 8, 0, 1, 7, 8, 1, 10, 7, 6, 7, 10, 2, 3, 11, -1},
+    {11, 2, 1, 11, 1, 7, 10, 6, 1, 6, 7, 1, -1, -1, -1, -1}, {8, 9, 6, 8, 6, 7, 9, 1, 6, 11, 6, 3, 1, 3, 6, -1},
+    {0, 9, 1, 11, 6, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {7, 8, 0, 7, 0, 6, 3, 11, 0, 11, 6, 0, -1, -1, -1, -1},
+    {7, 11, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {7, 6, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {3, 0, 8, 11, 7, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {0, 1, 9, 11, 7, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {8, 1, 9, 8, 3, 1, 11, 7, 6, -1, -1, -1, -1, -1, -1, -1}, {10, 1, 2, 6, 11, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {1, 2, 10, 3, 0, 8, 6, 11, 7, -1, -1, -1, -1, -1, -1, -1}, {2, 9, 0, 2, 10, 9, 6, 11, 7, -1, -1, -1, -1, -1, -1, -1},
+    {6, 11, 7, 2, 10, 3, 10, 8, 3, 10, 9, 8, -1, -1, -1, -1}, {7, 2, 3, 6, 2, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {7, 0, 8, 7, 6, 0, 6, 2, 0, -1, -1, -1, -1, -1, -1, -1}, {2, 7, 6, 2, 3, 7, 0, 1, 9, -1, -1, -1, -1, -1, -1, -1},
+    {1, 6, 2, 1, 8, 6, 1, 9, 8, 8, 7, 6, -1, -1, -1, -1}, {10, 7, 6, 10, 1, 7, 1, 3, 7, -1, -1, -1, -1, -1, -1, -1},
+    {10, 7, 6, 1, 7, 10, 1, 8, 7, 1, 0, 8, -1, -1, -1, -1}, {0, 3, 7, 0, 7, 10, 0, 10, 9, 6, 10, 7, -1, -1, -1, -1},
+    {7, 6, 10, 7, 10, 8, 8, 10, 9, -1, -1, -1, -1, -1, -1, -1}, {6, 8, 4, 11, 8, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {3, 6, 11, 3, 0, 6, 0, 4, 6, -1, -1, -1, -1, -1, -1, -1}, {8, 6, 11, 8, 4, 6, 9, 0, 1, -1, -1, -1, -1, -1, -1, -1},
+    {9, 4, 6, 9, 6, 3, 9, 3, 1, 11, 3, 6, -1, -1, -1, -1}, {6, 8, 4, 6, 11, 8, 2, 10, 1, -1, -1, -1, -1, -1, -1, -1},
+    {1, 2, 10, 3, 0, 11, 0, 6, 11, 0, 4, 6, -1, -1, -1, -1}, {4, 11, 8, 4, 6, 11, 0, 2, 9, 2, 10, 9, -1, -1, -1, -1},
+    {10, 9, 3, 10, 3, 2, 9, 4, 3, 11, 3, 6, 4, 6, 3, -1}, {8, 2, 3, 8, 4, 2, 4, 6, 2, -1, -1, -1, -1, -1, -1, -1},
+    {0, 4, 2, 4, 6, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {1, 9, 0, 2, 3, 4, 2, 4, 6, 4, 3, 8, -1, -1, -1, -1},
+    {1, 9, 4, 1, 4, 2, 2, 4, 6, -1, -1, -1, -1, -1, -1, -1}, {8, 1, 3, 8, 6, 1, 8, 4, 6, 6, 10, 1, -1, -1, -1, -1},
+    {10, 1, 0, 10, 0, 6, 6, 0, 4, -1, -1, -1, -1, -1, -1, -1}, {4, 6, 3, 4, 3, 8, 6, 10, 3, 0, 3, 9, 10, 9, 3, -1},
+    {10, 9, 4, 6, 10, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {4, 9, 5, 7, 6, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {0, 8, 3, 4, 9, 5, 11, 7, 6, -1, -1, -1, -1, -1, -1, -1}, {5, 0, 1, 5, 4, 0, 7, 6, 11, -1, -1, -1, -1, -1, -1, -1},
+    {11, 7, 6, 8, 3, 4, 3, 5, 4, 3, 1, 5, -1, -1, -1, -1}, {9, 5, 4, 10, 1, 2, 7, 6, 11, -1, -1, -1, -1, -1, -1, -1},
+    {6, 11, 7, 1, 2, 10, 0, 8, 3, 4, 9, 5, -1, -1, -1, -1}, {7, 6, 11, 5, 4, 10, 4, 2, 10, 4, 0, 2, -1, -1, -1, -1},
+    {3, 4, 8, 3, 5, 4, 3, 2, 5, 10, 5, 2, 11, 7, 6, -1}, {7, 2, 3, 7, 6, 2, 5, 4, 9, -1, -1, -1, -1, -1, -1, -1},
+    {9, 5, 4, 0, 8, 6, 0, 6, 2, 6, 8, 7, -1, -1, -1, -1}, {3, 6, 2, 3, 7, 6, 1, 5, 0, 5, 4, 0, -1, -1, -1, -1},
+    {6, 2, 8, 6, 8, 7, 2, 1, 8, 4, 8, 5, 1, 5, 8, -1}, {9, 5, 4, 10, 1, 6, 1, 7, 6, 1, 3, 7, -1, -1, -1, -1},
+    {1, 6, 10, 1, 7, 6, 1, 0, 7, 8, 7, 0, 9, 5, 4, -1}, {4, 0, 10, 4, 10, 5, 0, 3, 10, 6, 10, 7, 3, 7, 10, -1},
+    {7, 6, 10, 7, 10, 8, 5, 4, 10, 4, 8, 10, -1, -1, -1, -1}, {6, 9, 5, 6, 11, 9, 11, 8, 9, -1, -1, -1, -1, -1, -1, -1},
+    {3, 6, 11, 0, 6, 3, 0, 5, 6, 0, 9, 5, -1, -1, -1, -1}, {0, 11, 8, 0, 5, 11, 0, 1, 5, 5, 6, 11, -1, -1, -1, -1},
+    {6, 11, 3, 6, 3, 5, 5, 3, 1, -1, -1, -1, -1, -1, -1, -1}, {1, 2, 10, 9, 5, 11, 9, 11, 8, 11, 5, 6, -1, -1, -1, -1},
+    {0, 11, 3, 0, 6, 11, 0, 9, 6, 5, 6, 9, 1, 2, 10, -1}, {11, 8, 5, 11, 5, 6, 8, 0, 5, 10, 5, 2, 0, 2, 5, -1},
+    {6, 11, 3, 6, 3, 5, 2, 10, 3, 10, 5, 3, -1, -1, -1, -1}, {5, 8, 9, 5, 2, 8, 5, 6, 2, 3, 8, 2, -1, -1, -1, -1},
+    {9, 5, 6, 9, 6, 0, 0, 6, 2, -1, -1, -1, -1, -1, -1, -1}, {1, 5, 8, 1, 8, 0, 5, 6, 8, 3, 8, 2, 6, 2, 8, -1},
+    {1, 5, 6, 2, 1, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {1, 3, 6, 1, 6, 10, 3, 8, 6, 5, 6, 9, 8, 9, 6, -1},
+    {10, 1, 0, 10, 0, 6, 9, 5, 0, 5, 6, 0, -1, -1, -1, -1}, {0, 3, 8, 5, 6, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {10, 5, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {11, 5, 10, 7, 5, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {11, 5, 10, 11, 7, 5, 8, 3, 0, -1, -1, -1, -1, -1, -1, -1}, {5, 11, 7, 5, 10, 11, 1, 9, 0, -1, -1, -1, -1, -1, -1, -1},
+    {10, 7, 5, 10, 11, 7, 9, 8, 1, 8, 3, 1, -1, -1, -1, -1}, {11, 1, 2, 11, 7, 1, 7, 5, 1, -1, -1, -1, -1, -1, -1, -1},
+    {0, 8, 3, 1, 2, 7, 1, 7, 5, 7, 2, 11, -1, -1, -1, -1}, {9, 7, 5, 9, 2, 7, 9, 0, 2, 2, 11, 7, -1, -1, -1, -1},
+    {7, 5, 2, 7, 2, 11, 5, 9, 2, 3, 2, 8, 9, 8, 2, -1}, {2, 5, 10, 2, 3, 5, 3, 7, 5, -1, -1, -1, -1, -1, -1, -1},
+    {8, 2, 0, 8, 5, 2, 8, 7, 5, 10, 2, 5, -1, -1, -1, -1}, {9, 0, 1, 5, 10, 3, 5, 3, 7, 3, 10, 2, -1, -1, -1, -1},
+    {9, 8, 2, 9, 2, 1, 8, 7, 2, 10, 2, 5, 7, 5, 2, -1}, {1, 3, 5, 3, 7, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {0, 8, 7, 0, 7, 1, 1, 7, 5, -1, -1, -1, -1, -1, -1, -1}, {9, 0, 3, 9, 3, 5, 5, 3, 7, -1, -1, -1, -1, -1, -1, -1},
+    {9, 8, 7, 5, 9, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {5, 8, 4, 5, 10, 8, 10, 11, 8, -1, -1, -1, -1, -1, -1, -1},
+    {5, 0, 4, 5, 11, 0, 5, 10, 11, 11, 3, 0, -1, -1, -1, -1}, {0, 1, 9, 8, 4, 10, 8, 10, 11, 10, 4, 5, -1, -1, -1, -1},
+    {10, 11, 4, 10, 4, 5, 11, 3, 4, 9, 4, 1, 3, 1, 4, -1}, {2, 5, 1, 2, 8, 5, 2, 11, 8, 4, 5, 8, -1, -1, -1, -1},
+    {0, 4, 11, 0, 11, 3, 4, 5, 11, 2, 11, 1, 5, 1, 11, -1}, {0, 2, 5, 0, 5, 9, 2, 11, 5, 4, 5, 8, 11, 8, 5, -1},
+    {9, 4, 5, 2, 11, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {2, 5, 10, 3, 5, 2, 3, 4, 5, 3, 8, 4, -1, -1, -1, -1},
+    {5, 10, 2, 5, 2, 4, 4, 2, 0, -1, -1, -1, -1, -1, -1, -1}, {3, 10, 2, 3, 5, 10, 3, 8, 5, 4, 5, 8, 0, 1, 9, -1},
+    {5, 10, 2, 5, 2, 4, 1, 9, 2, 9, 4, 2, -1, -1, -1, -1}, {8, 4, 5, 8, 5, 3, 3, 5, 1, -1, -1, -1, -1, -1, -1, -1},
+    {0, 4, 5, 1, 0, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {8, 4, 5, 8, 5, 3, 9, 0, 5, 0, 3, 5, -1, -1, -1, -1},
+    {9, 4, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {4, 11, 7, 4, 9, 11, 9, 10, 11, -1, -1, -1, -1, -1, -1, -1},
+    {0, 8, 3, 4, 9, 7, 9, 11, 7, 9, 10, 11, -1, -1, -1, -1}, {1, 10, 11, 1, 11, 4, 1, 4, 0, 7, 4, 11, -1, -1, -1, -1},
+    {3, 1, 4, 3, 4, 8, 1, 10, 4, 7, 4, 11, 10, 11, 4, -1}, {4, 11, 7, 9, 11, 4, 9, 2, 11, 9, 1, 2, -1, -1, -1, -1},
+    {9, 7, 4, 9, 11, 7, 9, 1, 11, 2, 11, 1, 0, 8, 3, -1}, {11, 7, 4, 11, 4, 2, 2, 4, 0, -1, -1, -1, -1, -1, -1, -1},
+    {11, 7, 4, 11, 4, 2, 8, 3, 4, 3, 2, 4, -1, -1, -1, -1}, {2, 9, 10, 2, 7, 9, 2, 3, 7, 7, 4, 9, -1, -1, -1, -1},
+    {9, 10, 7, 9, 7, 4, 10, 2, 7, 8, 7, 0, 2, 0, 7, -1}, {3, 7, 10, 3, 10, 2, 7, 4, 10, 1, 10, 0, 4, 0, 10, -1},
+    {1, 10, 2, 8, 7, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {4, 9, 1, 4, 1, 7, 7, 1, 3, -1, -1, -1, -1, -1, -1, -1},
+    {4, 9, 1, 4, 1, 7, 0, 8, 1, 8, 7, 1, -1, -1, -1, -1}, {4, 0, 3, 7, 4, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {4, 8, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {9, 10, 8, 10, 11, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {3, 0, 9, 3, 9, 11, 11, 9, 10, -1, -1, -1, -1, -1, -1, -1}, {0, 1, 10, 0, 10, 8, 8, 10, 11, -1, -1, -1, -1, -1, -1, -1},
+    {3, 1, 10, 11, 3, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {1, 2, 11, 1, 11, 9, 9, 11, 8, -1, -1, -1, -1, -1, -1, -1},
+    {3, 0, 9, 3, 9, 11, 1, 2, 9, 2, 11, 9, -1, -1, -1, -1}, {0, 2, 11, 8, 0, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {3, 2, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {2, 3, 8, 2, 8, 10, 10, 8, 9, -1, -1, -1, -1, -1, -1, -1},
+    {9, 10, 2, 0, 9, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {2, 3, 8, 2, 8, 10, 0, 1, 8, 1, 10, 8, -1, -1, -1, -1},
+    {1, 10, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {1, 3, 8, 9, 1, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {0, 9, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, {0, 3, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}};
+
+
+    struct Vertex {
+        Vector3f p, // voxel position in voxel-world-coordinates (integral)
+            c // color from 0 to 255.f, converted later (when writing the obj) to 0-1
+            ;
+    };
+    struct Triangle { Vertex v[3]; };
+
+    GLOBAL(float, shaderParam, 0.f, "for all current shaders, this says which level-set to extract");
+
+    // shaders (Shader) for computing sdf and color value
+    struct mesh_doriginal_c {
+        static FUNCTION(void
+            , getSDFAndC
+            , (
+            _In_ const ITMVoxel* const v,
+            _Out_ float& sdf, 
+            _Out_ Vector3f& c
+            )
+            ,""
+            , PURITY_OUTPUT_POINTERS) {
+            c = v->clr.toFloat();
+            sdf = v->getSDF() - shaderParam;
+        }
+    };
+
+    struct mesh_d_a {
+        static FUNCTION(void
+            , getSDFAndC
+            , (
+            _In_ const ITMVoxel* const v,
+            _Out_ float& sdf,
+            _Out_ Vector3f& c
+            )
+            , ""
+            , PURITY_OUTPUT_POINTERS) {
+            c = Vector3f(v->luminanceAlbedo * 255.f /* needs to have high range now */);
+            sdf = v->refinedDistance - shaderParam;
+        }
+    };
+
+    template<typename Shader> // has to be threaded through till here
+    FUNCTION(
+        void
+        , get
+        , (
+        _In_ const Vector3i voxelLocation, // global voxel coordinate
+        _Inout_ bool& isFound,
+        _Out_ float& sdf,
+        _Out_ Vertex& vert)
+        , "Retrieves the voxel at the specified position and uses a shader to fill sdf and vert.c from it. vert.p is set to voxelLocation. isFound is expected to be true on input and set to false if the voxel cannot be found, otherwise unchanged (i.e. true)."
+        , PURITY_OUTPUT_POINTERS | PURITY_ENVIRONMENT_DEPENDENT) {
+
+        assert(isFound);
+        auto v = Scene::getCurrentSceneVoxel(voxelLocation);
+        if (!v) {
+            isFound = false;
+            return;
+        }
+
+        vert.p = voxelLocation.toFloat();
+
+        // 'shader' specifying which data from the current scene is read to drive coloring and sdf (level-set) of output
+        // this can be fully parametrized to allow visualizing any (derived) voxel data in the mesh
+        /*vert.c = v->clr.toFloat();
+        sdf = v->getSDF();*/
+        Shader::getSDFAndC(v, /* -> */ sdf, vert.c);
+        assertFinite(sdf);
+    }
+
+    template<typename Shader>
+    FUNCTION(
+        bool
+        ,findPointNeighbors
+        ,(
+        _Out_ Vertex v[8], 
+        _Out_ float sdf[8],
+        _In_ const Vector3i globalPos
+        )
+        , "calls get<Shader> on globalPos + {0|1}^3 to fill sdf an v"
+        , PURITY_OUTPUT_POINTERS | PURITY_ENVIRONMENT_DEPENDENT
+        )
+    {
+        bool isFound;
+
+#define access(dx, dy, dz, id) \
+        isFound = true; get<Shader>(globalPos + Vector3i(dx, dy, dz), isFound, sdf[id], v[id]);\
+        if (!isFound || sdf[id] == 1.0f) return false;
+
+        access(0, 0, 0, 0);
+        access(1, 0, 0, 1);
+        access(1, 1, 0, 2);
+        access(0, 1, 0, 3);
+        access(0, 0, 1, 4);
+        access(1, 0, 1, 5);
+        access(1, 1, 1, 6);
+        access(0, 1, 1, 7);
+#undef access
+        return true;
+    }
+
+    FUNCTION(
+        Vector3f
+        ,sdfInterp
+        ,(
+        _In_ const Vector3f &p1,
+        _In_ const Vector3f &p2,
+        _In_ const float valp1,
+        _In_ const float valp2
+        )
+        ,"finds the point between p1 and p2 where valp becomes zero when linearly interpolated on this line with the end values as specified"
+        , PURITY_PURE)
+    {
+        const float eps = 0.00001f;
+        if (fabs(0.0f - valp1) < eps) return p1;
+        if (fabs(0.0f - valp2) < eps) return p2;
+        if (fabs(valp1 - valp2) < eps) return p1;
+        assert(have_opposite_sign(valp1, valp2));
+        return p1 + ((0.0f - valp1) / (valp2 - valp1)) * (p2 - p1);
+    }
+
+    FUNCTION(
+        void
+        ,sdfInterp
+        ,(
+        _Out_ Vertex &out, 
+        _In_ const Vertex &p1,
+        _In_ const Vertex &p2,
+        _In_ const float valp1,
+        _In_ const float valp2
+        )
+        ,"sdfInterp for Vertex"
+        , PURITY_OUTPUT_POINTERS)
+    {
+        out.p = sdfInterp(p1.p, p2.p, valp1, valp2);
+        out.c = sdfInterp(p1.c, p2.c, valp1, valp2);
+    }
+
+    template<typename Shader>
+    FUNCTION(
+        unsigned int
+        ,buildVertList
+        ,(
+        _Out_ Vertex finalVertexList[12], 
+        _In_ const Vector3i globalPos
+        )
+        , "builds the vertex list for the voxel with origin at globalPos. returns (unsigned int )-1 on failure, otherwise an index into triangleTable"
+        , PURITY_OUTPUT_POINTERS | PURITY_ENVIRONMENT_DEPENDENT
+        )
+    {
+        Vertex vertices[8];  float sdfVals[8];
+
+        if (!findPointNeighbors<Shader>(vertices, sdfVals, globalPos)) return -1;
+
+        unsigned int cubeIndex = 0;
+        if (sdfVals[0] < 0) cubeIndex |= 1; if (sdfVals[1] < 0) cubeIndex |= 2;
+        if (sdfVals[2] < 0) cubeIndex |= 4; if (sdfVals[3] < 0) cubeIndex |= 8;
+        if (sdfVals[4] < 0) cubeIndex |= 16; if (sdfVals[5] < 0) cubeIndex |= 32;
+        if (sdfVals[6] < 0) cubeIndex |= 64; if (sdfVals[7] < 0) cubeIndex |= 128;
+
+        if (edgeTable[cubeIndex] == 0) return (unsigned int )- 1;
+
+
+#define access(id, mask, a, b) \
+        if (edgeTable[cubeIndex] & mask) sdfInterp(finalVertexList[id], vertices[a], vertices[b], sdfVals[a], sdfVals[b]);
+
+        access(0, 1, 0, 1);
+        access(1, 2, 1, 2);
+        access(2, 4, 2, 3);
+        access(3, 8, 3, 0);
+        access(4, 16, 4, 5);
+        access(5, 32, 5, 6);
+        access(6, 64, 6, 7);
+        access(7, 128, 7, 4);
+        access(8, 256, 0, 4);
+        access(9, 512, 1, 5);
+        access(10, 1024, 2, 6);
+        access(11, 2048, 3, 7);
+
+#undef access
+
+        return cubeIndex;
+    }
+
+    CONSTANT(unsigned int, noMaxTriangles, 10 * 1000 * 1000, 
+        "");//SDF_LOCAL_BLOCK_NUM * 32; // heuristic ?! // if anything, consider allocated blocks
+    // and max triangles per marching cube and assume moderate occupation of blocks (like, half)
+
+    GLOBAL(Triangle *, triangles, 0, "BUFFER FOR MESHED TRIANGLES, used entries given by noTriangles");
+    GLOBAL(unsigned int, noTriangles, 0, "");
+
+    template<typename Shader>
+    struct MeshVoxel {
+        doForEachAllocatedVoxel_process() {
+            Vertex finalVertexList[12];
+            const unsigned int cubeIndex = buildVertList<Shader>(finalVertexList, globalPos);
+
+            if (cubeIndex == (unsigned int)-1) return;
+
+            for (unsigned int i = 0; triangleTable[cubeIndex][i] != -1; i += 3)
+            {
+                const unsigned int triangleId = _atomicAdd(&noTriangles, 1);
+
+                assert(triangleId < noMaxTriangles - 1);
+
+                DO(k, 3) {
+                    triangles[triangleId].v[k] = finalVertexList[triangleTable[cubeIndex][i + k]];
+                    //assert(triangles[triangleId].c[k].x >= 0.f && triangles[triangleId].c[k].x <= 255.001);
+                }
+            }
+        }
+    };
+
+    CPU_FUNCTION(
+        void
+        ,MeshScene
+        ,(
+        const string& baseFileName, 
+        Scene const * const scene = Scene::getCurrentScene(), 
+        string shader = "mesh_doriginal_c", 
+        float shaderParam = 0.f
+        )
+        , "save scene to baseFileName.obj using the given shader"
+        )
+    {
+        CURRENT_SCENE_SCOPE((Scene*)scene); // promise: we will not modify the scene
+
+        auto_ptr<MemoryBlock<Triangle>> triangles(new MemoryBlock<Triangle>(noMaxTriangles));
+
+        meshing::shaderParam = shaderParam;
+        meshing::noTriangles = 0;
+        meshing::triangles = triangles->GetData();
+
+#define isShader(s) if (shader == #s) { Scene::getCurrentScene()->doForEachAllocatedVoxel<MeshVoxel<s>>(); }
+
+        isShader(mesh_doriginal_c)
+else isShader(mesh_d_a)
+        else fatalError("unkown shader %s", shader.c_str());
+#undef isShader
+        //Scene::getCurrentScene()->doForEachAllocatedVoxel<MeshVoxel>();
+
+
+        assert(noTriangles, "there should have been some triangles generated (cannot mesh empty scenes) but there where none");
+        assert(noMaxTriangles);
+        assert(noTriangles < noMaxTriangles);
+
+
+        // Write
+        cout << "writing file " << baseFileName << endl;
+        Triangle *triangleArray = triangles->GetData();
+
+        FILE *f; fopen_s(&f, (baseFileName + ".obj").c_str(), "wb");
+        assert(f, "could not open file");
+
+        int j = 1;
+        DO(i, noTriangles)
+        {
+            // Walk through vertex list in reverse for correct orientation (is the table flipped?)
+            for (int k = 2; k >= 0; k--) {
+                Vector3f p = triangleArray[i].v[k].p * voxelSize; // coordinates where voxel coordinates
+                Vector3f c = triangleArray[i].v[k].c / 255.0f; // colors in obj are 0 to 1
+
+                fprintf(f, "v %f %f %f %f %f %f\n", xyz(p), xyz(c));
+
+                assert(c.x >= 0.f && c.x <= 1.001, "%f", c.x); // color sanity check
+            }
+
+            fprintf(f, "f %d %d %d\n", j, j + 1, j + 2);
+            j += 3;
+        }
+
+        fclose(f);
+    }
+
+} // meshing namespace
+using namespace meshing;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace fusion {
+
+
+    /** \brief
+    Represents a single "view", i.e. RGB and depth images along
+    with all intrinsic, relative and extrinsic calibration information
+
+    This defines a point-cloud with 'valid half-space-pseudonormals' for each point:
+    We know that the observed points have a normal that lies in the same half-space as the direction towards the camera,
+    otherwise we could not have observed them.
+    */
+    class ITMView : public Managed {
+        /// RGB colour image.
+        ITMUChar4Image * const rgbData;
+
+        /// Float valued depth image converted from disparity image, 
+        /// if available according to @ref inputImageType.
+        ITMFloatImage * const depthData;
+
+        MEMBERFUNCTION(Vector2ui,imgSize_d,() const, "", PURITY_PURE) {
+            assert(depthImage->imgSize().area() > 1);
+            return depthImage->imgSize();
+        }
+    public:
+
+        /// Intrinsic calibration information for the view.
+        ITMRGBDCalib const * const calib;
+
+        CameraImage<Vector4u> * const colorImage;
+
+        /// Float valued depth image converted from disparity image, 
+        /// if available according to @ref inputImageType.
+        DepthImage * const depthImage;
+
+        // \param M_d world-to-view matrix
+        CPU_MEMBERFUNCTION(void, ChangePose, (Matrix4f M_d), "") {
+            assert(&M_d);
+            assert(abs(M_d.GetR().det() - 1) < 0.00001);
+            // TODO delete old ones!
+            auto depthCs = new CoordinateSystem(M_d.getInv());
+            depthImage->eyeCoordinates = depthCs;
+
+            Matrix4f M_rgb = calib->trafo_rgb_to_depth.calib_inv * M_d;
+            auto colorCs = new CoordinateSystem(M_rgb.getInv());
+            colorImage->eyeCoordinates = colorCs;
+        }
+
+        CPU_MEMBERFUNCTION(,ITMView,(const ITMRGBDCalib &calibration), "") : ITMView(&calibration) {};
+
+        CPU_MEMBERFUNCTION(, ITMView, (const ITMRGBDCalib *calibration), "") :
+            calib(new ITMRGBDCalib(*calibration)),
+            rgbData(new ITMUChar4Image(calibration->intrinsics_rgb.imageSize())),
+
+            depthData(new ITMFloatImage(calibration->intrinsics_d.imageSize())),
+
+            depthImage(new DepthImage(depthData, CoordinateSystem::global(), calib->intrinsics_d)),
+            colorImage(new CameraImage<Vector4u>(rgbData, CoordinateSystem::global(), calib->intrinsics_rgb)) {
+            assert(colorImage->eyeCoordinates == CoordinateSystem::global());
+            assert(depthImage->eyeCoordinates == CoordinateSystem::global());
+
+            Matrix4f M; M.setIdentity();
+            ChangePose(M);
+            assert(!(colorImage->eyeCoordinates == CoordinateSystem::global()));
+            assert(!(depthImage->eyeCoordinates == CoordinateSystem::global()));
+            assert(!(colorImage->eyeCoordinates == depthImage->eyeCoordinates));
+        }
+
+        CPU_MEMBERFUNCTION(void, ChangeImages, (_In_ ITMUChar4Image const * const rgbImage, _In_ ITMFloatImage const * const depthImage), "")
+        {
+            rgbData->SetFrom(*rgbImage);
+            depthData->SetFrom(*depthImage);
+        }
+    };
+
+    GLOBAL(ITMView *, currentView, 0, "current depth & color image used by fusion");
+
+#define INVALID_DEPTH (-1.f)
+
+
+
+    // integration 
+
+/** \brief
+Up to @ref maxW observations per voxel are averaged.
+Beyond that a sliding average is computed.
+*/
+#define maxW 100
+
+#define weightedCombine(oldX, oldW, newX, newW) \
+    newX = (float)oldW * oldX + (float)newW * newX; \
+    newW = oldW + newW;\
+    newX /= (float)newW;\
+    newW = MIN(newW, maxW);
+
+    FUNCTION(
+        void
+        ,updateVoxelColorInformation
+        ,(
+        _Out_ ITMVoxel& voxel,
+
+        _In_ const Vector3f oldC,
+        _In_ const int oldW,
+        _In_ /*const*/ Vector3f newC,
+        _In_ /*const*/ int newW
+        )
+        , "updates voxel.clr and w_color"
+        , PURITY_OUTPUT_POINTERS
+        )
+    {
+        weightedCombine(oldC, oldW, newC, newW);
+
+        // write back
+        /// C(X) <-  
+        voxel.clr = TO_UCHAR3(newC);
+        voxel.w_color = (unsigned char)newW;
+    }
+
+    FUNCTION(
+        void
+        , updateVoxelDepthInformation
+        , (
+        _Out_ ITMVoxel& voxel,
+
+        _In_ const float oldF,
+        _In_ const int oldW,
+        _In_ /*const*/ float newF,
+        _In_ /*const*/ int newW
+        )
+        , "updates voxel.sdf and w_depth"
+        , PURITY_OUTPUT_POINTERS
+        )
+    {
+        weightedCombine(oldF, oldW, newF, newW);
+
+        // write back
+        /// D(X) <-  (4)
+        voxel.setSDF(newF);
+        voxel.w_depth = (unsigned char)newW;
+    }
+#undef weightedCombine
+
+    /// Fusion Stage - Camera Data Integration
+    /// \returns \f$\eta\f$, -1 on failure
+    // Note that the stored T-SDF values are normalized to lie
+    // in [-1,1] within the truncation band.
+    FUNCTION(
+        float
+        ,computeUpdatedVoxelDepthInfo
+        , (
+        _Inout_ ITMVoxel& voxel, //!< X
+        _In_ const Point & pt_model //!< position of voxel X in world space
+        )
+        , "operates on currentView"
+        , PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS
+        )
+    {
+
+        // project point into depth image
+        /// X_d, depth camera coordinate system
+        const Vector4f pt_camera = Vector4f(
+            currentView->depthImage->eyeCoordinates->convert(pt_model).location,
+            1);
+        /// \pi(K_dX_d), projection into the depth image
+        Vector2f pt_image;
+        if (!currentView->depthImage->project(pt_model, pt_image))
+            return -1;
+
+        // get measured depth from image, no interpolation
+        /// I_d(\pi(K_dX_d))
+        auto p = currentView->depthImage->getPointForPixel(pt_image.toUInt());
+        const float depth_measure = p.location.z;
+        if (depth_measure <= 0.0) return -1;
+
+        /// I_d(\pi(K_dX_d)) - X_d^(z)          (3)
+        float const eta = depth_measure - pt_camera.z;
+        // check whether voxel needs updating
+        if (eta < -mu) return eta;
+
+        // compute updated SDF value and reliability (number of observations)
+        /// D(X), w(X)
+        float const oldF = voxel.getSDF();
+        int const oldW = voxel.w_depth;
+
+        // newF, normalized for -1 to 1
+        float const newF = MIN(1.0f, eta / mu);
+        int const newW = 1; // TODO consider different weighting schemes, e.g. taking into account the distance and angle of the surface (e.g. via depth image normal)
+
+        updateVoxelDepthInformation(
+            voxel,
+            oldF, oldW, newF, newW);
+
+        return eta;
+    }
+
+    /// \returns early on failure
+    FUNCTION(
+        void
+        ,computeUpdatedVoxelColorInfo
+        ,(
+        _Inout_ ITMVoxel& voxel ,
+        _In_ const Point & pt_model
+        )
+        , "integrate color. operates on currentView"
+        , PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS
+        )
+    {
+        Vector2f pt_image;
+        if (!currentView->colorImage->project(pt_model, pt_image))
+            return;
+
+        const int oldW = voxel.w_color;
+        const Vector3f oldC = TO_FLOAT3(voxel.clr);
+
+        /// Like formula (4) for depth
+        const Vector3f newC = TO_VECTOR3(interpolateBilinear<Vector4f>(currentView->colorImage->image->GetData(), pt_image, currentView->colorImage->imgSize()));
+        const int newW = 1;
+
+        updateVoxelColorInformation(
+            voxel,
+            oldC, oldW, newC, newW);
+    }
+
+
+    FUNCTION(
+        void
+        ,computeUpdatedVoxelInfo
+        , (
+        _Inout_ ITMVoxel & voxel, 
+        _In_ const Point & pt_model
+        )
+        , "integrate depth, operates on currentView"
+        ) {
+        const float eta = computeUpdatedVoxelDepthInfo(voxel, pt_model);
+
+        // Only the voxels within +- 25% mu of the surface get color
+        if ((eta > mu) || (fabs(eta / mu) > 0.25f)) return;
+        computeUpdatedVoxelColorInfo(voxel, pt_model);
+    }
+
+    /// Determine the blocks around a given depth sample that are currently visible
+    /// and need to be allocated.
+    /// Builds hashVisibility and entriesAllocType.
+    /// Operates on currentScene and currentView
+    /// \param x,y [in] loop over depth image.
+    struct buildHashAllocAndVisibleTypePP {
+        forEachPixelNoImage_process() {
+            // Find 3d position of depth pixel xy, in eye coordinates
+            const auto pt_camera = currentView->depthImage->getPointForPixel(Vector2ui(x, y));
+
+            const float depth = pt_camera.location.z;
+            // cannot deal with things too close to the camera
+            if (depth <= 0 || (depth - mu) < 0) return;
+
+            assert(depth > 0);
+            assert(assertFinite(depth));
+            assert(depth < 20.f, "sanity check: Found a depth of %fm but expecting depths less than 20m, you probably have an error in the depth convertion process", depth);
+
+            // the found point +- mu
+            const Vector pt_camera_v = (pt_camera - currentView->depthImage->location());
+            const float norm = length(pt_camera_v.direction);
+            const Vector pt_camera_v_minus_mu = pt_camera_v*(1.0f - mu / norm);
+            const Vector pt_camera_v_plus_mu = pt_camera_v*(1.0f + mu / norm);
+
+            // Convert to voxel block coordinates  
+            // the initial point pt_camera_v_minus_mu
+            /*mutable*/ Point point = voxelBlockCoordinates->convert(currentView->depthImage->location() + pt_camera_v_minus_mu);
+            // the direction towards pt_camera_v_plus_mu in voxelBlockCoordinates
+            const Vector vector = voxelBlockCoordinates->convert(pt_camera_v_plus_mu - pt_camera_v_minus_mu);
+
+            // We will step along point -> point_e and add all voxel blocks we encounter to the visible list
+            // "Create a segment on the line of sight in the range of the T-SDF truncation band"
+            const int noSteps = (int)ceil(2.0f* length(vector.direction)); // make steps smaller than 1, maybe even < 1/2 to really land in all blocks at least once
+            const Vector direction = vector * (1.f / (float)(noSteps - 1));
+
+            //add neighbouring blocks
+            REPEAT(noSteps)
+            {
+                // "take the block coordinates of voxels on this line segment"
+                const VoxelBlockPos blockPos = TO_SHORT_FLOOR3(point.location);
+                Scene::requestCurrentSceneVoxelBlockAllocation(blockPos);
+
+                point = point + direction;
+            }
+        }
+    };
+
+    // operates on currentView and current scene
+    struct IntegrateVoxel {
+        doForEachAllocatedVoxel_process() {
+            computeUpdatedVoxelInfo(*v, globalPoint);
+        }
+    };
+
+    CPU_FUNCTION(void, Fuse, (), "Fusion stage of the system, depth integration process. Operates on CURRENT_SCENE and currentView.")
+    {
+        assert(Scene::getCurrentScene());
+        assert(currentView);
+
+        // allocation request
+        forEachPixelNoImage<buildHashAllocAndVisibleTypePP>(currentView->depthImage->imgSize());
+
+        // allocation
+        Scene::performCurrentSceneAllocations();
+
+        // camera data integration
+        Scene::getCurrentScene()->doForEachAllocatedVoxel<IntegrateVoxel>();
+    }
+
+
+
+}
+using namespace fusion;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -7889,7 +8741,7 @@ TEST(testfcpu) {
 
 
 
-
+// === external interface, scripting ===
 
 
 
@@ -7913,9 +8765,12 @@ extern "C" int RunTestsM() {
     return 1;
 }
 
+// TODO this setup code should be run whether we use the WL interface or not
 void preWsMain() {
     //_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF); // catch malloc errors // TODO this prints a report when the program gracefully terminates. Anything else?
     // TODO I think this program still leaks lots of (cuda and cpu) memory, e.g. images
+
+    // TODO init cuda memory
 
     _controlfp_s(NULL,
         0, // By default, the run-time libraries mask all floating-point exceptions. (11111...). We set to 0 (unmask) the following:
@@ -7930,3 +8785,350 @@ void preWsExit() {
 
 
 
+
+
+// InfiniTAMScene[id] - management
+vector<Scene*> scenes;
+int addScene(Scene* s) {
+    assert(s);
+    scenes.push_back(s);
+    return scenes.size() - 1;
+}
+Scene* getScene(int id) {
+    assert(id >= 0 && id < scenes.size());
+    auto s = scenes[id];
+    assert(s, "%p, %d", s, id);
+    return s;
+}
+
+
+
+
+
+// WSTP utilities, very ad-hoc
+namespace WSTP {
+#define getTensor(TYPE, WLTYPE, expectDepth) int* dims; TYPE* a; int depth; char** heads; WSGet ## WLTYPE ## Array(stdlink, &a, &dims, &heads, &depth); assert(depth == expectDepth); 
+
+#define releaseTensor(TYPE) WSRelease ## TYPE ## Array(stdlink, a, dims, heads, depth);
+
+
+    void putImageRGBA8(ITMUChar4Image* i) {
+        int dims[] = {i->noDims.height, i->noDims.width, 4};
+        const char* heads[] = {"List", "List", "List"};
+        WSPutInteger8Array(stdlink,
+            (unsigned char*)i->GetData(),
+            dims, heads, 3);
+    }
+
+    void putImageFloat(ITMFloatImage* i) {
+        int dims[] = {i->noDims.height, i->noDims.width};
+        const char* heads[] = {"List", "List"};
+        WSPutReal32Array(stdlink,
+            (float*)i->GetData(),
+            dims, heads, 2);
+    }
+
+    void putImageFloat4(ITMFloat4Image* i) {
+        int dims[] = {i->noDims.height, i->noDims.width, 4};
+        const char* heads[] = {"List", "List", "List"};
+        WSPutReal32Array(stdlink,
+            (float*)i->GetData(),
+            dims, heads, 3);
+    }
+
+    // putFloatList rather
+    void putFloatArray(const float* a, const int n) {
+        int dims[] = {n};
+        const char* heads[] = {"List"};
+        WSPutReal32Array(stdlink, a, dims, heads, 1); // use List function
+    }
+
+    void putUnorm(unsigned char c) {
+        WSPutReal(stdlink, 1. * c / UCHAR_MAX);
+    }
+
+    unsigned char getUnormUC() {
+        double d;  WSGetDouble(stdlink, &d);
+        return d * UCHAR_MAX;
+    }
+
+    void putColor(Vector3u c) {
+        WSPutFunction(stdlink, "List", 3);
+        putUnorm(c.r);
+        putUnorm(c.g);
+        putUnorm(c.b);
+    }
+
+    Vector3u getColor() {
+        long args; WSCheckFunction(stdlink, "List", &args);
+        assert(args == 3);
+
+        unsigned char r = getUnormUC(), g = getUnormUC(), b = getUnormUC();
+        return Vector3u(r, g, b);
+    }
+
+    // {normalizedSDF_?SNormQ, sdfSampleCount_Integer?NonNegative, color : {r_?UNormQ, g_?UNormQ, b_?UNormQ}, colorSampleCount_Integer?NonNegative}
+    void putVoxel(const ITMVoxel& v) {
+        WSPutFunction(stdlink, "List", 4);
+
+        WSPutReal(stdlink, v.getSDF());
+        WSPutInteger(stdlink, v.w_depth);
+        putColor(v.clr);
+        WSPutInteger(stdlink, v.w_color);
+    }
+
+    void getVoxel(_Out_ ITMVoxel& v) {
+        long args;
+        WSCheckFunction(stdlink, "List", &args);
+        assert(args == 4);
+
+        float f; WSGetFloat(stdlink, &f); v.setSDF(f);
+        WSGetInteger8(stdlink, &v.w_depth);
+        v.clr = getColor();
+        WSGetInteger8(stdlink, &v.w_color);
+    }
+
+
+    // {{x_Integer,y_Integer,z_Integer}, {__Voxel}}
+    void putVoxelBlock(ITMVoxelBlock& v) {
+        WSPutFunction(stdlink, "List", 2);
+
+        WSPutInteger16List(stdlink, (short*)&v.pos_, 3); // TODO are these packed correctly?
+
+        WSPutFunction(stdlink, "List", SDF_BLOCK_SIZE3);
+        /*for (int i = 0; i < SDF_BLOCK_SIZE3; i++)
+        putVoxel(v.blockVoxels[i]);*/
+        // change ordering such that {x,y,z} indices in mathematica correspond to xyz here:
+        // make z vary fastest
+        XYZ_over_SDF_BLOCK_SIZE_xyz_order
+            putVoxel(*v.getVoxel(Vector3ui(x, y, z)));
+
+    }
+
+    // receives {{x_Integer,y_Integer,z_Integer}, {__Voxel}}
+    void getVoxelBlock(_Out_ ITMVoxelBlock& v) {
+        long args;
+        WSCheckFunction(stdlink, "List", &args);
+        assert(args == 2);
+
+        int count; short* ppos; WSGetInteger16List(stdlink, &ppos, &count);
+        assert(count == 3);
+        v.reinit(VoxelBlockPos(ppos));
+        assert(v.getPos() != INVALID_VOXEL_BLOCK_POS);
+        WSReleaseInteger16List(stdlink, ppos, count);
+
+        WSCheckFunction(stdlink, "List", &args);
+        assert(args == SDF_BLOCK_SIZE3);
+
+        /*
+        for (int i = 0; i < SDF_BLOCK_SIZE3; i++)
+        getVoxel(v.blockVoxels[i]);
+        */
+        // change ordering such that {x,y,z} indices in mathematica correspond to xyz here:
+        // make z vary fastest
+        XYZ_over_SDF_BLOCK_SIZE_xyz_order
+            getVoxel(*v.getVoxel(Vector3ui(x, y, z)));
+    }
+
+    Matrix4f getMatrix4f()
+    {
+        getTensor(double, Real64, 2);
+        assert(dims[0] == 4); assert(dims[1] == 4);
+
+        // read row-major matrix
+        Matrix4f m;
+        for (int y = 0; y < 4; y++) for (int x = 0; x < 4; x++) m(x, y) = a[y * 4 + x];
+
+        releaseTensor(Real64);
+        return m;
+    }
+
+    Vector4f getVector4f()
+    {
+        getTensor(float, Real32, 1);
+        assert(dims[0] == 4);
+        Vector4f m(a);
+        releaseTensor(Real32);
+        return m;
+    }
+
+    template<int X>
+    VectorX<float, X> getVectorXf()
+    {
+        getTensor(float, Real32, 1);
+        assert(dims[0] == X);
+        VectorX<float, X> m(a);
+        releaseTensor(Real32);
+        return m;
+    }
+
+
+
+    void putMatrix4f(Matrix4f m) {
+        int dims[] = {4, 4};
+        const char* heads[] = {"List", "List"};
+
+        // write row-major matrix
+        float a[4 * 4];
+        for (int y = 0; y < 4; y++) for (int x = 0; x < 4; x++) a[y * 4 + x] = m(x, y);
+
+        WSPutReal32Array(stdlink, a, dims, heads, 2);
+    }
+}
+using namespace WSTP;
+
+
+
+
+
+extern "C" {
+
+    int createScene(double voxelSize_) {
+        return addScene(new Scene(voxelSize_));
+    }
+
+    int sceneExistsQ(int id) {
+        return id >= 0 && id < scenes.size();
+    }
+
+    double getSceneVoxelSize(int id) {
+        return getScene(id)->getVoxelSize();
+    }
+
+    int countVoxelBlocks(int id) {
+        return getScene(id)->countVoxelBlocks();
+    }
+
+    void serializeScene(int id, char* fn) {
+        getScene(id)->serialize(binopen_write(fn));
+        WL_RETURN_VOID();
+    }
+
+    void deserializeScene(int id, char* fn) {
+        auto s = getScene(id);
+        s->deserialize(binopen_read(fn));
+        WL_RETURN_VOID();
+    }
+
+
+
+    // Manually insert a *new* voxel block
+    // TODO what should happen when it already exists?
+    // format: c.f. getVoxelBlock
+    void putVoxelBlock(int id) {
+        const auto s = getScene(id);
+
+        const int vbCountBefore = s->countVoxelBlocks();
+
+        ITMVoxelBlock receivedVb;
+        getVoxelBlock(receivedVb);
+        assert(receivedVb.getPos() != INVALID_VOXEL_BLOCK_POS);
+
+        auto& sceneVb = *s->getVoxelBlockForSequenceNumber(s->performVoxelBlockAllocation(receivedVb.getPos()));
+        assert(sceneVb.getPos() == receivedVb.getPos());
+        sceneVb = receivedVb; // copy
+
+        assert(vbCountBefore + 1 == s->countVoxelBlocks());
+        WL_RETURN_VOID();
+    }
+
+    // {__VoxelBlock} at most max many. 0 or negative numbers mean all
+    void getVoxelBlock(int id, int i) {
+        auto s = getScene(id);
+        const int n = s->voxelBlockHash->getLowestFreeSequenceNumber();
+        assert(i >= 1 /* valid sequence nubmers start at 1 - TODO this knowledge should not be repeated here */ && i < n, "there is no voxelBlock with index %d, valid indices are 1 to %d", i, n - 1);
+        putVoxelBlock(s->localVBA[i]);
+    }
+
+    void meshScene(int id, char* fn) {
+        MeshScene(fn, getScene(id));
+        WL_RETURN_VOID();
+    }
+
+    void meshSceneWithShader(int id, char* fn, char* shader, double shaderParam) {
+        MeshScene(fn, getScene(id), shader, (float)shaderParam);
+        WL_RETURN_VOID();
+    }
+
+    ITMIntrinsics getIntrinsics() {
+
+        ITMIntrinsics intrin;
+        auto i = getVectorXf<6>();
+        intrin.fx = i[0];
+        intrin.fy = i[1];
+        intrin.px = i[2];
+        intrin.py = i[3];
+        intrin.sizeX = i[4];
+        intrin.sizeY = i[5];
+        return intrin;
+    }
+
+    void processFrame(int id) {
+        // rgbaByteImage
+        Vector2ui rgbSz;
+        ITMUChar4Image* rgbaImage;
+        {
+            // rgbaByteImage_ /;TensorQ[rgbaByteImage, IntegerQ] &&Last@Dimensions@rgbaByteImage == 4
+            getTensor(unsigned char, Integer8, 3);
+            assert(dims[0] > 1); assert(dims[1] > 1); assert(dims[2] == 4);
+
+            rgbSz = Vector2ui(dims[1], dims[0]);
+            assert(rgbSz.width > rgbSz.height);
+
+            rgbaImage = new ITMUChar4Image(rgbSz);
+            rgbaImage->SetFrom((char*)a, rgbSz.area());
+
+            releaseTensor(Integer8);
+        }
+
+        //depthImage_
+        Vector2ui depthSz;
+        ITMFloatImage* depthImage;
+        {
+            // depthData_?NumericMatrixQ
+            getTensor(float, Real32, 2);
+            assert(dims[0] > 1); assert(dims[1] > 1);
+            depthSz = Vector2ui(dims[1], dims[0]);
+            assert(depthSz.width > depthSz.height);
+
+            depthImage = new ITMFloatImage(depthSz);
+            depthImage->SetFrom((char*)a, depthSz.area());
+
+            releaseTensor(Real32);
+        }
+        assert(depthSz.area() <= rgbSz.area());
+
+        // poseWorldToView_?poseMatrixQ
+        auto poseWorldToView = getMatrix4f();
+
+        ITMRGBDCalib calib;
+        // intrinsicsRgb : NamelessIntrinsicsPattern[]
+        calib.intrinsics_rgb = getIntrinsics();
+        assert(calib.intrinsics_rgb.imageSize() == rgbSz);
+        // intrinsicsD : NamelessIntrinsicsPattern[]
+        calib.intrinsics_d = getIntrinsics();
+        assert(calib.intrinsics_d.imageSize() == depthSz);
+
+        // rgbToDepth_?poseMatrixQ
+        calib.trafo_rgb_to_depth.SetFrom(getMatrix4f());
+
+        CURRENT_SCENE_SCOPE(getScene(id));
+
+        // Finally
+        assert(rgbaImage->noDims.area() > 1);
+        assert(depthImage->noDims.area() > 1);
+
+        if (currentView) delete currentView;
+        currentView = new ITMView(calib);
+
+        currentView->ChangeImages(rgbaImage, depthImage);
+        currentView->ChangePose(poseWorldToView);
+
+        Fuse();
+
+        //if (doTracking)
+        // ;// putMatrix4f(currentView->depthImage->eyeCoordinates->fromGlobal);
+        //else 
+        WL_RETURN_VOID(); // only changes state, no immediate result
+    }
+}

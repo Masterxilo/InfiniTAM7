@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     48455,       1279]
-NotebookOptionsPosition[     47276,       1238]
-NotebookOutlinePosition[     47618,       1253]
-CellTagsIndexPosition[     47575,       1250]
+NotebookDataLength[     83569,       2174]
+NotebookOptionsPosition[     81850,       2118]
+NotebookOutlinePosition[     82192,       2133]
+CellTagsIndexPosition[     82149,       2130]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -36,690 +36,17 @@ of them, such that names look like \
 Cell[CellGroupData[{
 
 Cell[BoxData[{
- RowBox[{"Install", "[", 
-  RowBox[{"LinkConnect", "[", 
-   RowBox[{"\"\<8000@masterxilo.ddns.net\>\"", ",", 
-    RowBox[{"LinkProtocol", "\[Rule]", "\"\<TCPIP\>\""}]}], "]"}], 
-  "]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Install", "[", 
+   RowBox[{"LinkConnect", "[", 
+    RowBox[{"\"\<8000\>\"", ",", 
+     RowBox[{"LinkProtocol", "\[Rule]", "\"\<TCPIP\>\""}]}], "]"}], "]"}], 
+  RowBox[{"(*", "localhost", "*)"}]}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{"Get42", "[", "]"}], "~", "VerificationTest", "~", 
   "42"}], "\[IndentingNewLine]", 
  RowBox[{"RunTestsM", "[", "]"}]}], "Input",
- CellChangeTimes->{{3.685215087896309*^9, 3.6852150942800393`*^9}}],
-
-Cell[BoxData[
- TemplateBox[{
-  "LinkConnect","linkc",
-   "\"Unable to connect to \\!\\(\\*RowBox[{\\\"LinkObject\\\", \\\"[\\\", \
-RowBox[{\\\"\\\\\\\"8000@masterxilo.ddns.net\\\\\\\"\\\", \\\",\\\", \\\"2313\
-\\\", \\\",\\\", \\\"14\\\"}], \\\"]\\\"}]\\).\"",2,125,14,
-   28168248676308092987,"Local"},
-  "MessageTemplate"]], "Message", "MSG",
- CellChangeTimes->{3.6852150963667903`*^9}],
-
-Cell[BoxData[
- TemplateBox[{
-  "First","normal",
-   "\"Nonatomic expression expected at position \
-\\!\\(\\*RowBox[{\\\"1\\\"}]\\) in \\!\\(\\*RowBox[{\\\"First\\\", \\\"[\\\", \
-\\\"$Failed\\\", \\\"]\\\"}]\\).\"",2,125,15,28168248676308092987,"Local"},
-  "MessageTemplate"]], "Message", "MSG",
- CellChangeTimes->{3.685215096398039*^9}],
-
-Cell[BoxData["$Failed"], "Output",
- CellChangeTimes->{3.685215096398039*^9}],
-
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{
-   TagBox["TestResultObject",
-    "SummaryHead"], "[", 
-   DynamicModuleBox[{Typeset`open$$ = False}, 
-    PanelBox[
-     PaneSelectorBox[{False->GridBox[{
-        {
-         PaneBox[
-          ButtonBox[
-           
-           DynamicBox[FEPrivate`FrontEndResource[
-            "FEBitmaps", "SquarePlusIconMedium"],
-            ImageSizeCache->{14., {0., 14.}}],
-           Appearance->None,
-           ButtonFunction:>(Typeset`open$$ = True),
-           Evaluator->Automatic,
-           Method->"Preemptive"],
-          Alignment->{Center, Center},
-          
-          ImageSize->
-           Dynamic[{
-            Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-             Magnification]}]], 
-         GraphicsBox[InsetBox[
-           PaneBox[
-            
-            DynamicBox[FEPrivate`FrontEndResource[
-             "MUnitExpressions", "TestFailureIcon"],
-             ImageSizeCache->{14., {4., 10.}}],
-            Alignment->Center,
-            
-            ImageSize->
-             Dynamic[{
-              Automatic, 3.5 CurrentValue["FontCapHeight"]/
-               AbsoluteCurrentValue[Magnification]}]]],
-          AspectRatio->1,
-          Axes->False,
-          Background->GrayLevel[0.93],
-          Frame->True,
-          FrameStyle->Directive[
-            Thickness[Tiny], 
-            GrayLevel[0.55]],
-          FrameTicks->None,
-          ImageSize->{Automatic, 
-            Dynamic[
-            3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-             Magnification]]},
-          PlotRange->{{0, 1}, {0, 1}},
-          ImageCache->GraphicsData["CompressedBitmap", "\<\
-eJzzTSzJSM1NLMlMTlRwL0osyMhMLlZwyy8CCjEzMjAwKIOwAgOI/R/IhBLK
-/3t6eoAMZjD97t07MJYHkYwjSooTTDJH39+3d/f5ng6uty9fMrCCxVhAbJAY
-CIPkuWhtCjuIZAIpYmD+ezQr9f/RzJR9F7o7GJhAhjCB1bCBmCBBkCQIgxSC
-tHASMhfkAGaQDiaQdrCRDMzIJjEwgUlmkEJUvfiMxWUO2BYWiIkgJlgdSBsH
-wWBE9iIDG9wwiARcMR5zuLCYg+YUsFHcg90IagUI9aOKpmmKVlmA+uZSJ+MP
-krKQplKwGocRAFqcduc=\
-\>"]], GridBox[{
-           {
-            RowBox[{
-             TagBox["\<\"Outcome: \"\>",
-              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
-             TagBox["\<\"Failure\"\>",
-              "SummaryItem"]}]},
-           {
-            RowBox[{
-             TagBox["\<\"Test ID: \"\>",
-              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
-             TagBox["None",
-              "SummaryItem"]}]}
-          },
-          AutoDelete->False,
-          
-          BaseStyle->{
-           ShowStringCharacters -> False, NumberMarks -> False, 
-            PrintPrecision -> 3, ShowSyntaxStyles -> False},
-          GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Automatic}}},
-          
-          GridBoxItemSize->{
-           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
-          GridBoxSpacings->{"Columns" -> {{2}}, "Rows" -> {{Automatic}}}]}
-       },
-       AutoDelete->False,
-       BaselinePosition->{1, 1},
-       GridBoxAlignment->{"Rows" -> {{Top}}},
-       GridBoxItemSize->{
-        "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], True->GridBox[{
-        {
-         PaneBox[
-          ButtonBox[
-           
-           DynamicBox[FEPrivate`FrontEndResource[
-            "FEBitmaps", "SquareMinusIconMedium"]],
-           Appearance->None,
-           ButtonFunction:>(Typeset`open$$ = False),
-           Evaluator->Automatic,
-           Method->"Preemptive"],
-          Alignment->{Center, Center},
-          
-          ImageSize->
-           Dynamic[{
-            Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-             Magnification]}]], 
-         GraphicsBox[InsetBox[
-           PaneBox[
-            
-            DynamicBox[FEPrivate`FrontEndResource[
-             "MUnitExpressions", "TestFailureIcon"]],
-            Alignment->Center,
-            
-            ImageSize->
-             Dynamic[{
-              Automatic, 3.5 CurrentValue["FontCapHeight"]/
-               AbsoluteCurrentValue[Magnification]}]]],
-          AspectRatio->1,
-          Axes->False,
-          Background->GrayLevel[0.93],
-          Frame->True,
-          FrameStyle->Directive[
-            Thickness[Tiny], 
-            GrayLevel[0.55]],
-          FrameTicks->None,
-          ImageSize->{Automatic, 
-            Dynamic[
-            3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-             Magnification]]},
-          PlotRange->{{0, 1}, {0, 1}}], GridBox[{
-           {
-            RowBox[{
-             TagBox["\<\"Outcome: \"\>",
-              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
-             TagBox["\<\"Failure\"\>",
-              "SummaryItem"]}]},
-           {
-            RowBox[{
-             TagBox["\<\"Test ID: \"\>",
-              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
-             TagBox["None",
-              "SummaryItem"]}]},
-           {
-            RowBox[{
-             TagBox["\<\"Input: \"\>",
-              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
-             TagBox[
-              PaneBox[
-               TagBox[
-                RowBox[{"Get42", "[", "]"}],
-                Short[#, 
-                 Rational[2, 3]]& ],
-               BaselinePosition->Baseline,
-               ContentPadding->False,
-               FrameMargins->0,
-               ImageSize->{{1, 500}, Automatic},
-               StripOnInput->True],
-              "SummaryItem"]}]},
-           {
-            RowBox[{
-             TagBox["\<\"Expected output: \"\>",
-              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
-             TagBox[
-              PaneBox[
-               TagBox["42",
-                Short[#, 
-                 Rational[2, 3]]& ],
-               BaselinePosition->Baseline,
-               ContentPadding->False,
-               FrameMargins->0,
-               ImageSize->{{1, 500}, Automatic},
-               StripOnInput->True],
-              "SummaryItem"]}]},
-           {
-            RowBox[{
-             TagBox["\<\"Actual output: \"\>",
-              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
-             TagBox[
-              PaneBox[
-               TagBox["$Failed",
-                Short[#, 
-                 Rational[2, 3]]& ],
-               BaselinePosition->Baseline,
-               ContentPadding->False,
-               FrameMargins->0,
-               ImageSize->{{1, 500}, Automatic},
-               StripOnInput->True],
-              "SummaryItem"]}]},
-           {
-            RowBox[{
-             TagBox["\<\"Expected messages: \"\>",
-              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
-             TagBox[
-              PaneBox[
-               TagBox[
-                RowBox[{"{", "}"}],
-                Short[#, 
-                 Rational[2, 3]]& ],
-               BaselinePosition->Baseline,
-               ContentPadding->False,
-               FrameMargins->0,
-               ImageSize->{{1, 500}, Automatic},
-               StripOnInput->True],
-              "SummaryItem"]}]},
-           {
-            RowBox[{
-             TagBox["\<\"Actual messages: \"\>",
-              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
-             TagBox[
-              PaneBox[
-               TagBox[
-                RowBox[{"{", 
-                 RowBox[{"Message", "[", 
-                  RowBox[{
-                   StyleBox[
-                    RowBox[{"LinkObject", "::", "linkd"}], "MessageName"], 
-                   ",", 
-                   RowBox[{"\[LeftSkeleton]", "1", "\[RightSkeleton]"}]}], 
-                  "]"}], "}"}],
-                Short[#, 
-                 Rational[2, 3]]& ],
-               BaselinePosition->Baseline,
-               ContentPadding->False,
-               FrameMargins->0,
-               ImageSize->{{1, 500}, Automatic},
-               StripOnInput->True],
-              "SummaryItem"]}]},
-           {
-            RowBox[{
-             TagBox["\<\"Time Taken: \"\>",
-              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
-             TagBox[
-              PaneBox[
-               TagBox[
-                
-                TemplateBox[{
-                 "0.0312503`5.645369188719096","\"s\"","seconds",
-                  "\"Seconds\""},
-                 "Quantity"],
-                Short[#, 
-                 Rational[2, 3]]& ],
-               BaselinePosition->Baseline,
-               ContentPadding->False,
-               FrameMargins->0,
-               ImageSize->{{1, 500}, Automatic},
-               StripOnInput->True],
-              "SummaryItem"]}]}
-          },
-          AutoDelete->False,
-          
-          BaseStyle->{
-           ShowStringCharacters -> False, NumberMarks -> False, 
-            PrintPrecision -> 3, ShowSyntaxStyles -> False},
-          GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Automatic}}},
-          
-          GridBoxItemSize->{
-           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
-          GridBoxSpacings->{"Columns" -> {{2}}, "Rows" -> {{Automatic}}}]}
-       },
-       AutoDelete->False,
-       BaselinePosition->{1, 1},
-       GridBoxAlignment->{"Rows" -> {{Top}}},
-       GridBoxItemSize->{
-        "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}]}, Dynamic[
-      Typeset`open$$],
-      ImageSize->Automatic],
-     BaselinePosition->Baseline],
-    DynamicModuleValues:>{}], "]"}],
-  TestResultObject[
-   Association[
-   "TestIndex" -> 12, "TestID" -> None, "Outcome" -> "Failure", "Input" -> 
-    HoldForm[
-      $CellContext`Get42[]], "ExpectedOutput" -> HoldForm[42], "ActualOutput" -> 
-    HoldForm[$Failed], "ExpectedMessages" -> {}, "ActualMessages" -> {
-      HoldForm[
-       Message[
-        MessageName[LinkObject, "linkd"], 
-        HoldForm[
-         LinkObject["8000@192.168.1.135", 2304, 13]]]]}, "AbsoluteTimeUsed" -> 
-    Quantity[0.0312503`5.645369188719096, "Seconds"], "CPUTimeUsed" -> 
-    Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[512, "Bytes"]]],
-  Editable->False,
-  SelectWithContents->True,
-  Selectable->False]], "Output",
- CellChangeTimes->{3.685215096460543*^9}],
-
-Cell[BoxData[
- TemplateBox[{
-  "LinkObject","linkn",
-   "\"Argument \\!\\(\\*RowBox[{\\\"LinkObject\\\", \\\"[\\\", RowBox[{\\\"\\\
-\\\\\"8000@192.168.1.135\\\\\\\"\\\", \\\",\\\", \\\"2304\\\", \\\",\\\", \
-\\\"13\\\"}], \\\"]\\\"}]\\) in \\!\\(\\*RowBox[{\\\"LinkWrite\\\", \
-\\\"[\\\", RowBox[{RowBox[{\\\"LinkObject\\\", \\\"[\\\", \
-RowBox[{\\\"\\\\\\\"8000@192.168.1.135\\\\\\\"\\\", \\\",\\\", \\\"2304\\\", \
-\\\",\\\", \\\"13\\\"}], \\\"]\\\"}], \\\",\\\", RowBox[{\\\"CallPacket\\\", \
-\\\"[\\\", RowBox[{\\\"1\\\", \\\",\\\", RowBox[{\\\"{\\\", \\\"}\\\"}]}], \\\
-\"]\\\"}]}], \\\"]\\\"}]\\) has an invalid LinkObject number; the link may be \
-closed.\"",2,127,16,28168248676308092987,"Local"},
-  "MessageTemplate"]], "Message", "MSG",
- CellChangeTimes->{3.6852150964761677`*^9}],
-
-Cell[BoxData["$Failed"], "Output",
- CellChangeTimes->{3.6852150964761677`*^9}]
-}, Open  ]],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[{
- RowBox[{"Install", "[", 
-  RowBox[{"LinkConnect", "[", 
-   RowBox[{"\"\<8000@188.61.108.226\>\"", ",", 
-    RowBox[{"LinkProtocol", "\[Rule]", "\"\<TCPIP\>\""}]}], "]"}], 
-  "]"}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"Get42", "[", "]"}], "~", "VerificationTest", "~", 
-  "42"}], "\[IndentingNewLine]", 
- RowBox[{"RunTestsM", "[", "]"}]}], "Input",
- CellChangeTimes->{{3.685214643447171*^9, 3.6852146479784746`*^9}}],
-
-Cell[BoxData[
- TemplateBox[{
-  "LinkConnect","linkc",
-   "\"Unable to connect to \\!\\(\\*RowBox[{\\\"LinkObject\\\", \\\"[\\\", \
-RowBox[{\\\"\\\\\\\"8000@188.61.108.226\\\\\\\"\\\", \\\",\\\", \\\"2258\\\", \
-\\\",\\\", \\\"13\\\"}], \\\"]\\\"}]\\).\"",2,116,8,28168248676308092987,
-   "Local"},
-  "MessageTemplate"]], "Message", "MSG",
- CellChangeTimes->{{3.6852146504003797`*^9, 3.685214657690222*^9}}],
-
-Cell[BoxData[
- TemplateBox[{
-  "First","normal",
-   "\"Nonatomic expression expected at position \
-\\!\\(\\*RowBox[{\\\"1\\\"}]\\) in \\!\\(\\*RowBox[{\\\"First\\\", \\\"[\\\", \
-\\\"$Failed\\\", \\\"]\\\"}]\\).\"",2,116,9,28168248676308092987,"Local"},
-  "MessageTemplate"]], "Message", "MSG",
- CellChangeTimes->{{3.6852146504003797`*^9, 3.6852146577370987`*^9}}],
-
-Cell[BoxData["$Failed"], "Output",
- CellChangeTimes->{{3.685214650431631*^9, 3.6852146577370987`*^9}}],
-
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{
-   TagBox["TestResultObject",
-    "SummaryHead"], "[", 
-   DynamicModuleBox[{Typeset`open$$ = False}, 
-    PanelBox[
-     PaneSelectorBox[{False->GridBox[{
-        {
-         PaneBox[
-          ButtonBox[
-           
-           DynamicBox[FEPrivate`FrontEndResource[
-            "FEBitmaps", "SquarePlusIconMedium"],
-            ImageSizeCache->{14., {0., 14.}}],
-           Appearance->None,
-           ButtonFunction:>(Typeset`open$$ = True),
-           Evaluator->Automatic,
-           Method->"Preemptive"],
-          Alignment->{Center, Center},
-          
-          ImageSize->
-           Dynamic[{
-            Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-             Magnification]}]], 
-         GraphicsBox[InsetBox[
-           PaneBox[
-            
-            DynamicBox[FEPrivate`FrontEndResource[
-             "MUnitExpressions", "TestFailureIcon"],
-             ImageSizeCache->{14., {4., 10.}}],
-            Alignment->Center,
-            
-            ImageSize->
-             Dynamic[{
-              Automatic, 3.5 CurrentValue["FontCapHeight"]/
-               AbsoluteCurrentValue[Magnification]}]]],
-          AspectRatio->1,
-          Axes->False,
-          Background->GrayLevel[0.93],
-          Frame->True,
-          FrameStyle->Directive[
-            Thickness[Tiny], 
-            GrayLevel[0.55]],
-          FrameTicks->None,
-          ImageSize->{Automatic, 
-            Dynamic[
-            3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-             Magnification]]},
-          PlotRange->{{0, 1}, {0, 1}}], GridBox[{
-           {
-            RowBox[{
-             TagBox["\<\"Outcome: \"\>",
-              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
-             TagBox["\<\"Failure\"\>",
-              "SummaryItem"]}]},
-           {
-            RowBox[{
-             TagBox["\<\"Test ID: \"\>",
-              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
-             TagBox["None",
-              "SummaryItem"]}]}
-          },
-          AutoDelete->False,
-          
-          BaseStyle->{
-           ShowStringCharacters -> False, NumberMarks -> False, 
-            PrintPrecision -> 3, ShowSyntaxStyles -> False},
-          GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Automatic}}},
-          
-          GridBoxItemSize->{
-           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
-          GridBoxSpacings->{"Columns" -> {{2}}, "Rows" -> {{Automatic}}}]}
-       },
-       AutoDelete->False,
-       BaselinePosition->{1, 1},
-       GridBoxAlignment->{"Rows" -> {{Top}}},
-       GridBoxItemSize->{
-        "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], True->GridBox[{
-        {
-         PaneBox[
-          ButtonBox[
-           
-           DynamicBox[FEPrivate`FrontEndResource[
-            "FEBitmaps", "SquareMinusIconMedium"]],
-           Appearance->None,
-           ButtonFunction:>(Typeset`open$$ = False),
-           Evaluator->Automatic,
-           Method->"Preemptive"],
-          Alignment->{Center, Center},
-          
-          ImageSize->
-           Dynamic[{
-            Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-             Magnification]}]], 
-         GraphicsBox[InsetBox[
-           PaneBox[
-            
-            DynamicBox[FEPrivate`FrontEndResource[
-             "MUnitExpressions", "TestFailureIcon"]],
-            Alignment->Center,
-            
-            ImageSize->
-             Dynamic[{
-              Automatic, 3.5 CurrentValue["FontCapHeight"]/
-               AbsoluteCurrentValue[Magnification]}]]],
-          AspectRatio->1,
-          Axes->False,
-          Background->GrayLevel[0.93],
-          Frame->True,
-          FrameStyle->Directive[
-            Thickness[Tiny], 
-            GrayLevel[0.55]],
-          FrameTicks->None,
-          ImageSize->{Automatic, 
-            Dynamic[
-            3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-             Magnification]]},
-          PlotRange->{{0, 1}, {0, 1}}], GridBox[{
-           {
-            RowBox[{
-             TagBox["\<\"Outcome: \"\>",
-              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
-             TagBox["\<\"Failure\"\>",
-              "SummaryItem"]}]},
-           {
-            RowBox[{
-             TagBox["\<\"Test ID: \"\>",
-              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
-             TagBox["None",
-              "SummaryItem"]}]},
-           {
-            RowBox[{
-             TagBox["\<\"Input: \"\>",
-              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
-             TagBox[
-              PaneBox[
-               TagBox[
-                RowBox[{"Get42", "[", "]"}],
-                Short[#, 
-                 Rational[2, 3]]& ],
-               BaselinePosition->Baseline,
-               ContentPadding->False,
-               FrameMargins->0,
-               ImageSize->{{1, 500}, Automatic},
-               StripOnInput->True],
-              "SummaryItem"]}]},
-           {
-            RowBox[{
-             TagBox["\<\"Expected output: \"\>",
-              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
-             TagBox[
-              PaneBox[
-               TagBox["42",
-                Short[#, 
-                 Rational[2, 3]]& ],
-               BaselinePosition->Baseline,
-               ContentPadding->False,
-               FrameMargins->0,
-               ImageSize->{{1, 500}, Automatic},
-               StripOnInput->True],
-              "SummaryItem"]}]},
-           {
-            RowBox[{
-             TagBox["\<\"Actual output: \"\>",
-              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
-             TagBox[
-              PaneBox[
-               TagBox["$Failed",
-                Short[#, 
-                 Rational[2, 3]]& ],
-               BaselinePosition->Baseline,
-               ContentPadding->False,
-               FrameMargins->0,
-               ImageSize->{{1, 500}, Automatic},
-               StripOnInput->True],
-              "SummaryItem"]}]},
-           {
-            RowBox[{
-             TagBox["\<\"Expected messages: \"\>",
-              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
-             TagBox[
-              PaneBox[
-               TagBox[
-                RowBox[{"{", "}"}],
-                Short[#, 
-                 Rational[2, 3]]& ],
-               BaselinePosition->Baseline,
-               ContentPadding->False,
-               FrameMargins->0,
-               ImageSize->{{1, 500}, Automatic},
-               StripOnInput->True],
-              "SummaryItem"]}]},
-           {
-            RowBox[{
-             TagBox["\<\"Actual messages: \"\>",
-              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
-             TagBox[
-              PaneBox[
-               TagBox[
-                RowBox[{"{", 
-                 RowBox[{"Message", "[", 
-                  RowBox[{
-                   StyleBox[
-                    RowBox[{"LinkObject", "::", "linkn"}], "MessageName"], 
-                   ",", 
-                   RowBox[{"\[LeftSkeleton]", "1", "\[RightSkeleton]"}], ",", 
-                   RowBox[{"\[LeftSkeleton]", "1", "\[RightSkeleton]"}]}], 
-                  "]"}], "}"}],
-                Short[#, 
-                 Rational[2, 3]]& ],
-               BaselinePosition->Baseline,
-               ContentPadding->False,
-               FrameMargins->0,
-               ImageSize->{{1, 500}, Automatic},
-               StripOnInput->True],
-              "SummaryItem"]}]},
-           {
-            RowBox[{
-             TagBox["\<\"Time Taken: \"\>",
-              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
-             TagBox[
-              PaneBox[
-               TagBox[
-                
-                TemplateBox[{
-                 "0.0156258`5.344357259156355","\"s\"","seconds",
-                  "\"Seconds\""},
-                 "Quantity"],
-                Short[#, 
-                 Rational[2, 3]]& ],
-               BaselinePosition->Baseline,
-               ContentPadding->False,
-               FrameMargins->0,
-               ImageSize->{{1, 500}, Automatic},
-               StripOnInput->True],
-              "SummaryItem"]}]}
-          },
-          AutoDelete->False,
-          
-          BaseStyle->{
-           ShowStringCharacters -> False, NumberMarks -> False, 
-            PrintPrecision -> 3, ShowSyntaxStyles -> False},
-          GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Automatic}}},
-          
-          GridBoxItemSize->{
-           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
-          GridBoxSpacings->{"Columns" -> {{2}}, "Rows" -> {{Automatic}}}]}
-       },
-       AutoDelete->False,
-       BaselinePosition->{1, 1},
-       GridBoxAlignment->{"Rows" -> {{Top}}},
-       GridBoxItemSize->{
-        "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}]}, Dynamic[
-      Typeset`open$$],
-      ImageSize->Automatic],
-     BaselinePosition->Baseline],
-    DynamicModuleValues:>{}], "]"}],
-  TestResultObject[
-   Association[
-   "TestIndex" -> 9, "TestID" -> None, "Outcome" -> "Failure", "Input" -> 
-    HoldForm[
-      $CellContext`Get42[]], "ExpectedOutput" -> HoldForm[42], "ActualOutput" -> 
-    HoldForm[$Failed], "ExpectedMessages" -> {}, "ActualMessages" -> {
-      HoldForm[
-       Message[
-        MessageName[LinkObject, "linkn"], 
-        HoldForm[
-         LinkObject["8000@192.168.1.135", 2200, 13]], 
-        HoldForm[
-         LinkWrite[
-          LinkObject["8000@192.168.1.135", 2200, 13], 
-          CallPacket[0, {}]]]]]}, "AbsoluteTimeUsed" -> 
-    Quantity[0.0156258`5.344357259156355, "Seconds"], "CPUTimeUsed" -> 
-    Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[544, "Bytes"]]],
-  Editable->False,
-  SelectWithContents->True,
-  Selectable->False]], "Output",
- CellChangeTimes->{{3.685214650431631*^9, 3.6852146577995987`*^9}}],
-
-Cell[BoxData[
- TemplateBox[{
-  "LinkObject","linkn",
-   "\"Argument \\!\\(\\*RowBox[{\\\"LinkObject\\\", \\\"[\\\", RowBox[{\\\"\\\
-\\\\\"8000@192.168.1.135\\\\\\\"\\\", \\\",\\\", \\\"2200\\\", \\\",\\\", \
-\\\"13\\\"}], \\\"]\\\"}]\\) in \\!\\(\\*RowBox[{\\\"LinkWrite\\\", \
-\\\"[\\\", RowBox[{RowBox[{\\\"LinkObject\\\", \\\"[\\\", \
-RowBox[{\\\"\\\\\\\"8000@192.168.1.135\\\\\\\"\\\", \\\",\\\", \\\"2200\\\", \
-\\\",\\\", \\\"13\\\"}], \\\"]\\\"}], \\\",\\\", RowBox[{\\\"CallPacket\\\", \
-\\\"[\\\", RowBox[{\\\"1\\\", \\\",\\\", RowBox[{\\\"{\\\", \\\"}\\\"}]}], \\\
-\"]\\\"}]}], \\\"]\\\"}]\\) has an invalid LinkObject number; the link may be \
-closed.\"",2,118,10,28168248676308092987,"Local"},
-  "MessageTemplate"]], "Message", "MSG",
- CellChangeTimes->{{3.6852146504003797`*^9, 3.6852146578152237`*^9}}],
-
-Cell[BoxData["$Failed"], "Output",
- CellChangeTimes->{{3.685214650431631*^9, 3.6852146578152237`*^9}}]
-}, Open  ]],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[{
- RowBox[{"Install", "[", 
-  RowBox[{"LinkConnect", "[", 
-   RowBox[{"\"\<8000@192.168.1.135\>\"", ",", 
-    RowBox[{"LinkProtocol", "\[Rule]", "\"\<TCPIP\>\""}]}], "]"}], 
-  "]"}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"Get42", "[", "]"}], "~", "VerificationTest", "~", 
-  "42"}], "\[IndentingNewLine]", 
- RowBox[{"RunTestsM", "[", "]"}]}], "Input",
- CellChangeTimes->{
-  3.685213138089093*^9, {3.6852131831237187`*^9, 3.6852132246108093`*^9}}],
+ CellChangeTimes->{{3.6852160305928345`*^9, 3.685216038702007*^9}}],
 
 Cell[BoxData[
  InterpretationBox[
@@ -735,7 +62,7 @@ Cell[BoxData[
            
            DynamicBox[FEPrivate`FrontEndResource[
             "FEBitmaps", "SquarePlusIconMedium"],
-            ImageSizeCache->{14., {0., 14.}}],
+            ImageSizeCache->{12., {0., 12.}}],
            Appearance->None,
            ButtonFunction:>(Typeset`open$$ = True),
            Evaluator->Automatic,
@@ -976,14 +303,11 @@ GzMvKcH1o4cXABG3d/Y=
       ImageSize->Automatic],
      BaselinePosition->Baseline],
     DynamicModuleValues:>{}], "]"}],
-  LinkObject["8000@192.168.1.135", 2304, 13],
+  LinkObject["8000@192.168.1.135", 4725, 20],
   Editable->False,
   SelectWithContents->True,
   Selectable->False]], "Output",
- CellChangeTimes->{{3.6852131408812904`*^9, 3.6852131453878236`*^9}, {
-   3.6852132061546736`*^9, 3.6852132415176*^9}, {3.6852133240964766`*^9, 
-   3.685213345331443*^9}, 3.6852144589492817`*^9, 3.685214576375749*^9, {
-   3.6852147274991736`*^9, 3.6852147335245667`*^9}}],
+ CellChangeTimes->{3.68521603123731*^9}],
 
 Cell[BoxData[
  InterpretationBox[
@@ -999,7 +323,7 @@ Cell[BoxData[
            
            DynamicBox[FEPrivate`FrontEndResource[
             "FEBitmaps", "SquarePlusIconMedium"],
-            ImageSizeCache->{14., {0., 14.}}],
+            ImageSizeCache->{12., {0., 12.}}],
            Appearance->None,
            ButtonFunction:>(Typeset`open$$ = True),
            Evaluator->Automatic,
@@ -1015,7 +339,7 @@ Cell[BoxData[
             
             DynamicBox[FEPrivate`FrontEndResource[
              "MUnitExpressions", "SuccessIcon"],
-             ImageSizeCache->{19., {4., 10.}}],
+             ImageSizeCache->{16., {4., 8.}}],
             Alignment->Center,
             
             ImageSize->
@@ -1171,6 +495,1562 @@ Cell[BoxData[
                TagBox[
                 
                 TemplateBox[{
+                 "0.0468756`5.821461837501559","\"s\"","seconds",
+                  "\"Seconds\""},
+                 "Quantity"],
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]}
+          },
+          AutoDelete->False,
+          
+          BaseStyle->{
+           ShowStringCharacters -> False, NumberMarks -> False, 
+            PrintPrecision -> 3, ShowSyntaxStyles -> False},
+          GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Automatic}}},
+          
+          GridBoxItemSize->{
+           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+          GridBoxSpacings->{"Columns" -> {{2}}, "Rows" -> {{Automatic}}}]}
+       },
+       AutoDelete->False,
+       BaselinePosition->{1, 1},
+       GridBoxAlignment->{"Rows" -> {{Top}}},
+       GridBoxItemSize->{
+        "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}]}, Dynamic[
+      Typeset`open$$],
+      ImageSize->Automatic],
+     BaselinePosition->Baseline],
+    DynamicModuleValues:>{}], "]"}],
+  TestResultObject[
+   Association[
+   "TestIndex" -> 43, "TestID" -> None, "Outcome" -> "Success", "Input" -> 
+    HoldForm[
+      $CellContext`Get42[]], "ExpectedOutput" -> HoldForm[42], "ActualOutput" -> 
+    HoldForm[42], "ExpectedMessages" -> {}, "ActualMessages" -> {}, 
+    "AbsoluteTimeUsed" -> Quantity[0.0468756`5.821461837501559, "Seconds"], 
+    "CPUTimeUsed" -> Quantity[0., "Seconds"], "MemoryUsed" -> 
+    Quantity[152, "Bytes"]]],
+  Editable->False,
+  SelectWithContents->True,
+  Selectable->False]], "Output",
+ CellChangeTimes->{3.685216031299809*^9}],
+
+Cell[BoxData["1"], "Output",
+ CellChangeTimes->{3.6852160316748095`*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"Install", "[", 
+  RowBox[{"LinkConnect", "[", 
+   RowBox[{"\"\<8000@127.0.0.1\>\"", ",", 
+    RowBox[{"LinkProtocol", "\[Rule]", "\"\<TCPIP\>\""}]}], "]"}], 
+  "]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Get42", "[", "]"}], "~", "VerificationTest", "~", 
+  "42"}], "\[IndentingNewLine]", 
+ RowBox[{"RunTestsM", "[", "]"}]}], "Input",
+ CellChangeTimes->{{3.6852160066794043`*^9, 3.6852160224704537`*^9}}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "LinkConnect","linkc",
+   "\"Unable to connect to \\!\\(\\*RowBox[{\\\"LinkObject\\\", \\\"[\\\", \
+RowBox[{\\\"\\\\\\\"8000@127.0.0.1\\\\\\\"\\\", \\\",\\\", \\\"4702\\\", \
+\\\",\\\", \\\"20\\\"}], \\\"]\\\"}]\\).\"",2,403,42,25657681940313805586,
+   "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{{3.6852160139391985`*^9, 3.685216023880363*^9}}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "First","normal",
+   "\"Nonatomic expression expected at position \
+\\!\\(\\*RowBox[{\\\"1\\\"}]\\) in \\!\\(\\*RowBox[{\\\"First\\\", \\\"[\\\", \
+\\\"$Failed\\\", \\\"]\\\"}]\\).\"",2,403,43,25657681940313805586,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{{3.6852160139391985`*^9, 3.6852160239115763`*^9}}],
+
+Cell[BoxData["$Failed"], "Output",
+ CellChangeTimes->{{3.6852160139391985`*^9, 3.6852160239115763`*^9}}],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TagBox["TestResultObject",
+    "SummaryHead"], "[", 
+   DynamicModuleBox[{Typeset`open$$ = False}, 
+    PanelBox[
+     PaneSelectorBox[{False->GridBox[{
+        {
+         PaneBox[
+          ButtonBox[
+           
+           DynamicBox[FEPrivate`FrontEndResource[
+            "FEBitmaps", "SquarePlusIconMedium"],
+            ImageSizeCache->{12., {0., 12.}}],
+           Appearance->None,
+           ButtonFunction:>(Typeset`open$$ = True),
+           Evaluator->Automatic,
+           Method->"Preemptive"],
+          Alignment->{Center, Center},
+          
+          ImageSize->
+           Dynamic[{
+            Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]}]], 
+         GraphicsBox[InsetBox[
+           PaneBox[
+            
+            DynamicBox[FEPrivate`FrontEndResource[
+             "MUnitExpressions", "TestFailureIcon"],
+             ImageSizeCache->{12., {4., 8.}}],
+            Alignment->Center,
+            
+            ImageSize->
+             Dynamic[{
+              Automatic, 3.5 CurrentValue["FontCapHeight"]/
+               AbsoluteCurrentValue[Magnification]}]]],
+          AspectRatio->1,
+          Axes->False,
+          Background->GrayLevel[0.93],
+          Frame->True,
+          FrameStyle->Directive[
+            Thickness[Tiny], 
+            GrayLevel[0.55]],
+          FrameTicks->None,
+          ImageSize->{Automatic, 
+            Dynamic[
+            3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]]},
+          PlotRange->{{0, 1}, {0, 1}}], GridBox[{
+           {
+            RowBox[{
+             TagBox["\<\"Outcome: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["\<\"Failure\"\>",
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Test ID: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["None",
+              "SummaryItem"]}]}
+          },
+          AutoDelete->False,
+          
+          BaseStyle->{
+           ShowStringCharacters -> False, NumberMarks -> False, 
+            PrintPrecision -> 3, ShowSyntaxStyles -> False},
+          GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Automatic}}},
+          
+          GridBoxItemSize->{
+           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+          GridBoxSpacings->{"Columns" -> {{2}}, "Rows" -> {{Automatic}}}]}
+       },
+       AutoDelete->False,
+       BaselinePosition->{1, 1},
+       GridBoxAlignment->{"Rows" -> {{Top}}},
+       GridBoxItemSize->{
+        "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], True->GridBox[{
+        {
+         PaneBox[
+          ButtonBox[
+           
+           DynamicBox[FEPrivate`FrontEndResource[
+            "FEBitmaps", "SquareMinusIconMedium"]],
+           Appearance->None,
+           ButtonFunction:>(Typeset`open$$ = False),
+           Evaluator->Automatic,
+           Method->"Preemptive"],
+          Alignment->{Center, Center},
+          
+          ImageSize->
+           Dynamic[{
+            Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]}]], 
+         GraphicsBox[InsetBox[
+           PaneBox[
+            
+            DynamicBox[FEPrivate`FrontEndResource[
+             "MUnitExpressions", "TestFailureIcon"]],
+            Alignment->Center,
+            
+            ImageSize->
+             Dynamic[{
+              Automatic, 3.5 CurrentValue["FontCapHeight"]/
+               AbsoluteCurrentValue[Magnification]}]]],
+          AspectRatio->1,
+          Axes->False,
+          Background->GrayLevel[0.93],
+          Frame->True,
+          FrameStyle->Directive[
+            Thickness[Tiny], 
+            GrayLevel[0.55]],
+          FrameTicks->None,
+          ImageSize->{Automatic, 
+            Dynamic[
+            3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]]},
+          PlotRange->{{0, 1}, {0, 1}}], GridBox[{
+           {
+            RowBox[{
+             TagBox["\<\"Outcome: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["\<\"Failure\"\>",
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Test ID: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["None",
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Input: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox[
+                RowBox[{"Get42", "[", "]"}],
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Expected output: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox["42",
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Actual output: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox["$Failed",
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Expected messages: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox[
+                RowBox[{"{", "}"}],
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Actual messages: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox[
+                RowBox[{"{", 
+                 RowBox[{"Message", "[", 
+                  RowBox[{
+                   StyleBox[
+                    RowBox[{"LinkObject", "::", "linkn"}], "MessageName"], 
+                   ",", 
+                   RowBox[{"\[LeftSkeleton]", "1", "\[RightSkeleton]"}], ",", 
+                   RowBox[{"LinkWrite", "[", 
+                    RowBox[{
+                    RowBox[{"\[LeftSkeleton]", "1", "\[RightSkeleton]"}], ",", 
+                    RowBox[{
+                    RowBox[{"\[LeftSkeleton]", "10", "\[RightSkeleton]"}], 
+                    "[", 
+                    RowBox[{"0", ",", 
+                    RowBox[{"\[LeftSkeleton]", "1", "\[RightSkeleton]"}]}], 
+                    "]"}]}], "]"}]}], "]"}], "}"}],
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Time Taken: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox[
+                
+                TemplateBox[{
+                 "0``7.1505149978319915","\"s\"","seconds","\"Seconds\""},
+                 "Quantity"],
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]}
+          },
+          AutoDelete->False,
+          
+          BaseStyle->{
+           ShowStringCharacters -> False, NumberMarks -> False, 
+            PrintPrecision -> 3, ShowSyntaxStyles -> False},
+          GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Automatic}}},
+          
+          GridBoxItemSize->{
+           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+          GridBoxSpacings->{"Columns" -> {{2}}, "Rows" -> {{Automatic}}}]}
+       },
+       AutoDelete->False,
+       BaselinePosition->{1, 1},
+       GridBoxAlignment->{"Rows" -> {{Top}}},
+       GridBoxItemSize->{
+        "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}]}, Dynamic[
+      Typeset`open$$],
+      ImageSize->Automatic],
+     BaselinePosition->Baseline],
+    DynamicModuleValues:>{}], "]"}],
+  TestResultObject[
+   Association[
+   "TestIndex" -> 42, "TestID" -> None, "Outcome" -> "Failure", "Input" -> 
+    HoldForm[
+      $CellContext`Get42[]], "ExpectedOutput" -> HoldForm[42], "ActualOutput" -> 
+    HoldForm[$Failed], "ExpectedMessages" -> {}, "ActualMessages" -> {
+      HoldForm[
+       Message[
+        MessageName[LinkObject, "linkn"], 
+        HoldForm[
+         LinkObject["8000@192.168.1.135", 4648, 20]], 
+        HoldForm[
+         LinkWrite[
+          LinkObject["8000@192.168.1.135", 4648, 20], 
+          CallPacket[0, {}]]]]]}, "AbsoluteTimeUsed" -> 
+    Quantity[0``7.1505149978319915, "Seconds"], "CPUTimeUsed" -> 
+    Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[544, "Bytes"]]],
+  Editable->False,
+  SelectWithContents->True,
+  Selectable->False]], "Output",
+ CellChangeTimes->{{3.6852160139391985`*^9, 3.685216023958457*^9}}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "LinkObject","linkn",
+   "\"Argument \\!\\(\\*RowBox[{\\\"LinkObject\\\", \\\"[\\\", RowBox[{\\\"\\\
+\\\\\"8000@192.168.1.135\\\\\\\"\\\", \\\",\\\", \\\"4648\\\", \\\",\\\", \
+\\\"20\\\"}], \\\"]\\\"}]\\) in \\!\\(\\*RowBox[{\\\"LinkWrite\\\", \
+\\\"[\\\", RowBox[{RowBox[{\\\"LinkObject\\\", \\\"[\\\", \
+RowBox[{\\\"\\\\\\\"8000@192.168.1.135\\\\\\\"\\\", \\\",\\\", \\\"4648\\\", \
+\\\",\\\", \\\"20\\\"}], \\\"]\\\"}], \\\",\\\", RowBox[{\\\"CallPacket\\\", \
+\\\"[\\\", RowBox[{\\\"1\\\", \\\",\\\", RowBox[{\\\"{\\\", \\\"}\\\"}]}], \\\
+\"]\\\"}]}], \\\"]\\\"}]\\) has an invalid LinkObject number; the link may be \
+closed.\"",2,405,44,25657681940313805586,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{{3.6852160139391985`*^9, 3.685216023958457*^9}}],
+
+Cell[BoxData["$Failed"], "Output",
+ CellChangeTimes->{{3.6852160139391985`*^9, 3.685216023974058*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"Install", "[", 
+  RowBox[{"LinkConnect", "[", 
+   RowBox[{"\"\<8000@localhost\>\"", ",", 
+    RowBox[{"LinkProtocol", "\[Rule]", "\"\<TCPIP\>\""}]}], "]"}], 
+  "]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Get42", "[", "]"}], "~", "VerificationTest", "~", 
+  "42"}], "\[IndentingNewLine]", 
+ RowBox[{"RunTestsM", "[", "]"}]}], "Input",
+ CellChangeTimes->{{3.685215087896309*^9, 3.6852150942800393`*^9}, {
+  3.685215998096157*^9, 3.685215999268081*^9}}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "LinkConnect","linkc",
+   "\"Unable to connect to \\!\\(\\*RowBox[{\\\"LinkObject\\\", \\\"[\\\", \
+RowBox[{\\\"\\\\\\\"8000@localhost\\\\\\\"\\\", \\\",\\\", \\\"4657\\\", \
+\\\",\\\", \\\"21\\\"}], \\\"]\\\"}]\\).\"",2,397,36,25657681940313805586,
+   "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.6852150963667903`*^9, 3.685216000813243*^9}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "First","normal",
+   "\"Nonatomic expression expected at position \
+\\!\\(\\*RowBox[{\\\"1\\\"}]\\) in \\!\\(\\*RowBox[{\\\"First\\\", \\\"[\\\", \
+\\\"$Failed\\\", \\\"]\\\"}]\\).\"",2,397,37,25657681940313805586,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.6852150963667903`*^9, 3.6852160008444967`*^9}],
+
+Cell[BoxData["$Failed"], "Output",
+ CellChangeTimes->{3.685215096398039*^9, 3.6852160008444967`*^9}],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TagBox["TestResultObject",
+    "SummaryHead"], "[", 
+   DynamicModuleBox[{Typeset`open$$ = False}, 
+    PanelBox[
+     PaneSelectorBox[{False->GridBox[{
+        {
+         PaneBox[
+          ButtonBox[
+           
+           DynamicBox[FEPrivate`FrontEndResource[
+            "FEBitmaps", "SquarePlusIconMedium"],
+            ImageSizeCache->{12., {0., 12.}}],
+           Appearance->None,
+           ButtonFunction:>(Typeset`open$$ = True),
+           Evaluator->Automatic,
+           Method->"Preemptive"],
+          Alignment->{Center, Center},
+          
+          ImageSize->
+           Dynamic[{
+            Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]}]], 
+         GraphicsBox[InsetBox[
+           PaneBox[
+            
+            DynamicBox[FEPrivate`FrontEndResource[
+             "MUnitExpressions", "TestFailureIcon"],
+             ImageSizeCache->{12., {4., 8.}}],
+            Alignment->Center,
+            
+            ImageSize->
+             Dynamic[{
+              Automatic, 3.5 CurrentValue["FontCapHeight"]/
+               AbsoluteCurrentValue[Magnification]}]]],
+          AspectRatio->1,
+          Axes->False,
+          Background->GrayLevel[0.93],
+          Frame->True,
+          FrameStyle->Directive[
+            Thickness[Tiny], 
+            GrayLevel[0.55]],
+          FrameTicks->None,
+          ImageSize->{Automatic, 
+            Dynamic[
+            3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]]},
+          PlotRange->{{0, 1}, {0, 1}}], GridBox[{
+           {
+            RowBox[{
+             TagBox["\<\"Outcome: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["\<\"Failure\"\>",
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Test ID: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["None",
+              "SummaryItem"]}]}
+          },
+          AutoDelete->False,
+          
+          BaseStyle->{
+           ShowStringCharacters -> False, NumberMarks -> False, 
+            PrintPrecision -> 3, ShowSyntaxStyles -> False},
+          GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Automatic}}},
+          
+          GridBoxItemSize->{
+           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+          GridBoxSpacings->{"Columns" -> {{2}}, "Rows" -> {{Automatic}}}]}
+       },
+       AutoDelete->False,
+       BaselinePosition->{1, 1},
+       GridBoxAlignment->{"Rows" -> {{Top}}},
+       GridBoxItemSize->{
+        "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], True->GridBox[{
+        {
+         PaneBox[
+          ButtonBox[
+           
+           DynamicBox[FEPrivate`FrontEndResource[
+            "FEBitmaps", "SquareMinusIconMedium"]],
+           Appearance->None,
+           ButtonFunction:>(Typeset`open$$ = False),
+           Evaluator->Automatic,
+           Method->"Preemptive"],
+          Alignment->{Center, Center},
+          
+          ImageSize->
+           Dynamic[{
+            Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]}]], 
+         GraphicsBox[InsetBox[
+           PaneBox[
+            
+            DynamicBox[FEPrivate`FrontEndResource[
+             "MUnitExpressions", "TestFailureIcon"]],
+            Alignment->Center,
+            
+            ImageSize->
+             Dynamic[{
+              Automatic, 3.5 CurrentValue["FontCapHeight"]/
+               AbsoluteCurrentValue[Magnification]}]]],
+          AspectRatio->1,
+          Axes->False,
+          Background->GrayLevel[0.93],
+          Frame->True,
+          FrameStyle->Directive[
+            Thickness[Tiny], 
+            GrayLevel[0.55]],
+          FrameTicks->None,
+          ImageSize->{Automatic, 
+            Dynamic[
+            3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]]},
+          PlotRange->{{0, 1}, {0, 1}}], GridBox[{
+           {
+            RowBox[{
+             TagBox["\<\"Outcome: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["\<\"Failure\"\>",
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Test ID: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["None",
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Input: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox[
+                RowBox[{"Get42", "[", "]"}],
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Expected output: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox["42",
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Actual output: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox["$Failed",
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Expected messages: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox[
+                RowBox[{"{", "}"}],
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Actual messages: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox[
+                RowBox[{"{", 
+                 RowBox[{"Message", "[", 
+                  RowBox[{
+                   StyleBox[
+                    RowBox[{"LinkObject", "::", "linkd"}], "MessageName"], 
+                   ",", 
+                   RowBox[{"\[LeftSkeleton]", "1", "\[RightSkeleton]"}]}], 
+                  "]"}], "}"}],
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Time Taken: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox[
+                
+                TemplateBox[{
+                 "0.0312538`5.645417826510484","\"s\"","seconds",
+                  "\"Seconds\""},
+                 "Quantity"],
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]}
+          },
+          AutoDelete->False,
+          
+          BaseStyle->{
+           ShowStringCharacters -> False, NumberMarks -> False, 
+            PrintPrecision -> 3, ShowSyntaxStyles -> False},
+          GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Automatic}}},
+          
+          GridBoxItemSize->{
+           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+          GridBoxSpacings->{"Columns" -> {{2}}, "Rows" -> {{Automatic}}}]}
+       },
+       AutoDelete->False,
+       BaselinePosition->{1, 1},
+       GridBoxAlignment->{"Rows" -> {{Top}}},
+       GridBoxItemSize->{
+        "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}]}, Dynamic[
+      Typeset`open$$],
+      ImageSize->Automatic],
+     BaselinePosition->Baseline],
+    DynamicModuleValues:>{}], "]"}],
+  TestResultObject[
+   Association[
+   "TestIndex" -> 40, "TestID" -> None, "Outcome" -> "Failure", "Input" -> 
+    HoldForm[
+      $CellContext`Get42[]], "ExpectedOutput" -> HoldForm[42], "ActualOutput" -> 
+    HoldForm[$Failed], "ExpectedMessages" -> {}, "ActualMessages" -> {
+      HoldForm[
+       Message[
+        MessageName[LinkObject, "linkd"], 
+        HoldForm[
+         LinkObject["8000@192.168.1.135", 4648, 20]]]]}, "AbsoluteTimeUsed" -> 
+    Quantity[0.0312538`5.645417826510484, "Seconds"], "CPUTimeUsed" -> 
+    Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[512, "Bytes"]]],
+  Editable->False,
+  SelectWithContents->True,
+  Selectable->False]], "Output",
+ CellChangeTimes->{3.685215096398039*^9, 3.685216000891334*^9}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "LinkObject","linkn",
+   "\"Argument \\!\\(\\*RowBox[{\\\"LinkObject\\\", \\\"[\\\", RowBox[{\\\"\\\
+\\\\\"8000@192.168.1.135\\\\\\\"\\\", \\\",\\\", \\\"4648\\\", \\\",\\\", \
+\\\"20\\\"}], \\\"]\\\"}]\\) in \\!\\(\\*RowBox[{\\\"LinkWrite\\\", \
+\\\"[\\\", RowBox[{RowBox[{\\\"LinkObject\\\", \\\"[\\\", \
+RowBox[{\\\"\\\\\\\"8000@192.168.1.135\\\\\\\"\\\", \\\",\\\", \\\"4648\\\", \
+\\\",\\\", \\\"20\\\"}], \\\"]\\\"}], \\\",\\\", RowBox[{\\\"CallPacket\\\", \
+\\\"[\\\", RowBox[{\\\"1\\\", \\\",\\\", RowBox[{\\\"{\\\", \\\"}\\\"}]}], \\\
+\"]\\\"}]}], \\\"]\\\"}]\\) has an invalid LinkObject number; the link may be \
+closed.\"",2,399,38,25657681940313805586,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.6852150963667903`*^9, 3.6852160009069796`*^9}],
+
+Cell[BoxData["$Failed"], "Output",
+ CellChangeTimes->{3.685215096398039*^9, 3.6852160009069796`*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"Install", "[", 
+  RowBox[{"LinkConnect", "[", 
+   RowBox[{"\"\<8000@188.61.108.226\>\"", ",", 
+    RowBox[{"LinkProtocol", "\[Rule]", "\"\<TCPIP\>\""}]}], "]"}], 
+  "]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Get42", "[", "]"}], "~", "VerificationTest", "~", 
+  "42"}], "\[IndentingNewLine]", 
+ RowBox[{"RunTestsM", "[", "]"}]}], "Input",
+ CellChangeTimes->{{3.685214643447171*^9, 3.6852146479784746`*^9}}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "LinkConnect","linkc",
+   "\"Unable to connect to \\!\\(\\*RowBox[{\\\"LinkObject\\\", \\\"[\\\", \
+RowBox[{\\\"\\\\\\\"8000@188.61.108.226\\\\\\\"\\\", \\\",\\\", \\\"2258\\\", \
+\\\",\\\", \\\"13\\\"}], \\\"]\\\"}]\\).\"",2,116,8,28168248676308092987,
+   "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{{3.6852146504003797`*^9, 3.685214657690222*^9}}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "First","normal",
+   "\"Nonatomic expression expected at position \
+\\!\\(\\*RowBox[{\\\"1\\\"}]\\) in \\!\\(\\*RowBox[{\\\"First\\\", \\\"[\\\", \
+\\\"$Failed\\\", \\\"]\\\"}]\\).\"",2,116,9,28168248676308092987,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{{3.6852146504003797`*^9, 3.6852146577370987`*^9}}],
+
+Cell[BoxData["$Failed"], "Output",
+ CellChangeTimes->{{3.685214650431631*^9, 3.6852146577370987`*^9}}],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TagBox["TestResultObject",
+    "SummaryHead"], "[", 
+   DynamicModuleBox[{Typeset`open$$ = False}, 
+    PanelBox[
+     PaneSelectorBox[{False->GridBox[{
+        {
+         PaneBox[
+          ButtonBox[
+           
+           DynamicBox[FEPrivate`FrontEndResource[
+            "FEBitmaps", "SquarePlusIconMedium"],
+            ImageSizeCache->{12., {0., 12.}}],
+           Appearance->None,
+           ButtonFunction:>(Typeset`open$$ = True),
+           Evaluator->Automatic,
+           Method->"Preemptive"],
+          Alignment->{Center, Center},
+          
+          ImageSize->
+           Dynamic[{
+            Automatic, 
+             3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+              Magnification])}]], 
+         GraphicsBox[InsetBox[
+           PaneBox[
+            
+            DynamicBox[FEPrivate`FrontEndResource[
+             "MUnitExpressions", "TestFailureIcon"],
+             ImageSizeCache->{12., {4., 8.}}],
+            Alignment->Center,
+            
+            ImageSize->
+             Dynamic[{
+              Automatic, 
+               3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                Magnification])}]]],
+          AspectRatio->1,
+          Axes->False,
+          Background->GrayLevel[0.93],
+          Frame->True,
+          FrameStyle->Directive[
+            Thickness[Tiny], 
+            GrayLevel[0.55]],
+          FrameTicks->None,
+          ImageSize->{Automatic, 
+            Dynamic[
+            3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+              Magnification])]},
+          PlotRange->{{0, 1}, {0, 1}}], GridBox[{
+           {
+            RowBox[{
+             TagBox["\<\"Outcome: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["\<\"Failure\"\>",
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Test ID: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["None",
+              "SummaryItem"]}]}
+          },
+          AutoDelete->False,
+          
+          BaseStyle->{
+           ShowStringCharacters -> False, NumberMarks -> False, 
+            PrintPrecision -> 3, ShowSyntaxStyles -> False},
+          GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Automatic}}},
+          
+          GridBoxItemSize->{
+           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+          GridBoxSpacings->{"Columns" -> {{2}}, "Rows" -> {{Automatic}}}]}
+       },
+       AutoDelete->False,
+       BaselinePosition->{1, 1},
+       GridBoxAlignment->{"Rows" -> {{Top}}},
+       GridBoxItemSize->{
+        "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], True->GridBox[{
+        {
+         PaneBox[
+          ButtonBox[
+           
+           DynamicBox[FEPrivate`FrontEndResource[
+            "FEBitmaps", "SquareMinusIconMedium"]],
+           Appearance->None,
+           ButtonFunction:>(Typeset`open$$ = False),
+           Evaluator->Automatic,
+           Method->"Preemptive"],
+          Alignment->{Center, Center},
+          
+          ImageSize->
+           Dynamic[{
+            Automatic, 
+             3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+              Magnification])}]], 
+         GraphicsBox[InsetBox[
+           PaneBox[
+            
+            DynamicBox[FEPrivate`FrontEndResource[
+             "MUnitExpressions", "TestFailureIcon"]],
+            Alignment->Center,
+            
+            ImageSize->
+             Dynamic[{
+              Automatic, 
+               3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                Magnification])}]]],
+          AspectRatio->1,
+          Axes->False,
+          Background->GrayLevel[0.93],
+          Frame->True,
+          FrameStyle->Directive[
+            Thickness[Tiny], 
+            GrayLevel[0.55]],
+          FrameTicks->None,
+          ImageSize->{Automatic, 
+            Dynamic[
+            3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+              Magnification])]},
+          PlotRange->{{0, 1}, {0, 1}}], GridBox[{
+           {
+            RowBox[{
+             TagBox["\<\"Outcome: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["\<\"Failure\"\>",
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Test ID: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["None",
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Input: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox[
+                RowBox[{"Get42", "[", "]"}],
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Expected output: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox["42",
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Actual output: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox["$Failed",
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Expected messages: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox[
+                RowBox[{"{", "}"}],
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Actual messages: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox[
+                RowBox[{"{", 
+                 RowBox[{"Message", "[", 
+                  RowBox[{
+                   StyleBox[
+                    RowBox[{"LinkObject", "::", "linkn"}], "MessageName"], 
+                   ",", 
+                   RowBox[{"\[LeftSkeleton]", "1", "\[RightSkeleton]"}], ",", 
+                   RowBox[{"\[LeftSkeleton]", "1", "\[RightSkeleton]"}]}], 
+                  "]"}], "}"}],
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Time Taken: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox[
+                
+                TemplateBox[{
+                 "0.0156258`5.344357259156355","\"s\"","seconds",
+                  "\"Seconds\""},
+                 "Quantity"],
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]}
+          },
+          AutoDelete->False,
+          
+          BaseStyle->{
+           ShowStringCharacters -> False, NumberMarks -> False, 
+            PrintPrecision -> 3, ShowSyntaxStyles -> False},
+          GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Automatic}}},
+          
+          GridBoxItemSize->{
+           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+          GridBoxSpacings->{"Columns" -> {{2}}, "Rows" -> {{Automatic}}}]}
+       },
+       AutoDelete->False,
+       BaselinePosition->{1, 1},
+       GridBoxAlignment->{"Rows" -> {{Top}}},
+       GridBoxItemSize->{
+        "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}]}, Dynamic[
+      Typeset`open$$],
+      ImageSize->Automatic],
+     BaselinePosition->Baseline],
+    DynamicModuleValues:>{}], "]"}],
+  TestResultObject[
+   Association[
+   "TestIndex" -> 9, "TestID" -> None, "Outcome" -> "Failure", "Input" -> 
+    HoldForm[
+      $CellContext`Get42[]], "ExpectedOutput" -> HoldForm[42], "ActualOutput" -> 
+    HoldForm[$Failed], "ExpectedMessages" -> {}, "ActualMessages" -> {
+      HoldForm[
+       Message[
+        MessageName[LinkObject, "linkn"], 
+        HoldForm[
+         LinkObject["8000@192.168.1.135", 2200, 13]], 
+        HoldForm[
+         LinkWrite[
+          LinkObject["8000@192.168.1.135", 2200, 13], 
+          CallPacket[0, {}]]]]]}, "AbsoluteTimeUsed" -> 
+    Quantity[0.0156258`5.344357259156355, "Seconds"], "CPUTimeUsed" -> 
+    Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[544, "Bytes"]]],
+  Editable->False,
+  SelectWithContents->True,
+  Selectable->False]], "Output",
+ CellChangeTimes->{{3.685214650431631*^9, 3.6852146577995987`*^9}}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "LinkObject","linkn",
+   "\"Argument \\!\\(\\*RowBox[{\\\"LinkObject\\\", \\\"[\\\", RowBox[{\\\"\\\
+\\\\\"8000@192.168.1.135\\\\\\\"\\\", \\\",\\\", \\\"2200\\\", \\\",\\\", \
+\\\"13\\\"}], \\\"]\\\"}]\\) in \\!\\(\\*RowBox[{\\\"LinkWrite\\\", \
+\\\"[\\\", RowBox[{RowBox[{\\\"LinkObject\\\", \\\"[\\\", \
+RowBox[{\\\"\\\\\\\"8000@192.168.1.135\\\\\\\"\\\", \\\",\\\", \\\"2200\\\", \
+\\\",\\\", \\\"13\\\"}], \\\"]\\\"}], \\\",\\\", RowBox[{\\\"CallPacket\\\", \
+\\\"[\\\", RowBox[{\\\"1\\\", \\\",\\\", RowBox[{\\\"{\\\", \\\"}\\\"}]}], \\\
+\"]\\\"}]}], \\\"]\\\"}]\\) has an invalid LinkObject number; the link may be \
+closed.\"",2,118,10,28168248676308092987,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{{3.6852146504003797`*^9, 3.6852146578152237`*^9}}],
+
+Cell[BoxData["$Failed"], "Output",
+ CellChangeTimes->{{3.685214650431631*^9, 3.6852146578152237`*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"Install", "[", 
+  RowBox[{"LinkConnect", "[", 
+   RowBox[{"\"\<8000@192.168.1.135\>\"", ",", 
+    RowBox[{"LinkProtocol", "\[Rule]", "\"\<TCPIP\>\""}]}], "]"}], 
+  "]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Get42", "[", "]"}], "~", "VerificationTest", "~", 
+  "42"}], "\[IndentingNewLine]", 
+ RowBox[{"RunTestsM", "[", "]"}]}], "Input",
+ CellChangeTimes->{
+  3.685213138089093*^9, {3.6852131831237187`*^9, 3.6852132246108093`*^9}}],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TagBox["LinkObject",
+    "SummaryHead"], "[", 
+   DynamicModuleBox[{Typeset`open$$ = False}, 
+    PanelBox[
+     PaneSelectorBox[{False->GridBox[{
+        {
+         PaneBox[
+          ButtonBox[
+           
+           DynamicBox[FEPrivate`FrontEndResource[
+            "FEBitmaps", "SquarePlusIconMedium"],
+            ImageSizeCache->{12., {0., 12.}}],
+           Appearance->None,
+           ButtonFunction:>(Typeset`open$$ = True),
+           Evaluator->Automatic,
+           Method->"Preemptive"],
+          Alignment->{Center, Center},
+          
+          ImageSize->
+           Dynamic[{
+            Automatic, 
+             3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+              Magnification])}]], 
+         GraphicsBox[
+          {Thickness[0.038461538461538464`], 
+           {FaceForm[{GrayLevel[0.93], Opacity[1.]}], 
+            FilledCurveBox[{{{1, 4, 3}, {0, 1, 0}, {1, 3, 3}, {0, 1, 0}, {1, 
+             3, 3}, {0, 1, 0}, {1, 3, 3}, {0, 1, 0}}}, {{{25.499999999999996`,
+              2.5}, {25.499999999999996`, 1.3953100000000003`}, {
+             24.604699999999998`, 0.49999999999999994`}, {23.5, 
+             0.49999999999999994`}, {2.5, 0.49999999999999994`}, {
+             1.3953100000000003`, 0.49999999999999994`}, {
+             0.49999999999999994`, 1.3953100000000003`}, {
+             0.49999999999999994`, 2.5}, {0.49999999999999994`, 23.5}, {
+             0.49999999999999994`, 24.604699999999998`}, {1.3953100000000003`,
+              25.499999999999996`}, {2.5, 25.499999999999996`}, {23.5, 
+             25.499999999999996`}, {24.604699999999998`, 
+             25.499999999999996`}, {25.499999999999996`, 
+             24.604699999999998`}, {25.499999999999996`, 23.5}, {
+             25.499999999999996`, 2.5}}}]}, 
+           {FaceForm[{RGBColor[0.5, 0.5, 0.5], Opacity[1.]}], 
+            FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 
+             1, 0}, {0, 1, 0}, {0, 1, 0}}}, {{{20.5426, 
+             19.116799999999998`}, {16.3832, 21.876199999999997`}, {16.3832, 
+             20.021499999999996`}, {6.930469999999999, 20.021499999999996`}, {
+             6.930469999999999, 18.212100000000003`}, {16.3832, 
+             18.212100000000003`}, {16.3832, 16.357399999999995`}, {20.5426, 
+             19.116799999999998`}}}], 
+            FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 
+             1, 0}, {0, 1, 0}, {0, 1, 0}}}, {{{5.30508, 13.8391}, {9.46445, 
+             11.079700000000003`}, {9.46445, 12.933999999999997`}, {
+             18.917199999999998`, 12.933999999999997`}, {18.917199999999998`, 
+             14.7438}, {9.46445, 14.7438}, {9.46445, 16.598}, {5.30508, 
+             13.8391}}}], 
+            FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 
+             1, 0}, {0, 1, 0}, {0, 1, 0}}}, {{{5.30508, 13.8391}, {9.46445, 
+             11.079700000000003`}, {9.46445, 12.933999999999997`}, {
+             18.917199999999998`, 12.933999999999997`}, {18.917199999999998`, 
+             14.7438}, {9.46445, 14.7438}, {9.46445, 16.598}, {5.30508, 
+             13.8391}}}], 
+            FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 
+             1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0,
+              1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+             0, 1, 0}, {0, 1, 0}, {0, 1, 0}}}, CompressedData["
+1:eJxTTMoPSmVmYGBgBGIRIGYC4sIjUTVcAooO8+XdOPpnKDg8YkwNXuen7JA2
+W/qycJSgw5sbHEde31CB82PFhGf3n1V1aFVgVz0zR8oBrF9czWFHsFXE/9Wy
+Dje0Dj4qiFWDy7cVLYptDVKH65/g6Xbu0HMNOB9sn4I23H6w+SWacD5De8DS
+tDQNB7ldC/alskg4aD2+nx6joeFgnPFi/oMZog5B9vlaQa/UHao9k7f0KUhA
++D/UUPVbqML5jCB+oIpDzJHypGv8Eg4eGad3ikiqwM2T57H5LndPGW6eya7m
+GzMvKcH1o4cXABG3d/Y=
+             "]], 
+            FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 
+             1, 0}, {0, 1, 0}}}, {{{14.163129999999999`, 4.337966249999999}, {
+             16.96813, 4.337966249999999}, {16.96813, 5.047809999999999}, {
+             14.98813, 5.047809999999999}, {14.98813, 8.29796625}, {
+             14.163129999999999`, 8.29796625}, {14.163129999999999`, 
+             4.337966249999999}}}]}},
+          AspectRatio->1,
+          Axes->False,
+          Background->GrayLevel[0.93],
+          Frame->True,
+          FrameStyle->Directive[
+            Thickness[Tiny], 
+            GrayLevel[0.7]],
+          FrameTicks->None,
+          ImageSize->{Automatic, 
+            Dynamic[
+            3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+              Magnification]), ImageSizeCache -> {45., {0., 9.}}]},
+          ImageCache->GraphicsData["CompressedBitmap", "\<\
+eJy1Vb1LQlEUv49naR+DNUUNvbGxv6Km9laJoIYoqj9AUBEFTQfJQRwdXBoU
+REHCTRAUHAQHQUFw07HxdH7H98w+zBvVcM879517fud3z8d7J777i/Mr3/3l
+mc86vvXdXFye3VlH17f8yjSUUhaWpaATq7aw1Hg8VmqfCoWCMdWViY3F+gv2
+u8TSaEF8OvQwmUxgVnv0pf35r+wekevU7XYpEAhgR6lUihqNhujxeJzS6TRl
+MhlqtVprWnAeKpVK4grYZDJJ+Xx+Btfv9zc0YRC1Wq1SsVgUSDD7AYxb5BqN
+RiMKh8PU6/XkicsBGuxsKKWL1el0hA5oAAPYtVpNMHO5HA2Hw6VY/13UKVeT
+yuUyxWIx2W0t8VkR6aLBYECJRIL8fj9ytb3EzWWHQoHhwkttijQl1UjTDF4D
+J5vN/grHuUaz2aRQKCRYwWBwHW3ER+v1ujaUe45SJBLRyqLH9kEW38Xhd+ic
+SqXydu4bHK99jXa7LVfACHL3urVub0pjozl5TaeILZgdO7My6UxFrWriOTTm
+qxKNRiXOrHoaOBgWYPFiXpArMt8OL3QRn1nKyzvHCzz4y6SZUhMDKjx0yrBg
+0B6d0i6wHzr26Sd+9PGQCxvop7yeONgOIioTuAfwhdn44gdivALRBiuN\
+\>"]], GridBox[{
+           {
+            RowBox[{
+             TagBox["\<\"Name: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              StyleBox[
+               PaneBox["\<\"8000@192.168.1.135\"\>",
+                BaselinePosition->Baseline,
+                ContentPadding->False,
+                FrameMargins->0,
+                ImageSize->{{1, 300}, Automatic},
+                StripOnInput->True],
+               LineBreakWithin->False],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Link mode: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["Connect",
+              "SummaryItem"]}]}
+          },
+          AutoDelete->False,
+          
+          BaseStyle->{
+           ShowStringCharacters -> False, NumberMarks -> False, 
+            PrintPrecision -> 3, ShowSyntaxStyles -> False},
+          GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Automatic}}},
+          
+          GridBoxItemSize->{
+           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+          GridBoxSpacings->{"Columns" -> {{2}}, "Rows" -> {{Automatic}}}]}
+       },
+       AutoDelete->False,
+       BaselinePosition->{1, 1},
+       GridBoxAlignment->{"Rows" -> {{Top}}},
+       GridBoxItemSize->{
+        "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], True->GridBox[{
+        {
+         PaneBox[
+          ButtonBox[
+           
+           DynamicBox[FEPrivate`FrontEndResource[
+            "FEBitmaps", "SquareMinusIconMedium"]],
+           Appearance->None,
+           ButtonFunction:>(Typeset`open$$ = False),
+           Evaluator->Automatic,
+           Method->"Preemptive"],
+          Alignment->{Center, Center},
+          
+          ImageSize->
+           Dynamic[{
+            Automatic, 
+             3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+              Magnification])}]], 
+         GraphicsBox[
+          {Thickness[0.038461538461538464`], 
+           {FaceForm[{GrayLevel[0.93], Opacity[1.]}], 
+            FilledCurveBox[{{{1, 4, 3}, {0, 1, 0}, {1, 3, 3}, {0, 1, 0}, {1, 
+             3, 3}, {0, 1, 0}, {1, 3, 3}, {0, 1, 0}}}, {{{25.499999999999996`,
+              2.5}, {25.499999999999996`, 1.3953100000000003`}, {
+             24.604699999999998`, 0.49999999999999994`}, {23.5, 
+             0.49999999999999994`}, {2.5, 0.49999999999999994`}, {
+             1.3953100000000003`, 0.49999999999999994`}, {
+             0.49999999999999994`, 1.3953100000000003`}, {
+             0.49999999999999994`, 2.5}, {0.49999999999999994`, 23.5}, {
+             0.49999999999999994`, 24.604699999999998`}, {1.3953100000000003`,
+              25.499999999999996`}, {2.5, 25.499999999999996`}, {23.5, 
+             25.499999999999996`}, {24.604699999999998`, 
+             25.499999999999996`}, {25.499999999999996`, 
+             24.604699999999998`}, {25.499999999999996`, 23.5}, {
+             25.499999999999996`, 2.5}}}]}, 
+           {FaceForm[{RGBColor[0.5, 0.5, 0.5], Opacity[1.]}], 
+            FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 
+             1, 0}, {0, 1, 0}, {0, 1, 0}}}, {{{20.5426, 
+             19.116799999999998`}, {16.3832, 21.876199999999997`}, {16.3832, 
+             20.021499999999996`}, {6.930469999999999, 20.021499999999996`}, {
+             6.930469999999999, 18.212100000000003`}, {16.3832, 
+             18.212100000000003`}, {16.3832, 16.357399999999995`}, {20.5426, 
+             19.116799999999998`}}}], 
+            FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 
+             1, 0}, {0, 1, 0}, {0, 1, 0}}}, {{{5.30508, 13.8391}, {9.46445, 
+             11.079700000000003`}, {9.46445, 12.933999999999997`}, {
+             18.917199999999998`, 12.933999999999997`}, {18.917199999999998`, 
+             14.7438}, {9.46445, 14.7438}, {9.46445, 16.598}, {5.30508, 
+             13.8391}}}], 
+            FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 
+             1, 0}, {0, 1, 0}, {0, 1, 0}}}, {{{5.30508, 13.8391}, {9.46445, 
+             11.079700000000003`}, {9.46445, 12.933999999999997`}, {
+             18.917199999999998`, 12.933999999999997`}, {18.917199999999998`, 
+             14.7438}, {9.46445, 14.7438}, {9.46445, 16.598}, {5.30508, 
+             13.8391}}}], 
+            FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 
+             1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0,
+              1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+             0, 1, 0}, {0, 1, 0}, {0, 1, 0}}}, CompressedData["
+1:eJxTTMoPSmVmYGBgBGIRIGYC4sIjUTVcAooO8+XdOPpnKDg8YkwNXuen7JA2
+W/qycJSgw5sbHEde31CB82PFhGf3n1V1aFVgVz0zR8oBrF9czWFHsFXE/9Wy
+Dje0Dj4qiFWDy7cVLYptDVKH65/g6Xbu0HMNOB9sn4I23H6w+SWacD5De8DS
+tDQNB7ldC/alskg4aD2+nx6joeFgnPFi/oMZog5B9vlaQa/UHao9k7f0KUhA
++D/UUPVbqML5jCB+oIpDzJHypGv8Eg4eGad3ikiqwM2T57H5LndPGW6eya7m
+GzMvKcH1o4cXABG3d/Y=
+             "]], 
+            FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 
+             1, 0}, {0, 1, 0}}}, {{{14.163129999999999`, 4.337966249999999}, {
+             16.96813, 4.337966249999999}, {16.96813, 5.047809999999999}, {
+             14.98813, 5.047809999999999}, {14.98813, 8.29796625}, {
+             14.163129999999999`, 8.29796625}, {14.163129999999999`, 
+             4.337966249999999}}}]}},
+          AspectRatio->1,
+          Axes->False,
+          Background->GrayLevel[0.93],
+          Frame->True,
+          FrameStyle->Directive[
+            Thickness[Tiny], 
+            GrayLevel[0.7]],
+          FrameTicks->None,
+          ImageSize->{Automatic, 
+            Dynamic[
+            3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+              Magnification]), ImageSizeCache -> {45., {0., 9.}}]}], GridBox[{
+           {
+            RowBox[{
+             TagBox["\<\"Name: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox["\<\"8000@192.168.1.135\"\>",
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Link mode: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["Connect",
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Link protocol: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["\<\"TCPIP\"\>",
+              "SummaryItem"]}]}
+          },
+          AutoDelete->False,
+          
+          BaseStyle->{
+           ShowStringCharacters -> False, NumberMarks -> False, 
+            PrintPrecision -> 3, ShowSyntaxStyles -> False},
+          GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Automatic}}},
+          
+          GridBoxItemSize->{
+           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+          GridBoxSpacings->{"Columns" -> {{2}}, "Rows" -> {{Automatic}}}]}
+       },
+       AutoDelete->False,
+       BaselinePosition->{1, 1},
+       GridBoxAlignment->{"Rows" -> {{Top}}},
+       GridBoxItemSize->{
+        "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}]}, Dynamic[
+      Typeset`open$$],
+      ImageSize->Automatic],
+     BaselinePosition->Baseline],
+    DynamicModuleValues:>{}], "]"}],
+  LinkObject["8000@192.168.1.135", 2304, 13],
+  Editable->False,
+  SelectWithContents->True,
+  Selectable->False]], "Output",
+ CellChangeTimes->{{3.6852131408812904`*^9, 3.6852131453878236`*^9}, {
+   3.6852132061546736`*^9, 3.6852132415176*^9}, {3.6852133240964766`*^9, 
+   3.685213345331443*^9}, 3.6852144589492817`*^9, 3.685214576375749*^9, {
+   3.6852147274991736`*^9, 3.6852147335245667`*^9}}],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TagBox["TestResultObject",
+    "SummaryHead"], "[", 
+   DynamicModuleBox[{Typeset`open$$ = False}, 
+    PanelBox[
+     PaneSelectorBox[{False->GridBox[{
+        {
+         PaneBox[
+          ButtonBox[
+           
+           DynamicBox[FEPrivate`FrontEndResource[
+            "FEBitmaps", "SquarePlusIconMedium"],
+            ImageSizeCache->{12., {0., 12.}}],
+           Appearance->None,
+           ButtonFunction:>(Typeset`open$$ = True),
+           Evaluator->Automatic,
+           Method->"Preemptive"],
+          Alignment->{Center, Center},
+          
+          ImageSize->
+           Dynamic[{
+            Automatic, 
+             3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+              Magnification])}]], 
+         GraphicsBox[InsetBox[
+           PaneBox[
+            
+            DynamicBox[FEPrivate`FrontEndResource[
+             "MUnitExpressions", "SuccessIcon"],
+             ImageSizeCache->{16., {4., 8.}}],
+            Alignment->Center,
+            
+            ImageSize->
+             Dynamic[{
+              Automatic, 
+               3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                Magnification])}]]],
+          AspectRatio->1,
+          Axes->False,
+          Background->GrayLevel[0.93],
+          Frame->True,
+          FrameStyle->Directive[
+            Thickness[Tiny], 
+            GrayLevel[0.55]],
+          FrameTicks->None,
+          ImageSize->{Automatic, 
+            Dynamic[
+            3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+              Magnification])]},
+          PlotRange->{{0, 1}, {0, 1}},
+          ImageCache->GraphicsData["CompressedBitmap", "\<\
+eJzzTSzJSM1NLMlMTlRwL0osyMhMLlZwyy8CCjEzMjAwKICwAgOI/R/IhBIK
+DO/evWNgkP/f09PDCGEzMIM4YDYIS4NIxlF5XPKcYJK5acmhZat6tkxge/Xm
+FQM/AT3sYJKN8e27txNn7533P2ZGIgjvaNnQwfXy9Us+AtrZIFYyv3n7Zv7k
+ndNAWoEqwOTR2tWN/E9fPgOr4CFgDivENJCT13Rv6YM541f8rJS36fOymSBG
+XixbUS366PkjsGJuooxk39K+sQtm3LfE2WlOJ66f1Lj+8MaT7IUFDFBz7xQs
+KZW7++QuWAcXUeayhOy7dADkvI8pczOtzt4+xwTxAcgYkHEwK0HWgKwjZCo0
+IN2OXT9hdPHuJQgPIgPyMcjnMCNfZ8zPMb5w5yInASN5IdpBcQCKC5h2kIPt
+T908zUFAOx9EOygVgFIDchj6HLpyhJ2Adn5EjIISI3KMRu26sIeNgHYBSFiD
+EtbsqTtnwLSv79rcx0BI70Dnw0Enj1KmMgIAFNHmWg==\
+\>"]], GridBox[{
+           {
+            RowBox[{
+             TagBox["\<\"Outcome: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["\<\"Success\"\>",
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Test ID: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["None",
+              "SummaryItem"]}]}
+          },
+          AutoDelete->False,
+          
+          BaseStyle->{
+           ShowStringCharacters -> False, NumberMarks -> False, 
+            PrintPrecision -> 3, ShowSyntaxStyles -> False},
+          GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Automatic}}},
+          
+          GridBoxItemSize->{
+           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+          GridBoxSpacings->{"Columns" -> {{2}}, "Rows" -> {{Automatic}}}]}
+       },
+       AutoDelete->False,
+       BaselinePosition->{1, 1},
+       GridBoxAlignment->{"Rows" -> {{Top}}},
+       GridBoxItemSize->{
+        "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], True->GridBox[{
+        {
+         PaneBox[
+          ButtonBox[
+           
+           DynamicBox[FEPrivate`FrontEndResource[
+            "FEBitmaps", "SquareMinusIconMedium"]],
+           Appearance->None,
+           ButtonFunction:>(Typeset`open$$ = False),
+           Evaluator->Automatic,
+           Method->"Preemptive"],
+          Alignment->{Center, Center},
+          
+          ImageSize->
+           Dynamic[{
+            Automatic, 
+             3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+              Magnification])}]], 
+         GraphicsBox[InsetBox[
+           PaneBox[
+            
+            DynamicBox[FEPrivate`FrontEndResource[
+             "MUnitExpressions", "SuccessIcon"]],
+            Alignment->Center,
+            
+            ImageSize->
+             Dynamic[{
+              Automatic, 
+               3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                Magnification])}]]],
+          AspectRatio->1,
+          Axes->False,
+          Background->GrayLevel[0.93],
+          Frame->True,
+          FrameStyle->Directive[
+            Thickness[Tiny], 
+            GrayLevel[0.55]],
+          FrameTicks->None,
+          ImageSize->{Automatic, 
+            Dynamic[
+            3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+              Magnification])]},
+          PlotRange->{{0, 1}, {0, 1}}], GridBox[{
+           {
+            RowBox[{
+             TagBox["\<\"Outcome: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["\<\"Success\"\>",
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Test ID: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["None",
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Input: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox[
+                RowBox[{"Get42", "[", "]"}],
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Expected output: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox["42",
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Actual output: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox["42",
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Time Taken: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox[
+                
+                TemplateBox[{
                  "0.0781227`6.043292242366364","\"s\"","seconds",
                   "\"Seconds\""},
                  "Quantity"],
@@ -1252,34 +2132,49 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[558, 20, 728, 13, 284, "Text"],
+Cell[558, 20, 728, 13, 239, "Text"],
 Cell[CellGroupData[{
-Cell[1311, 37, 444, 10, 86, "Input"],
-Cell[1758, 49, 388, 8, 26, "Message"],
-Cell[2149, 59, 337, 7, 26, "Message"],
-Cell[2489, 68, 76, 1, 37, "Output"],
-Cell[2568, 71, 9979, 281, 81, "Output"],
-Cell[12550, 354, 790, 13, 49, "Message"],
-Cell[13343, 369, 78, 1, 37, "Output"]
+Cell[1311, 37, 475, 11, 69, "Input"],
+Cell[1789, 50, 12239, 259, 72, "Output"],
+Cell[14031, 311, 8037, 230, 72, "Output"],
+Cell[22071, 543, 72, 1, 30, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[13458, 375, 439, 10, 86, "Input"],
-Cell[13900, 387, 406, 8, 26, "Message"],
-Cell[14309, 397, 364, 7, 26, "Message"],
-Cell[14676, 406, 102, 1, 37, "Output"],
-Cell[14781, 409, 9815, 278, 81, "Output"],
-Cell[24599, 689, 816, 13, 49, "Message"],
-Cell[25418, 704, 102, 1, 37, "Output"]
+Cell[22180, 549, 436, 10, 69, "Input"],
+Cell[22619, 561, 402, 8, 22, "Message"],
+Cell[23024, 571, 365, 7, 22, "Message"],
+Cell[23392, 580, 104, 1, 30, "Output"],
+Cell[23499, 583, 10130, 284, 72, "Output"],
+Cell[33632, 869, 814, 13, 41, "Message"],
+Cell[34449, 884, 102, 1, 30, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[25557, 710, 465, 11, 86, "Input"],
-Cell[26025, 723, 12470, 262, 81, "Output"],
-Cell[38498, 987, 8268, 233, 81, "Output"],
-Cell[46769, 1222, 300, 4, 37, "Output"]
+Cell[34588, 890, 483, 11, 69, "Input"],
+Cell[35074, 903, 400, 8, 22, "Message"],
+Cell[35477, 913, 363, 7, 22, "Message"],
+Cell[35843, 922, 100, 1, 30, "Output"],
+Cell[35946, 925, 9607, 273, 72, "Output"],
+Cell[45556, 1200, 814, 13, 41, "Message"],
+Cell[46373, 1215, 100, 1, 30, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[47106, 1231, 57, 1, 37, "Input"],
-Cell[47166, 1234, 94, 1, 37, "Output"]
+Cell[46510, 1221, 439, 10, 69, "Input"],
+Cell[46952, 1233, 406, 8, 22, "Message"],
+Cell[47361, 1243, 364, 7, 22, "Message"],
+Cell[47728, 1252, 102, 1, 30, "Output"],
+Cell[47833, 1255, 9892, 282, 72, "Output"],
+Cell[57728, 1539, 816, 13, 41, "Message"],
+Cell[58547, 1554, 102, 1, 30, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[58686, 1560, 465, 11, 69, "Input"],
+Cell[59154, 1573, 13238, 277, 72, "Output"],
+Cell[72395, 1852, 8945, 248, 72, "Output"],
+Cell[81343, 2102, 300, 4, 30, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[81680, 2111, 57, 1, 30, "Input"],
+Cell[81740, 2114, 94, 1, 30, "Output"]
 }, Open  ]]
 }
 ]

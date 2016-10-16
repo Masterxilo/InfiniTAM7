@@ -222,14 +222,283 @@ L0:	return res;
 } /* _tr1 */
 
 
+int createScene P(( double _tp1));
+
+#if WSPROTOTYPES
+static int _tr2( WSLINK mlp)
+#else
+static int _tr2(mlp) WSLINK mlp;
+#endif
+{
+	int	res = 0;
+	double _tp1;
+	int _rp0;
+	if ( ! WSGetReal( mlp, &_tp1) ) goto L0;
+	if ( ! WSNewPacket(mlp) ) goto L1;
+
+	_rp0 = createScene(_tp1);
+
+	res = WSAbort ?
+		WSPutFunction( mlp, "Abort", 0) : WSPutInteger( mlp, _rp0);
+L1: 
+L0:	return res;
+} /* _tr2 */
+
+
+double getSceneVoxelSize P(( int _tp1));
+
+#if WSPROTOTYPES
+static int _tr3( WSLINK mlp)
+#else
+static int _tr3(mlp) WSLINK mlp;
+#endif
+{
+	int	res = 0;
+	int _tp1;
+	double _rp0;
+	if ( ! WSGetInteger( mlp, &_tp1) ) goto L0;
+	if ( ! WSNewPacket(mlp) ) goto L1;
+
+	_rp0 = getSceneVoxelSize(_tp1);
+
+	res = WSAbort ?
+		WSPutFunction( mlp, "Abort", 0) : WSPutReal( mlp, _rp0);
+L1: 
+L0:	return res;
+} /* _tr3 */
+
+
+int sceneExistsQ P(( int _tp1));
+
+#if WSPROTOTYPES
+static int _tr4( WSLINK mlp)
+#else
+static int _tr4(mlp) WSLINK mlp;
+#endif
+{
+	int	res = 0;
+	int _tp1;
+	int _rp0;
+	if ( ! WSGetInteger( mlp, &_tp1) ) goto L0;
+	if ( ! WSNewPacket(mlp) ) goto L1;
+
+	_rp0 = sceneExistsQ(_tp1);
+
+	res = WSAbort ?
+		WSPutFunction( mlp, "Abort", 0) : WSPutInteger( mlp, _rp0);
+L1: 
+L0:	return res;
+} /* _tr4 */
+
+
+void serializeScene P(( int _tp1, const char * _tp2));
+
+#if WSPROTOTYPES
+static int _tr5( WSLINK mlp)
+#else
+static int _tr5(mlp) WSLINK mlp;
+#endif
+{
+	int	res = 0;
+	int _tp1;
+	const char * _tp2;
+	if ( ! WSGetInteger( mlp, &_tp1) ) goto L0;
+	if ( ! WSGetString( mlp, &_tp2) ) goto L1;
+	if ( ! WSNewPacket(mlp) ) goto L2;
+
+	serializeScene(_tp1, _tp2);
+
+	res = 1;
+L2:	WSReleaseString(mlp, _tp2);
+L1: 
+L0:	return res;
+} /* _tr5 */
+
+
+void deserializeScene P(( int _tp1, const char * _tp2));
+
+#if WSPROTOTYPES
+static int _tr6( WSLINK mlp)
+#else
+static int _tr6(mlp) WSLINK mlp;
+#endif
+{
+	int	res = 0;
+	int _tp1;
+	const char * _tp2;
+	if ( ! WSGetInteger( mlp, &_tp1) ) goto L0;
+	if ( ! WSGetString( mlp, &_tp2) ) goto L1;
+	if ( ! WSNewPacket(mlp) ) goto L2;
+
+	deserializeScene(_tp1, _tp2);
+
+	res = 1;
+L2:	WSReleaseString(mlp, _tp2);
+L1: 
+L0:	return res;
+} /* _tr6 */
+
+
+int countVoxelBlocks P(( int _tp1));
+
+#if WSPROTOTYPES
+static int _tr7( WSLINK mlp)
+#else
+static int _tr7(mlp) WSLINK mlp;
+#endif
+{
+	int	res = 0;
+	int _tp1;
+	int _rp0;
+	if ( ! WSGetInteger( mlp, &_tp1) ) goto L0;
+	if ( ! WSNewPacket(mlp) ) goto L1;
+
+	_rp0 = countVoxelBlocks(_tp1);
+
+	res = WSAbort ?
+		WSPutFunction( mlp, "Abort", 0) : WSPutInteger( mlp, _rp0);
+L1: 
+L0:	return res;
+} /* _tr7 */
+
+
+void getVoxelBlock P(( int _tp1, int _tp2));
+
+#if WSPROTOTYPES
+static int _tr8( WSLINK mlp)
+#else
+static int _tr8(mlp) WSLINK mlp;
+#endif
+{
+	int	res = 0;
+	int _tp1;
+	int _tp2;
+	if ( ! WSGetInteger( mlp, &_tp1) ) goto L0;
+	if ( ! WSGetInteger( mlp, &_tp2) ) goto L1;
+	if ( ! WSNewPacket(mlp) ) goto L2;
+
+	getVoxelBlock(_tp1, _tp2);
+
+	res = 1;
+L2: L1: 
+L0:	return res;
+} /* _tr8 */
+
+
+void putVoxelBlock P(( int _tp1));
+
+#if WSPROTOTYPES
+static int _tr9( WSLINK mlp)
+#else
+static int _tr9(mlp) WSLINK mlp;
+#endif
+{
+	int	res = 0;
+	int _tp1;
+	if ( ! WSGetInteger( mlp, &_tp1) ) goto L0;
+
+	putVoxelBlock(_tp1);
+
+	res = 1;
+ 
+L0:	return res;
+} /* _tr9 */
+
+
+void meshScene P(( int _tp1, const char * _tp2));
+
+#if WSPROTOTYPES
+static int _tr10( WSLINK mlp)
+#else
+static int _tr10(mlp) WSLINK mlp;
+#endif
+{
+	int	res = 0;
+	int _tp1;
+	const char * _tp2;
+	if ( ! WSGetInteger( mlp, &_tp1) ) goto L0;
+	if ( ! WSGetString( mlp, &_tp2) ) goto L1;
+	if ( ! WSNewPacket(mlp) ) goto L2;
+
+	meshScene(_tp1, _tp2);
+
+	res = 1;
+L2:	WSReleaseString(mlp, _tp2);
+L1: 
+L0:	return res;
+} /* _tr10 */
+
+
+void meshSceneWithShader P(( int _tp1, const char * _tp2, const char * _tp3, double _tp4));
+
+#if WSPROTOTYPES
+static int _tr11( WSLINK mlp)
+#else
+static int _tr11(mlp) WSLINK mlp;
+#endif
+{
+	int	res = 0;
+	int _tp1;
+	const char * _tp2;
+	const char * _tp3;
+	double _tp4;
+	if ( ! WSGetInteger( mlp, &_tp1) ) goto L0;
+	if ( ! WSGetString( mlp, &_tp2) ) goto L1;
+	if ( ! WSGetString( mlp, &_tp3) ) goto L2;
+	if ( ! WSGetReal( mlp, &_tp4) ) goto L3;
+	if ( ! WSNewPacket(mlp) ) goto L4;
+
+	meshSceneWithShader(_tp1, _tp2, _tp3, _tp4);
+
+	res = 1;
+L4: L3:	WSReleaseString(mlp, _tp3);
+L2:	WSReleaseString(mlp, _tp2);
+L1: 
+L0:	return res;
+} /* _tr11 */
+
+
+void processFrame P(( int _tp1, int _tp2));
+
+#if WSPROTOTYPES
+static int _tr12( WSLINK mlp)
+#else
+static int _tr12(mlp) WSLINK mlp;
+#endif
+{
+	int	res = 0;
+	int _tp1;
+	int _tp2;
+	if ( ! WSGetInteger( mlp, &_tp1) ) goto L0;
+	if ( ! WSGetInteger( mlp, &_tp2) ) goto L1;
+
+	processFrame(_tp1, _tp2);
+
+	res = 1;
+ L1: 
+L0:	return res;
+} /* _tr12 */
+
+
 static struct func {
 	int   f_nargs;
 	int   manual;
 	int   (*f_func)P((WSLINK));
 	const char  *f_name;
-	} _tramps[2] = {
+	} _tramps[13] = {
 		{ 0, 0, _tr0, "Get42" },
-		{ 0, 0, _tr1, "RunTestsM" }
+		{ 0, 0, _tr1, "RunTestsM" },
+		{ 1, 0, _tr2, "createScene" },
+		{ 1, 0, _tr3, "getSceneVoxelSize" },
+		{ 1, 0, _tr4, "sceneExistsQ" },
+		{ 2, 0, _tr5, "serializeScene" },
+		{ 2, 0, _tr6, "deserializeScene" },
+		{ 1, 0, _tr7, "countVoxelBlocks" },
+		{ 2, 0, _tr8, "getVoxelBlock" },
+		{ 1, 2, _tr9, "putVoxelBlock" },
+		{ 2, 0, _tr10, "meshScene" },
+		{ 4, 0, _tr11, "meshSceneWithShader" },
+		{ 2, 2, _tr12, "processFrame" }
 		};
 
 static const char* evalstrs[] = {
@@ -272,6 +541,17 @@ int WSInstall(mlp) WSLINK mlp;
 	if (_res) _res = _doevalstr( mlp, 0);
 	if (_res) _res = _doevalstr( mlp, 1);
 	if (_res) _res = _doevalstr( mlp, 2);
+	if (_res) _res = _definepattern(mlp, (char *)"createScene[voxelSize_Real]", (char *)"{ voxelSize }", 2);
+	if (_res) _res = _definepattern(mlp, (char *)"getSceneVoxelSize[id_Integer?NonNegative]", (char *)"{ id }", 3);
+	if (_res) _res = _definepattern(mlp, (char *)"sceneExistsQ[id_Integer?NonNegative]", (char *)"{ id }", 4);
+	if (_res) _res = _definepattern(mlp, (char *)"serializeScene[id_Integer?NonNegative, fn_String]", (char *)"{ id, fn }", 5);
+	if (_res) _res = _definepattern(mlp, (char *)"deserializeScene[id_Integer?NonNegative, fn_String]", (char *)"{ id, fn }", 6);
+	if (_res) _res = _definepattern(mlp, (char *)"countVoxelBlocks[id_Integer?NonNegative]", (char *)"{ id }", 7);
+	if (_res) _res = _definepattern(mlp, (char *)"getVoxelBlock[id_Integer?NonNegative, i_Integer?Positive]", (char *)"{ id, i }", 8);
+	if (_res) _res = _definepattern(mlp, (char *)"putVoxelBlock[     id_Integer?NonNegative     (* Manual *)     , voxelBlockData : { {_,_,_} (*pos*), {__List} (*8^3 voxels' data*) }]", (char *)"{ id, voxelBlockData }", 9);
+	if (_res) _res = _definepattern(mlp, (char *)"meshScene[id_Integer?NonNegative, fn_String]", (char *)"{ id, fn }", 10);
+	if (_res) _res = _definepattern(mlp, (char *)"meshSceneWithShader[id_Integer?NonNegative, fn_String, shader_String, shaderParam_Real]", (char *)"{ id, fn, shader, shaderParam }", 11);
+	if (_res) _res = _definepattern(mlp, (char *)"processFrame[     id_Integer?NonNegative     (* Manual *)     , rgbaByteImage_ /;TensorQ[rgbaByteImage, IntegerQ] && Last@Dimensions@rgbaByteImage == 4     , depthData_?NumericMatrixQ     , poseWorldToView_?PoseMatrixQ     , intrinsicsRgb : NamelessIntrinsicsPattern[]     , intrinsicsD : NamelessIntrinsicsPattern[]     , rgbToDepth_?PoseMatrixQ     ]", (char *)"{ doTracking, id, rgbaByteImage, depthData, poseWorldToView, intrinsicsRgb, intrinsicsD, rgbToDepth }", 12);
 	if (_res) _res = _doevalstr( mlp, 3);
 	if (_res) _res = _doevalstr( mlp, 4);
 	if (_res) _res = _doevalstr( mlp, 5);
@@ -287,7 +567,7 @@ int WSDoCallPacket( WSLINK mlp)
 int WSDoCallPacket( mlp) WSLINK mlp;
 #endif
 {
-	return _WSDoCallPacket( mlp, _tramps, 2);
+	return _WSDoCallPacket( mlp, _tramps, 13);
 } /* WSDoCallPacket */
 
 /******************************* begin trailer ********************************/
