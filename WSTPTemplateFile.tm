@@ -123,11 +123,64 @@
     , intrinsicsD : NamelessIntrinsicsPattern[]
     , rgbToDepth_?PoseMatrixQ
     ]
-:Arguments:      { doTracking, id, rgbaByteImage, depthData, poseWorldToView, intrinsicsRgb, intrinsicsD, rgbToDepth }
-:ArgumentTypes:  { Integer, Integer, Manual }
+:Arguments:      { id, rgbaByteImage, depthData, poseWorldToView, intrinsicsRgb, intrinsicsD, rgbToDepth }
+:ArgumentTypes:  { Integer, Manual }
 :ReturnType:     Manual
 :End:
 
+
+:Begin:
+:Function:       initAD
+:Pattern:        initAD[id_Integer?NonNegative]
+:Arguments:      { id }
+:ArgumentTypes:  { Integer }
+:ReturnType:     Manual
+:End:
+
+
+
+:Begin:
+:Function:       refineScene
+:Pattern:        refineScene[id_Integer, eg_Real, er_Real, es_Real, ea_Real, l : {__Real}]
+:Arguments:      { id, eg, er, es, ea, l }
+:ArgumentTypes:  { Integer, Real, Real, Real, Real, RealList }
+:ReturnType:     Manual
+:End:
+
+
+
+:Begin:
+:Function:       sceneEnergy
+:Pattern:        sceneEnergy[id_Integer, eg_Real, er_Real, es_Real, ea_Real, l : {__Real}]
+:Arguments:      { id, eg, er, es, ea, l }
+:ArgumentTypes:  { Integer, Real, Real, Real, Real, RealList }
+:ReturnType:     Real
+:End:
+
+
+:Begin:
+:Function:       dumpSceneVoxelPositions
+:Pattern:        dumpSceneVoxelPositions[id_Integer?NonNegative, fn_String]
+:Arguments:      { id, fn }
+:ArgumentTypes:  { Integer, String }
+:ReturnType:     Manual
+:End:
+
+:Begin:
+:Function:       dumpSceneVoxelPositionsBlockwise
+:Pattern:        dumpSceneVoxelPositionsBlockwise[id_Integer?NonNegative, fn_String]
+:Arguments:      { id, fn }
+:ArgumentTypes:  { Integer, String }
+:ReturnType:     Manual
+:End:
+
+:Begin:
+:Function:       dumpSceneOptimizationBlocks
+:Pattern:        dumpSceneOptimizationBlocks[id_Integer?NonNegative, fn_String, {offsetx_Integer,offsety_Integer,offsetz_Integer}]
+:Arguments:      { id, fn, offsetx, offsety, offsetz }
+:ArgumentTypes:  { Integer, String, Integer, Integer, Integer }
+:ReturnType:     Manual
+:End:
 
 
 :Evaluate: Protect@"InfiniTAM2`Private`*"

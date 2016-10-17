@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     66098,       1625]
-NotebookOptionsPosition[     65297,       1595]
-NotebookOutlinePosition[     65637,       1610]
-CellTagsIndexPosition[     65594,       1607]
+NotebookDataLength[     66141,       1622]
+NotebookOptionsPosition[     65342,       1592]
+NotebookOutlinePosition[     65682,       1607]
+CellTagsIndexPosition[     65639,       1604]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -47,7 +47,7 @@ Cell[BoxData[
            
            DynamicBox[FEPrivate`FrontEndResource[
             "FEBitmaps", "SquarePlusIconMedium"],
-            ImageSizeCache->{14., {0., 14.}}],
+            ImageSizeCache->{12., {0., 12.}}],
            Appearance->None,
            ButtonFunction:>(Typeset`open$$ = True),
            Evaluator->Automatic,
@@ -131,9 +131,9 @@ GzMvKcH1o4cXABG3d/Y=
              TagBox[
               StyleBox[
                
-               PaneBox["\<\"\\\"C:\\\\Users\\\\Paul'Masterxilo'\\\\Dropbox\\\\\
-Paul\\\\MasterarbeitShared\\\\Research\\\\InfiniTAM7\\\\x64\\\\Debug\\\\\
-InfiniTAM7.exe\\\"\"\>",
+               PaneBox["\<\"\\\"C:\\\\Users\\\\Paul\\\\Dropbox\\\\Paul\\\\\
+MasterarbeitShared\\\\Research\\\\InfiniTAM7\\\\x64\\\\Debug\\\\InfiniTAM7.\
+exe\\\"\"\>",
                 BaselinePosition->Baseline,
                 ContentPadding->False,
                 FrameMargins->0,
@@ -252,9 +252,9 @@ GzMvKcH1o4cXABG3d/Y=
               "SummaryItemAnnotation"], "\[InvisibleSpace]", 
              TagBox[
               
-              PaneBox["\<\"\\\"C:\\\\Users\\\\Paul'Masterxilo'\\\\Dropbox\\\\\
-Paul\\\\MasterarbeitShared\\\\Research\\\\InfiniTAM7\\\\x64\\\\Debug\\\\\
-InfiniTAM7.exe\\\"\"\>",
+              PaneBox["\<\"\\\"C:\\\\Users\\\\Paul\\\\Dropbox\\\\Paul\\\\\
+MasterarbeitShared\\\\Research\\\\InfiniTAM7\\\\x64\\\\Debug\\\\InfiniTAM7.\
+exe\\\"\"\>",
                BaselinePosition->Baseline,
                ContentPadding->False,
                FrameMargins->0,
@@ -295,14 +295,14 @@ InfiniTAM7.exe\\\"\"\>",
      BaselinePosition->Baseline],
     DynamicModuleValues:>{}], "]"}],
   LinkObject[
-  "\"C:\\Users\\Paul'Masterxilo'\\Dropbox\\Paul\\MasterarbeitShared\\Research\
-\\InfiniTAM7\\x64\\Debug\\InfiniTAM7.exe\"", 2124, 7],
+  "\"C:\\Users\\Paul\\Dropbox\\Paul\\MasterarbeitShared\\Research\\InfiniTAM7\
+\\x64\\Debug\\InfiniTAM7.exe\"", 11863, 14],
   Editable->False,
   SelectWithContents->True,
   Selectable->False]], "Output",
  CellChangeTimes->{
   3.68521132240558*^9, {3.68521150799669*^9, 3.6852115212592783`*^9}, 
-   3.6852116379081345`*^9, 3.6852124023683567`*^9}],
+   3.6852116379081345`*^9, 3.6852124023683567`*^9, 3.6856140963110447`*^9}],
 
 Cell[BoxData[
  InterpretationBox[
@@ -318,7 +318,7 @@ Cell[BoxData[
            
            DynamicBox[FEPrivate`FrontEndResource[
             "FEBitmaps", "SquarePlusIconMedium"],
-            ImageSizeCache->{14., {0., 14.}}],
+            ImageSizeCache->{12., {0., 12.}}],
            Appearance->None,
            ButtonFunction:>(Typeset`open$$ = True),
            Evaluator->Automatic,
@@ -334,7 +334,7 @@ Cell[BoxData[
             
             DynamicBox[FEPrivate`FrontEndResource[
              "MUnitExpressions", "SuccessIcon"],
-             ImageSizeCache->{19., {4., 10.}}],
+             ImageSizeCache->{16., {4., 8.}}],
             Alignment->Center,
             
             ImageSize->
@@ -490,7 +490,7 @@ Cell[BoxData[
                TagBox[
                 
                 TemplateBox[{
-                 "0``7.150514997831988","\"s\"","seconds","\"Seconds\""},
+                 "0``7.1505149978319915","\"s\"","seconds","\"Seconds\""},
                  "Quantity"],
                 Short[#, 
                  Rational[2, 3]]& ],
@@ -523,24 +523,24 @@ Cell[BoxData[
     DynamicModuleValues:>{}], "]"}],
   TestResultObject[
    Association[
-   "TestIndex" -> 1, "TestID" -> None, "Outcome" -> "Success", "Input" -> 
+   "TestIndex" -> 20, "TestID" -> None, "Outcome" -> "Success", "Input" -> 
     HoldForm[
       $CellContext`Get42[]], "ExpectedOutput" -> HoldForm[42], "ActualOutput" -> 
     HoldForm[42], "ExpectedMessages" -> {}, "ActualMessages" -> {}, 
-    "AbsoluteTimeUsed" -> Quantity[0``7.150514997831988, "Seconds"], 
+    "AbsoluteTimeUsed" -> Quantity[0``7.1505149978319915, "Seconds"], 
     "CPUTimeUsed" -> Quantity[0., "Seconds"], "MemoryUsed" -> 
-    Quantity[7064, "Bytes"]]],
+    Quantity[152, "Bytes"]]],
   Editable->False,
   SelectWithContents->True,
   Selectable->False]], "Output",
  CellChangeTimes->{
   3.68521132240558*^9, {3.68521150799669*^9, 3.6852115212592783`*^9}, 
-   3.6852116379081345`*^9, 3.685212403477746*^9}],
+   3.6852116379081345`*^9, 3.6852124023683567`*^9, 3.6856140963422966`*^9}],
 
 Cell[BoxData["1"], "Output",
  CellChangeTimes->{
   3.68521132240558*^9, {3.68521150799669*^9, 3.6852115212592783`*^9}, 
-   3.6852116379081345`*^9, 3.685212403477746*^9}]
+   3.6852116379081345`*^9, 3.6852124023683567`*^9, 3.6856140993965473`*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -572,7 +572,7 @@ Cell[BoxData[
            
            DynamicBox[FEPrivate`FrontEndResource[
             "FEBitmaps", "SquarePlusIconMedium"],
-            ImageSizeCache->{14., {0., 14.}}],
+            ImageSizeCache->{12., {0., 12.}}],
            Appearance->None,
            ButtonFunction:>(Typeset`open$$ = True),
            Evaluator->Automatic,
@@ -581,9 +581,8 @@ Cell[BoxData[
           
           ImageSize->
            Dynamic[{
-            Automatic, 
-             3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-              Magnification])}]], 
+            Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]}]], 
          GraphicsBox[
           {Thickness[0.038461538461538464`], 
            {FaceForm[{GrayLevel[0.93], Opacity[1.]}], 
@@ -704,9 +703,8 @@ InfiniTAM7Cuda.exe\\\"\"\>",
           
           ImageSize->
            Dynamic[{
-            Automatic, 
-             3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-              Magnification])}]], 
+            Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]}]], 
          GraphicsBox[
           {Thickness[0.038461538461538464`], 
            {FaceForm[{GrayLevel[0.93], Opacity[1.]}], 
@@ -823,12 +821,12 @@ InfiniTAM7Cuda.exe\\\"\"\>",
     DynamicModuleValues:>{}], "]"}],
   LinkObject[
   "\"C:\\Users\\Paul\\Dropbox\\Paul\\MasterarbeitShared\\Research\\InfiniTAM7\
-\\x64cuda\\Debug\\InfiniTAM7Cuda.exe\"", 4462, 13],
+\\x64cuda\\Debug\\InfiniTAM7Cuda.exe\"", 11868, 15],
   Editable->False,
   SelectWithContents->True,
   Selectable->False]], "Output",
  CellChangeTimes->{{3.6852115312017107`*^9, 3.685211589947157*^9}, 
-   3.685211640787757*^9}],
+   3.685211640787757*^9, 3.6856141055204797`*^9}],
 
 Cell[BoxData[
  InterpretationBox[
@@ -844,7 +842,7 @@ Cell[BoxData[
            
            DynamicBox[FEPrivate`FrontEndResource[
             "FEBitmaps", "SquarePlusIconMedium"],
-            ImageSizeCache->{14., {0., 14.}}],
+            ImageSizeCache->{12., {0., 12.}}],
            Appearance->None,
            ButtonFunction:>(Typeset`open$$ = True),
            Evaluator->Automatic,
@@ -853,22 +851,20 @@ Cell[BoxData[
           
           ImageSize->
            Dynamic[{
-            Automatic, 
-             3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-              Magnification])}]], 
+            Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]}]], 
          GraphicsBox[InsetBox[
            PaneBox[
             
             DynamicBox[FEPrivate`FrontEndResource[
              "MUnitExpressions", "SuccessIcon"],
-             ImageSizeCache->{19., {4., 10.}}],
+             ImageSizeCache->{16., {4., 8.}}],
             Alignment->Center,
             
             ImageSize->
              Dynamic[{
-              Automatic, 
-               3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-                Magnification])}]]],
+              Automatic, 3.5 CurrentValue["FontCapHeight"]/
+               AbsoluteCurrentValue[Magnification]}]]],
           AspectRatio->1,
           Axes->False,
           Background->GrayLevel[0.93],
@@ -879,8 +875,8 @@ Cell[BoxData[
           FrameTicks->None,
           ImageSize->{Automatic, 
             Dynamic[
-            3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-              Magnification])]},
+            3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]]},
           PlotRange->{{0, 1}, {0, 1}}], GridBox[{
            {
             RowBox[{
@@ -925,9 +921,8 @@ Cell[BoxData[
           
           ImageSize->
            Dynamic[{
-            Automatic, 
-             3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-              Magnification])}]], 
+            Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]}]], 
          GraphicsBox[InsetBox[
            PaneBox[
             
@@ -937,9 +932,8 @@ Cell[BoxData[
             
             ImageSize->
              Dynamic[{
-              Automatic, 
-               3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-                Magnification])}]]],
+              Automatic, 3.5 CurrentValue["FontCapHeight"]/
+               AbsoluteCurrentValue[Magnification]}]]],
           AspectRatio->1,
           Axes->False,
           Background->GrayLevel[0.93],
@@ -950,8 +944,8 @@ Cell[BoxData[
           FrameTicks->None,
           ImageSize->{Automatic, 
             Dynamic[
-            3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-              Magnification])]},
+            3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]]},
           PlotRange->{{0, 1}, {0, 1}}], GridBox[{
            {
             RowBox[{
@@ -1020,7 +1014,7 @@ Cell[BoxData[
                TagBox[
                 
                 TemplateBox[{
-                 "0.001001`4.15094907531131","\"s\"","seconds","\"Seconds\""},
+                 "0``7.1505149978319915","\"s\"","seconds","\"Seconds\""},
                  "Quantity"],
                 Short[#, 
                  Rational[2, 3]]& ],
@@ -1053,22 +1047,22 @@ Cell[BoxData[
     DynamicModuleValues:>{}], "]"}],
   TestResultObject[
    Association[
-   "TestIndex" -> 36, "TestID" -> None, "Outcome" -> "Success", "Input" -> 
+   "TestIndex" -> 21, "TestID" -> None, "Outcome" -> "Success", "Input" -> 
     HoldForm[
       $CellContext`Get42[]], "ExpectedOutput" -> HoldForm[42], "ActualOutput" -> 
     HoldForm[42], "ExpectedMessages" -> {}, "ActualMessages" -> {}, 
-    "AbsoluteTimeUsed" -> Quantity[0.001001`4.15094907531131, "Seconds"], 
+    "AbsoluteTimeUsed" -> Quantity[0``7.1505149978319915, "Seconds"], 
     "CPUTimeUsed" -> Quantity[0., "Seconds"], "MemoryUsed" -> 
     Quantity[96, "Bytes"]]],
   Editable->False,
   SelectWithContents->True,
   Selectable->False]], "Output",
  CellChangeTimes->{{3.6852115312017107`*^9, 3.685211589947157*^9}, 
-   3.6852116408258085`*^9}],
+   3.685211640787757*^9, 3.6856141055517173`*^9}],
 
 Cell[BoxData["1"], "Output",
  CellChangeTimes->{{3.6852115312017107`*^9, 3.685211589947157*^9}, 
-   3.68521164121527*^9}]
+   3.685211640787757*^9, 3.6856141118680644`*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -1100,7 +1094,7 @@ Cell[BoxData[
            
            DynamicBox[FEPrivate`FrontEndResource[
             "FEBitmaps", "SquarePlusIconMedium"],
-            ImageSizeCache->{14., {0., 14.}}],
+            ImageSizeCache->{12., {0., 12.}}],
            Appearance->None,
            ButtonFunction:>(Typeset`open$$ = True),
            Evaluator->Automatic,
@@ -1184,8 +1178,8 @@ GzMvKcH1o4cXABG3d/Y=
              TagBox[
               StyleBox[
                
-               PaneBox["\<\"\\\"C:\\\\Users\\\\Paul'Masterxilo'\\\\Dropbox\\\\\
-Paul\\\\MasterarbeitShared\\\\Research\\\\InfiniTAM7\\\\x64vs15\\\\Debug\\\\\
+               PaneBox["\<\"\\\"C:\\\\Users\\\\Paul\\\\Dropbox\\\\Paul\\\\\
+MasterarbeitShared\\\\Research\\\\InfiniTAM7\\\\x64vs15\\\\Debug\\\\\
 InfiniTAM7vs15.exe\\\"\"\>",
                 BaselinePosition->Baseline,
                 ContentPadding->False,
@@ -1305,8 +1299,8 @@ GzMvKcH1o4cXABG3d/Y=
               "SummaryItemAnnotation"], "\[InvisibleSpace]", 
              TagBox[
               
-              PaneBox["\<\"\\\"C:\\\\Users\\\\Paul'Masterxilo'\\\\Dropbox\\\\\
-Paul\\\\MasterarbeitShared\\\\Research\\\\InfiniTAM7\\\\x64vs15\\\\Debug\\\\\
+              PaneBox["\<\"\\\"C:\\\\Users\\\\Paul\\\\Dropbox\\\\Paul\\\\\
+MasterarbeitShared\\\\Research\\\\InfiniTAM7\\\\x64vs15\\\\Debug\\\\\
 InfiniTAM7vs15.exe\\\"\"\>",
                BaselinePosition->Baseline,
                ContentPadding->False,
@@ -1348,13 +1342,14 @@ InfiniTAM7vs15.exe\\\"\"\>",
      BaselinePosition->Baseline],
     DynamicModuleValues:>{}], "]"}],
   LinkObject[
-  "\"C:\\Users\\Paul'Masterxilo'\\Dropbox\\Paul\\MasterarbeitShared\\Research\
-\\InfiniTAM7\\x64vs15\\Debug\\InfiniTAM7vs15.exe\"", 2143, 8],
+  "\"C:\\Users\\Paul\\Dropbox\\Paul\\MasterarbeitShared\\Research\\InfiniTAM7\
+\\x64vs15\\Debug\\InfiniTAM7vs15.exe\"", 11872, 16],
   Editable->False,
   SelectWithContents->True,
   Selectable->False]], "Output",
  CellChangeTimes->{3.6852115981023564`*^9, 3.685211628219018*^9, 
-  3.685211660110917*^9, 3.6852119618750906`*^9, 3.6852124219460993`*^9}],
+  3.685211660110917*^9, 3.6852119618750906`*^9, 3.6852124219460993`*^9, 
+  3.6856141150825925`*^9}],
 
 Cell[BoxData[
  InterpretationBox[
@@ -1370,7 +1365,7 @@ Cell[BoxData[
            
            DynamicBox[FEPrivate`FrontEndResource[
             "FEBitmaps", "SquarePlusIconMedium"],
-            ImageSizeCache->{14., {0., 14.}}],
+            ImageSizeCache->{12., {0., 12.}}],
            Appearance->None,
            ButtonFunction:>(Typeset`open$$ = True),
            Evaluator->Automatic,
@@ -1386,7 +1381,7 @@ Cell[BoxData[
             
             DynamicBox[FEPrivate`FrontEndResource[
              "MUnitExpressions", "SuccessIcon"],
-             ImageSizeCache->{19., {4., 10.}}],
+             ImageSizeCache->{16., {4., 8.}}],
             Alignment->Center,
             
             ImageSize->
@@ -1542,7 +1537,7 @@ Cell[BoxData[
                TagBox[
                 
                 TemplateBox[{
-                 "0``7.150514997831988","\"s\"","seconds","\"Seconds\""},
+                 "0``7.1505149978319915","\"s\"","seconds","\"Seconds\""},
                  "Quantity"],
                 Short[#, 
                  Rational[2, 3]]& ],
@@ -1575,25 +1570,27 @@ Cell[BoxData[
     DynamicModuleValues:>{}], "]"}],
   TestResultObject[
    Association[
-   "TestIndex" -> 2, "TestID" -> None, "Outcome" -> "Success", "Input" -> 
+   "TestIndex" -> 22, "TestID" -> None, "Outcome" -> "Success", "Input" -> 
     HoldForm[
       $CellContext`Get42[]], "ExpectedOutput" -> HoldForm[42], "ActualOutput" -> 
     HoldForm[42], "ExpectedMessages" -> {}, "ActualMessages" -> {}, 
-    "AbsoluteTimeUsed" -> Quantity[0``7.150514997831988, "Seconds"], 
+    "AbsoluteTimeUsed" -> Quantity[0``7.1505149978319915, "Seconds"], 
     "CPUTimeUsed" -> Quantity[0., "Seconds"], "MemoryUsed" -> 
-    Quantity[168, "Bytes"]]],
+    Quantity[152, "Bytes"]]],
   Editable->False,
   SelectWithContents->True,
   Selectable->False]], "Output",
  CellChangeTimes->{3.6852115981023564`*^9, 3.685211628219018*^9, 
-  3.685211660110917*^9, 3.6852119618750906`*^9, 3.685212421992976*^9}],
+  3.685211660110917*^9, 3.6852119618750906`*^9, 3.6852124219460993`*^9, 
+  3.6856141151138277`*^9}],
 
 Cell[BoxData["1"], "Output",
  CellChangeTimes->{3.6852115981023564`*^9, 3.685211628219018*^9, 
-  3.685211660110917*^9, 3.6852119618750906`*^9, 3.685212422024226*^9}]
+  3.685211660110917*^9, 3.6852119618750906`*^9, 3.6852124219460993`*^9, 
+  3.685614118501854*^9}]
 }, Open  ]]
 },
-WindowSize->{784, 794},
+WindowSize->{784, 924},
 WindowMargins->{{Automatic, 0}, {Automatic, 0}},
 FrontEndVersion->"11.0 for Microsoft Windows (64-bit) (July 28, 2016)",
 StyleDefinitions->"Default.nb"
@@ -1610,22 +1607,22 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[580, 22, 563, 11, 86, "Input"],
-Cell[1146, 35, 12731, 269, 84, "Output"],
-Cell[13880, 306, 8104, 231, 81, "Output"],
-Cell[21987, 539, 169, 3, 37, "Output"]
+Cell[580, 22, 563, 11, 69, "Input"],
+Cell[1146, 35, 12721, 269, 73, "Output"],
+Cell[13870, 306, 8131, 231, 72, "Output"],
+Cell[22004, 539, 195, 3, 30, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[22193, 547, 523, 11, 110, "Input"],
-Cell[22719, 560, 12705, 270, 84, "Output"],
-Cell[35427, 832, 8146, 234, 81, "Output"],
-Cell[43576, 1068, 121, 2, 37, "Output"]
+Cell[22236, 547, 523, 11, 69, "Input"],
+Cell[22762, 560, 12696, 268, 73, "Output"],
+Cell[35461, 830, 8081, 230, 72, "Output"],
+Cell[43545, 1062, 146, 2, 30, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[43734, 1075, 523, 11, 110, "Input"],
-Cell[44260, 1088, 12751, 268, 84, "Output"],
-Cell[57014, 1358, 8099, 230, 81, "Output"],
-Cell[65116, 1590, 165, 2, 37, "Output"]
+Cell[43728, 1069, 523, 11, 69, "Input"],
+Cell[44254, 1082, 12744, 269, 73, "Output"],
+Cell[57001, 1353, 8130, 231, 72, "Output"],
+Cell[65134, 1586, 192, 3, 30, "Output"]
 }, Open  ]]
 }
 ]

@@ -14,6 +14,7 @@ For vs13/15 x64 and optionally CUDA 7.0, sm50.
 
 // Custom headers
 #include <paul.h>
+#include "cpputil.h"
 
 
 
@@ -392,11 +393,15 @@ CPU_FUNCTION(T, bin, (ifstream& f), "") {
 }
 
 CPU_FUNCTION(ofstream, binopen_write, (string fn), "") {
-	return ofstream(fn, ios::binary);
+    ofstream x(fn, ios::binary);
+    assert(x/*!x.fail()*/, "cannot write to %s", fn.c_str());
+    return x;
 }
 
 CPU_FUNCTION(ifstream, binopen_read, (string fn), "") {
-	return ifstream(fn, ios::binary);
+	ifstream x(fn, ios::binary);
+    assert(x/*.is_open() && !x.fail()*/, "cannot read %s", fn.c_str());
+    return x;
 }
 
 
@@ -520,7 +525,6 @@ FUNCTION(bool, approximatelyEqual, (float x, float y), "whether x and y differ b
 
 
 
-
 FUNCTION(void, assertApproxEqual, (const float a, const float b, const unsigned int considered_initial_bits = 20, const float tooSmallThreshold = 0.0001f), "crude relative float equality test", PURITY_PURE) {
 	if (abs(a) <= tooSmallThreshold && abs(b) <= tooSmallThreshold) return;
 
@@ -576,6 +580,23 @@ FUNCTION(void, assertApproxEqual, (
 
 
 
+template<typename T>
+CPU_FUNCTION(
+    bool
+    ,assertEachInRange
+    ,(
+    const vector<T>& v
+    , const T& min
+    , const T& max
+    )
+    ,"true if each element of v (of length len) is >= min, <= max, undefined otherwise"
+    , PURITY_PURE
+    ) {
+    for (const auto& x : v) {
+        assert(min <= x && x <= max, "assertEachInRange: out-of-range element found");
+    }
+    return true;
+}
 
 template<typename T>
 FUNCTION(
@@ -591,7 +612,7 @@ FUNCTION(
 	, PURITY_PURE) {
 	assert(v);
 	while (len--) { // Note: len reduced once more, gets gigantic if len was already 0
-		assert(min <= *v && *v <= max);
+        assert(min <= *v && *v <= max, "assertEachInRange: out-of-range element found");
 		v++;
 	}
 	return true;
@@ -953,43 +974,46 @@ FUNCTION(unsigned int*, allocZeroedIntegers, (_In_ const int n, MEMPOOL), "Alloc
 #define freeTemporaryW() cs_free(wsz * sizeof(unsigned int)); 
 
 
+
 FUNCTION(cs *, cs_transpose, (const cs * const A, MEMPOOL),
-	"C = A'"
-	""
-	"memoryPool must be big enough to contain the following:"
-	"cs_spalloc_size(n, m, Ap[n], 0) --location of output"
-	"nextEven(m)*sizeof(int) --temporary")
+    "C = A'"
+    ""
+    "memoryPool must be big enough to contain the following:"
+    "cs_spalloc_size(n, m, Ap[n], 0) --location of output"
+    "nextEven(m)*sizeof(int) --temporary")
 {
-	assert(A && cs_is_compressed_col(A));
+    assert(A && cs_is_compressed_col(A));
 
-	const unsigned int m = A->m;
-	const unsigned int n = A->n;
-	unsigned int const * const Ai = A->i;
-	unsigned int const * const Ap = A->p;
-	float const * const Ax = A->x;
+    const unsigned int m = A->m;
+    const unsigned int n = A->n;
+    unsigned int const * const Ai = A->i;
+    unsigned int const * const Ap = A->p;
+    float const * const Ax = A->x;
 
-	cs *C; C = cs_spalloc(n, m, Ap[n], 0, MEMPOOLPARAM); /* allocate result */
+    cs *C; C = cs_spalloc(n, m, Ap[n], 0, MEMPOOLPARAM); /* allocate result */
 
-	allocTemporaryW(m); /* get workspace */
+    allocTemporaryW(m); /* get workspace */
 
-	unsigned int* const Cp = C->p; unsigned int* const Ci = C->i; float* const Cx = C->x;
-	assert(Cp && Ci && Cx);
+    unsigned int* const Cp = C->p; unsigned int* const Ci = C->i; float* const Cx = C->x;
+    assert(Cp && Ci && Cx);
 
-	for (unsigned int p = 0; p < Ap[n]; p++) w[Ai[p]]++;	   /* row counts */
-	cs_cumsum(Cp, w, m);				   /* row pointers */
-	for (unsigned int j = 0; j < n; j++)
-	{
-		for (unsigned int p = Ap[j]; p < Ap[j + 1]; p++)
-		{
-			int q;
-			Ci[q = w[Ai[p]]++] = j;	/* place A(i,j) as entry C(j,i) */
-			Cx[q] = Ax[p];
-		}
-	}
+    DO(p, Ap[n]) w[Ai[p]]++;	   /* row counts */
 
-	freeTemporaryW();
+    cs_cumsum(Cp, w, m);				   /* row pointers */
 
-	return C;	/* success; free w and return C */
+    DO(j, n)
+    {
+        FOR1S(p, Ap[j], Ap[j + 1]) // for (unsigned int p = Ap[j]; p < Ap[j + 1]; p++)
+        {
+            unsigned int q;
+            Ci[q = w[Ai[p]]++] = j;	/* place A(i,j) as entry C(j,i) */
+            Cx[q] = assertFinite(Ax[p]);
+        }
+    }
+
+    freeTemporaryW();
+
+    return C;	/* success; free w and return C */
 }
 
 FUNCTION(cs *, cs_triplet, (const cs * const T, MEMPOOL),
@@ -1045,95 +1069,6 @@ FUNCTION(void, cs_entry, (cs * const T, const unsigned int i, const unsigned int
 	T->p[T->nz++] = j;
 }
 
-CPU_FUNCTION(void, cs_dump, (const cs * const A, FILE* f), "Similar to cs_print. dump a sparse matrix in the format:\n"
-	"height width\n"
-	"i j x\n"
-	"etc. Note that this format does not allow reconstructing whether the matrix was in triplet or compressed column form,"
-	"but the cc-form indices will increase more regularly than in the triplet case."
-	, PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS) {
-	assert(f);
-
-	unsigned int p, j, m, n, nzmax;
-	unsigned int *Ap, *Ai;
-	float *Ax;
-	m = A->m; n = A->n; Ap = A->p; Ai = A->i; Ax = A->x;
-	nzmax = A->nzmax;
-	assert(Ax);
-
-	fprintf(f, "%u %u\n", m, n);
-
-	if (cs_is_compressed_col(A))
-	{
-		for (j = 0; j < n; j++)
-		{
-			for (p = Ap[j]; p < Ap[j + 1]; p++)
-			{
-				assert(Ai[p] < m);
-				fprintf(f, "%u %u %g\n", Ai[p], j, Ax[p]);
-			}
-		}
-	}
-	else
-	{
-		auto nz = A->nz;
-		assert(nz <= (int)nzmax);
-		for (p = 0; p < (unsigned int)nz; p++)
-		{
-			assert(Ai[p] < m);
-			assert(Ap[p] < n);
-			fprintf(f, "%u %u %g\n", Ai[p], Ap[p], Ax[p]);
-		}
-	}
-}
-
-FUNCTION(int, cs_print, (const cs * const A, int brief = 0), "print a sparse matrix. Similar to cs_dump, but always writes to stdout.")
-{
-	assert(A);
-	unsigned int p, j, m, n, nzmax;
-	unsigned int *Ap, *Ai;
-	float *Ax;
-
-	m = A->m; n = A->n; Ap = A->p; Ai = A->i; Ax = A->x;
-	nzmax = A->nzmax;
-
-	printf("CSparse %s\n",
-#ifdef __CUDA_ARCH__
-		"on CUDA"
-#else
-		"on CPU"
-#endif
-		);
-	assert(m > 0 && n > 0);
-	if (cs_is_compressed_col(A))
-	{
-		printf("%d-by-%d, nzmax: %d nnz: %d\n", m, n, nzmax,
-			Ap[n]);
-		for (j = 0; j < n; j++)
-		{
-			printf("    col %d : locations %d to %d\n", j, Ap[j], Ap[j + 1] - 1);
-			for (p = Ap[j]; p < Ap[j + 1]; p++)
-			{
-				assert(Ai[p] < m);
-				printf("      %d : %g\n", Ai[p], Ax ? Ax[p] : 1);
-				if (brief && p > 20) { printf("  ...\n"); return (1); }
-			}
-		}
-	}
-	else
-	{
-		auto nz = A->nz;
-		printf("triplet: %d-by-%d, nzmax: %d nnz: %d\n", m, n, nzmax, nz);
-		assert(nz <= (int)nzmax);
-		for (p = 0; p < (unsigned int)nz; p++)
-		{
-			printf("    %d %d : %f\n", Ai[p], Ap[p], Ax ? Ax[p] : 1);
-			assert(Ap[p] >= 0);
-			if (brief && p > 20) { printf("  ...\n"); return (1); }
-		}
-	}
-	return (1);
-}
-
 
 FUNCTION(int, cs_mv, (
 	_Inout_ float * __restrict y,
@@ -1174,6 +1109,212 @@ FUNCTION(int, cs_mv, (
 
 	return (1);
 }
+
+
+
+
+
+
+
+
+
+
+// dump/print cs data
+
+
+CPU_FUNCTION(void, cs_dump, (const cs * const A, FILE* f), "Similar to cs_print. dump a sparse matrix in the format:\n"
+    "height width\n"
+    "i j x\n"
+    "etc. Note that this format does not allow reconstructing whether the matrix was in triplet or compressed column form,"
+    "but the cc-form indices will increase more regularly than in the triplet case."
+    "OLD FORMAT cannot be parsed without knowing eof, use cs_dump2"
+    , PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS) {
+    assert(f);
+
+    unsigned int p, j, m, n, nzmax;
+    unsigned int *Ap, *Ai;
+    float *Ax;
+    m = A->m; n = A->n; Ap = A->p; Ai = A->i; Ax = A->x;
+
+    assert(A->nzmax > 0);
+    assert(Ax);
+
+    fprintf(f, "%u %u\n", m, n);
+    assert(m > 0 && n > 0);
+
+    if (cs_is_compressed_col(A))
+    {
+        for (j = 0; j < n; j++)
+        {
+            for (p = Ap[j]; p < Ap[j + 1]; p++)
+            {
+                assert(Ai[p] < m);
+                fprintf(f, "%u %u %.18g\n", Ai[p], j, assertFinite(Ax[p]));
+            }
+        }
+    }
+    else
+    {
+        auto nz = A->nz;
+        assert(nz <= (int)A->nzmax);
+        for (p = 0; p < (unsigned int)nz; p++)
+        {
+            assert(Ai[p] < m);
+            assert(Ap[p] < n);
+            fprintf(f, "%u %u %.18g\n", Ai[p], Ap[p], assertFinite(Ax[p]));
+        }
+    }
+}
+
+
+CPU_FUNCTION(void, cs_dump2, (const cs * const A, FILE* f), "like cs_dump but with a different format:\n"
+    "height width\n"
+    "nnz\n"
+    "i j x\n"
+    "Note that we also dump the amount of nonzero elements for delimiter-less parsing"
+    , PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS) {
+    assert(f);
+
+    unsigned int p, j, m, n, nzmax;
+    unsigned int *Ap, *Ai;
+    float *Ax;
+    m = A->m; n = A->n; Ap = A->p; Ai = A->i; Ax = A->x;
+
+    assert(A->nzmax > 0);
+    assert(Ax);
+
+    fprintf(f, "%u %u\n", m, n);
+    assert(m > 0 && n > 0);
+
+    if (cs_is_compressed_col(A))
+    {
+        fprintf(f, "%u\n", A->nzmax);
+        for (j = 0; j < n; j++)
+        {
+            for (p = Ap[j]; p < Ap[j + 1]; p++)
+            {
+                assert(Ai[p] < m);
+                fprintf(f, "%u %u %.18g\n", Ai[p], j, assertFinite(Ax[p]));
+            }
+        }
+    }
+    else
+    {
+        auto nz = A->nz;
+        assert(nz <= (int)A->nzmax);
+        assert(nz > 0);
+
+        fprintf(f, "%u\n", nz);
+
+        for (p = 0; p < (unsigned int)nz; p++)
+        {
+            assert(Ai[p] < m);
+            assert(Ap[p] < n);
+            fprintf(f, "%u %u %.18g\n", Ai[p], Ap[p], assertFinite(Ax[p]));
+        }
+    }
+}
+
+
+CPU_FUNCTION(
+    cs *
+    , cs_undump2
+    , (FILE* f, MEMPOOL)
+    , "reads from a file stream written by cs_dump2 a cs-Matrix A, allocated in MEMPOOL and returns it. The returned matrix"
+    "is in triple form (as written by cs_entry), it needs to be converted first to be used in other routines"
+    , PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS) {
+
+    unsigned int m, n, nzmax;
+    mustSucceed(2 == fscanf_s(f, "%u %u\n", &m, &n));
+    assert(m > 0 && n > 0);
+
+    mustSucceed(1 == fscanf_s(f, "%u\n", &nzmax));
+    assert(nzmax);
+
+    cs* A = cs_spalloc(m, n, nzmax, true, MEMPOOLPARAM);
+
+    REPEAT(nzmax) {
+
+        unsigned int i, j;
+        float x;
+        mustSucceed(3 == fscanf_s(f, "%u %u %g\n", &i, &j, &x));
+        assert(i < m && j < n);
+        cs_entry(A, i, j, assertFinite(x));
+
+    }
+    assert(A->nz == A->nzmax);
+    assert(A->nz);
+
+    return A;
+}
+
+CPU_FUNCTION(
+    cs *
+    , cs_undump2
+    , (const char* const fn)
+    , "variant syntax for cs_undump2 which allocates the matrix in malloced memory and takes a file name. USE ONLY FOR DEBUGGING TODO."
+    , PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS) {
+    FILE* f; fopen_s(&f, fn, "rb"); // TODO does not close file
+    assert(f);
+    int sz = 16 * 1000 * 1000;
+    char* mem = (char*)malloc(sz);
+    return cs_undump2(f, mem, sz);
+}
+
+FUNCTION(int, cs_print, (const cs * const A, int brief = 0), "print a sparse matrix. Similar to cs_dump, but always writes to stdout.")
+{
+    assert(A);
+    unsigned int p, j, m, n, nzmax;
+    unsigned int *Ap, *Ai;
+    float *Ax;
+
+    m = A->m; n = A->n; Ap = A->p; Ai = A->i; Ax = A->x;
+    nzmax = A->nzmax;
+
+    printf("CSparse %s\n",
+#ifdef __CUDA_ARCH__
+        "on CUDA"
+#else
+        "on CPU"
+#endif
+        );
+    assert(m > 0 && n > 0);
+    if (cs_is_compressed_col(A))
+    {
+        printf("%d-by-%d, nzmax: %d nnz: %d\n", m, n, nzmax,
+            Ap[n]);
+        for (j = 0; j < n; j++)
+        {
+            printf("    col %d : locations %d to %d\n", j, Ap[j], Ap[j + 1] - 1);
+            for (p = Ap[j]; p < Ap[j + 1]; p++)
+            {
+                assert(Ai[p] < m);
+                printf("      %d : %g\n", Ai[p], Ax ? Ax[p] : 1);
+                if (brief && p > 20) { printf("  ...\n"); return (1); }
+            }
+        }
+    }
+    else
+    {
+        auto nz = A->nz;
+        printf("triplet: %d-by-%d, nzmax: %d nnz: %d\n", m, n, nzmax, nz);
+        assert(nz <= (int)nzmax);
+        for (p = 0; p < (unsigned int)nz; p++)
+        {
+            printf("    %d %d : %f\n", Ai[p], Ap[p], Ax ? Ax[p] : 1);
+            assert(Ap[p] >= 0);
+            if (brief && p > 20) { printf("  ...\n"); return (1); }
+        }
+    }
+    return (1);
+}
+
+
+
+
+
+
+
 // ---
 
 
@@ -1194,8 +1335,8 @@ FUNCTION(
 
 // A nonempty vector of finite floats
 struct fvector {
-	float* x;
-	unsigned int n; // > 0
+    /*const*/ float* /*const*/ x;
+    /*const*/unsigned int n; // > 0
 
 	MEMBERFUNCTION(void, print, (), "print this fvector") {
 		printv(x, n);
@@ -1213,31 +1354,20 @@ struct fvector {
     }
 };
 
-CPU_FUNCTION(
-	void
-	, dump
-	, (const fvector & v, FILE* f)
-	,
-	"Similar to fvector::print, cs_dump. dump a vector in the format:\n"
-	"n\n"
-	"x\n"
-	"etc. "
-	, PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS) {
-	assert(f);
-	fprintf(f, "%u\n", v.n);
-	FOREACHC(y, v.x, v.n)
-		fprintf(f, "%g\n", y);
-}
-
-FUNCTION(bool, assertFinite, (_In_reads_(n) const float* const x, const unsigned int n), "assert that each element in v is finite", PURITY_PURE) {
+FUNCTION(bool, assertFinite, (_In_reads_(n) const float* const x, const unsigned int n), "assert that each element in v is finite. true if this is so, undefined otherwise.", PURITY_PURE) {
 	assert(n > 0);
 	FOREACH(y, x, n)
 		assertFinite(y);
 	return true;
 }
 
-FUNCTION(bool, assertFinite, (const fvector& v), "assert that each element in v is finite", PURITY_PURE) {
+FUNCTION(bool, assertFinite, (const fvector& v), "assert that each element in v is finite. true if this is so, undefined otherwise.", PURITY_PURE) {
 	assertFinite(v.x, v.n);
+	return true;
+}
+
+CPU_FUNCTION(bool, assertFinite, (const vector<float>& v), "assert that each element in v is finite. true if this is so, undefined otherwise.", PURITY_PURE) {
+	assertFinite((float*)v.data(), restrictSize(v.size()));
 	return true;
 }
 
@@ -1273,6 +1403,123 @@ FUNCTION(fvector, vector_copy, (const fvector& other, MEMPOOL), "create a copy o
 	return v;
 }
 
+
+
+
+
+
+
+
+
+
+CPU_FUNCTION(
+    void
+    , dump
+    , (const fvector & v, FILE* f)
+    ,
+    "Similar to fvector::print, cs_dump. dump a vector in the format:\n"
+    "n\n"
+    "x\n"
+    "etc. "
+    , PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS) {
+    assert(f);
+    fprintf(f, "%u\n", v.n);
+    FOREACHC(y, v.x, v.n)
+        fprintf(f, "%g\n", y);
+}
+
+CPU_FUNCTION(
+    void
+    , dump
+    , (_In_ const vector<float> & v, _Inout_ FILE* const  f)
+    ,
+    "dump a vector of floats in the format:\n"
+    "n\n"
+    "x\n"
+    "etc. "
+    , PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS /* Note: modifies f */) {
+    assert(f);
+    fprintf(f, "%u\n", restrictSize(v.size()));
+    for (auto y : v)
+        fprintf(f, "%.18g\n", y);
+}
+
+CPU_FUNCTION(
+    vector<float>
+    , undump_vector_float
+    , (_Inout_ FILE* const f)
+    ,
+    "similar to undump for fvector, just another format"
+    , PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS /* modifies f */) {
+
+    assert(f);
+    unsigned int n;
+    mustSucceed(1 == fscanf_s(f, "%u\n", &n));
+    assert(n);
+
+    vector<float> v(n);
+
+    for (auto& y : v) {
+        mustSucceed(1 == fscanf_s(f, "%g\n", &y));
+        assertFinite(y);
+    }
+
+    assert(v.size());
+    return v;
+}
+
+CPU_FUNCTION(
+    fvector
+    , undump
+    , (_Inout_ FILE* const f)
+    ,
+    "Allocates an fvector with vector_allocate_malloc and fills it with the data found in the file stream, "
+    "which must have been produced by dump()"
+    , PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS /* modifies f */) {
+
+    assert(f);
+    unsigned int n;
+    mustSucceed(1 == fscanf_s(f, "%u\n", &n));
+    assert(n);
+
+    fvector v = vector_allocate_malloc(n);
+
+    FOREACH(y, v.x, v.n)
+        mustSucceed(1 == fscanf_s(f, "%g\n", &y));
+
+    assertFinite(v);
+    assert(v.n);
+    return v;
+}
+
+CPU_FUNCTION(
+    fvector
+    , undump
+    , (const char* const fn)
+    , "variant syntax for undump takes a file name. USE ONLY FOR DEBUGGING TODO."
+    , PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS) {
+
+    FILE* f; fopen_s(&f, fn, "rb"); // TODO does not close file
+    assert(f, "failed to undump %s", fn);
+    return undump(f);
+}
+
+
+
+CPU_FUNCTION(
+    vector<float>
+    , undump_vector_float
+    , (const char* const fn)
+    , "variant syntax for undump_vector_float takes a file name. USE ONLY FOR DEBUGGING TODO."
+    , PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS) {
+
+    FILE* f; fopen_s(&f, fn, "rb"); // TODO does not close file
+    assert(f);
+    return undump_vector_float(f);
+}
+
+
+
 struct matrix {
 	const cs* const mat; // in compressed column form (transpose does not work with triplets)
 
@@ -1286,10 +1533,10 @@ struct matrix {
 	}
 
 
-	MEMBERFUNCTION(, matrix, (const cs* const mat), "construct a matrix wrapper", PURITY_OUTPUT_POINTERS) : mat(mat) {
-		assert(!cs_is_triplet(mat)); assert(cs_is_compressed_col(mat));
-		assert(mat->m && mat->n);
-		assertFinite(mat->x, cs_x_used_entries(mat));
+    MEMBERFUNCTION(, matrix, (const cs* const mat), "construct a matrix wrapper", PURITY_OUTPUT_POINTERS) : mat(mat) {
+        assert(!cs_is_triplet(mat), "matrices passed to matrix() must be in compressed column form, suitable for computation. Use cs_triplet first.");
+        assert(mat->m && mat->n);
+        assertFinite(mat->x, cs_x_used_entries(mat));
 	}
 
 	MEMBERFUNCTION(void, print, (), "print this matrix") {
@@ -1328,6 +1575,8 @@ FUNCTION(void, mv, (_Inout_ fvector& y, const float alpha, const matrix& A, cons
 	assert(y.n == A.mat->m);
 	assert(x.n == A.mat->n);
 	cs_mv(y.x, alpha, A.mat, x.x, beta);
+
+    assertFinite(y);
 }
 
 FUNCTION(void, mv, (_Out_ fvector& y, const matrix& A, const fvector& x), "y = A x", PURITY_OUTPUT_POINTERS) {
@@ -1359,79 +1608,120 @@ x is an n-fvector in this case still
 x is used as the initial guess -- it may be 0 but must in any case contain valid numbers
 */
 FUNCTION(void, conjgrad_normal, (
-	const matrix& A,
-	const fvector& b,
-	fvector& x,
-	MEMPOOL),
-	"x = A\b" /* conceptually a pure function, but does memory allocation - however the memory is freed (but not reset) again */
-	)
+    const matrix& A,
+    const fvector& b,
+    fvector& x,
+    MEMPOOL),
+    "x = A\b" /* conceptually a pure function, but does memory allocation - however the memory is freed (but not reset) again */
+    )
 {
-	memoryPush(); //savepoint: anything allocated after this can be freed again
+    memoryPush(); //savepoint: anything allocated after this can be freed again
 
-	unsigned int m = A.rows, n = A.cols;
+    const unsigned int m = A.rows, n = A.cols;
 
-	matrix AT = transpose(A, MEMPOOLPARAM); // TODO implement an mv that does transposing in-place
+    matrix AT = transpose(A, MEMPOOLPARAM); // TODO implement an mv that does transposing in-place
 
-	fvector t = vector_allocate(m, MEMPOOLPARAM);
+    fvector t = vector_allocate(m, MEMPOOLPARAM); // temporary vector, initialized at (1)
 
-	fvector r = vector_allocate(n, MEMPOOLPARAM); mv(r, AT, b); mv(t, A, x); mv(r, -1, AT, t, 1);//r=A^T*b; t = A*x; r = -A^T*t + r;//r=A^T*b-A^T*A*x;
+    fvector r = vector_allocate(n, MEMPOOLPARAM);
+    mv(r, AT, b); mv(t, A, x); mv(r, -1, AT, t, 1);//r=A^T*b; t = A*x; r = -A^T*t + r;//r=A^T*b-A^T*A*x;
 
-	fvector p = vector_copy(r, MEMPOOLPARAM);//p=r;
+    fvector p = vector_copy(r, MEMPOOLPARAM);//p=r;
 
-	float rsold = dot(r, r);//rsold=r'*r;
+    float rsold = dot(r, r);//rsold=r'*r;
 
-	fvector Ap;
-	if (sqrt(rsold) < 1e-5) goto end; // low residual: solution found
+    fvector Ap;
 
-	Ap = vector_allocate(A.cols, MEMPOOLPARAM);
+    const float sqrtTolerance = 1e-3; // 1e-5 // sqrt(8e-3); <- this tolerance is so large, not even 1-d sqrt(2) can be computed reliably in tens of iterations
+    if (sqrt(rsold) < sqrtTolerance) goto end; // low residual: solution found
 
-	REPEAT(b.n) {
+    Ap = vector_allocate(A.cols, MEMPOOLPARAM); // initialized at (2)
 
-		mv(t, A, p); mv(Ap, AT, t);//t = A*p;Ap=A^T*t;//Ap=A^T*A*p;
+    REPEAT(b.n) {
+        printf("rsold %f\n", rsold);
+        mv(t, A, p); /* (1) */ mv(Ap, AT, t); /* (2) */ //t = A*p;Ap=A^T*t;//Ap=A^T*A*p;
 
-		if (abs(dot(p, Ap)) < 1e-9) { printf("conjgrad_normal emergency exit\n"); goto end; }// avoid almost division by 0
-		float alpha = assertFinite(rsold / (dot(p, Ap)));//alpha=rsold/(p'*Ap);
+        if (abs(dot(p, Ap)) < 1e-9) { printf("conjgrad_normal emergency exit\n"); goto end; }// avoid almost division by 0
 
-		axpy(x, alpha, p);//x = alpha p + x;//x=x+alpha*p;
-		axpy(r, -alpha, Ap);//r = -alpha*Ap + r;//r=r-alpha*Ap;
-		float rsnew = dot(r, r);//rsnew=r'*r;
-		if (sqrt(rsnew) < 1e-5) goto end; // error tolerance, might also limit amount of iterations or check change in rsnew to rsold...
-		float beta = assertFinite(rsnew / rsold);
-		scal(p, beta); axpy(p, r);//p*=(rsnew/rsold); p = r + p;//p=r+(rsnew/rsold)*p;
-		rsold = rsnew;//rsold=rsnew;
+        const float alpha = assertFinite(rsold / (dot(p, Ap)));//alpha=rsold/(p'*Ap);
 
-	}
+        axpy(x, alpha, p);//x = alpha p + x;//x=x+alpha*p;
+        axpy(r, -alpha, Ap);//r = -alpha*Ap + r;//r=r-alpha*Ap;
+        const float rsnew = dot(r, r);//rsnew=r'*r;
+
+        if (sqrt(rsnew) < sqrtTolerance) { printf("conjgrad_normal converged\n"); goto end; } // error tolerance, might also limit amount of iterations or check change in rsnew to rsold...
+
+        const float beta = assertFinite(rsnew / rsold);
+        scal(p, beta); axpy(p, r);//p*=(rsnew/rsold); p = r + p;//p=r+(rsnew/rsold)*p;
+        rsold = rsnew;//rsold=rsnew;
+
+    }
+    if (n > 100)
+    fatalError("conjgrad_normal ran n (%u) times, that seems odd, probably did not converge. Do something about your equation system or data, and/or use preconditioning. Maybe use smaller or less regular data.\n", b.n);
 
 end:
-	memoryPop(); // free anything allocated since memory push
+    memoryPop(); // free anything allocated since memory push
 }
+
 
 // solving least-squares problems
-FUNCTION(void, cs_cg, (
+FUNCTION(
+    void,
+    cs_cg,
 
-		const cs * const A, 
-		_In_reads_(A->m) const float * const b, 
-		_Inout_updates_all_(A->n) float *x, 
-		MEMPOOL
-	
-	),
-	"x=A\b"
-	""
-	"current value of x is used as initial guess"
-	"Uses memory pool to allocate transposed copy of A and four vectors with size m or n, but frees all of these temporaries again"
-	// PURITY_OUTPUT_POINTERS conceptually
-	)
+    (
+    _In_ const cs * const A
+    , _In_reads_(A->m) const float * const b
+    , _Inout_updates_all_(A->n) float * const x
+    , MEMPOOL
+    )
+
+    ,
+    "Compute x=A\b, i.e. solve Ax = b for x in the least squares sense."
+    "Minimize ||Ax - b||_2^2."
+    ""
+    "A is R^(m x n), x is R^n and b R^m."
+    ""
+    "Current value of x is used as initial guess."
+    "Uses memory pool to allocate transposed copy of A and four vectors with size m or n"
+
+    // PURITY_OUTPUT_POINTERS conceptually, but MEMPOOL makes the whole thing a bit more complicated
+    // uses only stack memory and memory available from MEMPOOL, no calls to malloc
+    )
 {
-	const auto old_memory_size = memory_size;
-	assert(A && b && x && memoryPool && memory_size > 0);
+    assert(A && b && x && memoryPool && memory_size > 0);
 
-	auto xv = vector_wrapper(x, A->n);
-	conjgrad_normal(matrix(A), vector_wrapper((float*)b, A->m), xv, MEMPOOLPARAM);
+    printf("cs_cg %u x %u... nnz: %u (this might take a while)\n",
+        A->m, A->n, A->nzmax);
 
-	assert(memory_size == old_memory_size);
+    auto xv = vector_wrapper(x, A->n);
+
+    conjgrad_normal(matrix(A), vector_wrapper((float*)b, A->m), xv, MEMPOOLPARAM);
+
+    printf("cs_cg ends\n");
+
+    assertFinite(xv);
+    assert(A->n == xv.n);
 }
 
+FUNCTION(
+    void,
+    cs_cg_0guess,
 
+    (
+    _In_ const cs * const A
+    , _In_reads_(A->m) const float * const b
+    , _Inout_updates_all_(A->n) float * const x
+    , MEMPOOL
+    )
+
+    ,
+    "like cs_cg but sets x to 0 as initial guess"
+    )
+{
+    memset(x, 0, sizeof(float) * A->n);
+    cs_cg(A, b, x, MEMPOOLPARAM);
+}
 
 TEST(test_cg) {
 	char memory[1000];
@@ -3163,6 +3453,12 @@ namespace vecmath {
 	// Documents that something is a unit-vector (e.g. normal vector), i.e. \in S^2
 	typedef Vector3f UnitVector;
 
+
+    _Must_inspect_result_
+        FUNCTION(bool, approximatelyEqualv, (Vector3f x, Vector3f y), "whether x and y differ by at most 1e-5f. Undefined for infinite values.", PURITY_PURE) {
+        return ::approximatelyEqual(x.x, y.x) && ::approximatelyEqual(x.y, y.y) && ::approximatelyEqual(x.z, y.z);
+    }
+
 	typedef class Vector4<float> Vector4f;
 	typedef class Vector4<int> Vector4i;
 	typedef class Vector4<short> Vector4s;
@@ -4091,7 +4387,7 @@ namespace vecmath {
 
 
         /// Constructor must define
-        /// Constructor::ExtraData(), add, atomicAdd
+        /// Constructor::ExtraData(), with operations add(ExtraData&, const ExtraData&), atomicAdd of the same signature
         /// static const unsigned int Constructor::m
         /// bool Constructor::generate(const unsigned int i, VectorX<float, m>& , float& bi)
         template<typename Constructor>
@@ -7829,6 +8125,367 @@ namespace TestScene {
 
 
 
+
+
+
+
+
+// sdf Voxel utilities
+
+/// === ITMBlockhash methods (readVoxel) ===
+
+// isFound is assumed true initially and set to false when a requested voxel is not found
+// a new voxel is returned in that case
+FUNCTION(ITMVoxel, readVoxel, (
+    const Vector3i & point,
+    bool &isFound, Scene* scene = Scene::getCurrentScene()), "", PURITY_ENVIRONMENT_DEPENDENT)
+{
+    ITMVoxel* v = scene->getVoxel(point);
+    if (!v) {
+        isFound = false;
+        return ITMVoxel();
+    }
+    return *v;
+}
+
+
+/// === Generic methods (readSDF) ===
+
+// isFound is set to true or false
+FUNCTION(float, readFromSDF_float_uninterpolated, (
+    Vector3f point, //!< in voxel-fractional-world-coordinates (such that one voxel has size 1)
+    bool &isFound), "", PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS)
+{
+    isFound = true;
+    ITMVoxel res = readVoxel(TO_INT_ROUND3(point), isFound);
+    return res.getSDF();
+}
+
+#define COMPUTE_COEFF_POS_FROM_POINT() \
+    /* Coeff are the sub-block coordinates, used for interpolation*/\
+    Vector3f coeff; Vector3i pos; TO_INT_FLOOR3(pos, coeff, point);
+
+#define forEachBoundingVoxel_operate() MEMBERFUNCTION(void, operator(), (Vector3i globalPos, float lerpCoeff), "", PURITY_OUTPUT_POINTERS)
+// Given point in voxel-fractional-world-coordinates, this calls
+// f(Vector3i globalPos, Vector3i lerpCoeff) on each globalPos (voxel-world-coordinates) bounding the given point
+// in no specific order
+template<typename T>
+FUNCTION(
+void, forEachBoundingVoxel,(
+Vector3f point, //!< in voxel-fractional-world-coordinates (such that one voxel has size 1)
+T& f
+), "") {
+
+    COMPUTE_COEFF_POS_FROM_POINT();
+    float lerpCoeff;
+
+#define access(dx,dy,dz) \
+    lerpCoeff = \
+    (dx ? coeff.x : 1.0f - coeff.x) *\
+    (dy ? coeff.y : 1.0f - coeff.y) *\
+    (dz ? coeff.z : 1.0f - coeff.z);\
+    f(pos + Vector3i(dx, dy, dz), lerpCoeff);
+
+
+    access(0, 0, 0);
+    access(0, 0, 1);
+    access(0, 1, 0);
+    access(0, 1, 1);
+    access(1, 0, 0);
+    access(1, 0, 1);
+    access(1, 1, 0);
+    access(1, 1, 1);
+
+#undef access
+}
+
+struct InterpolateSDF {
+    float result;
+    bool& isFound;
+    MEMBERFUNCTION(,InterpolateSDF, (bool& isFound), "") : result(0), isFound(isFound) {}
+
+    forEachBoundingVoxel_operate() {
+        result += lerpCoeff * readVoxel(globalPos, isFound).getSDF();
+    }
+};
+
+FUNCTION(float, readFromSDF_float_interpolated, (
+    Vector3f point, //!< in voxel-fractional-world-coordinates (such that one voxel has size 1)
+    bool &isFound), "", PURITY_ENVIRONMENT_DEPENDENT)
+{
+    InterpolateSDF interpolator(isFound);
+    forEachBoundingVoxel(point, interpolator);
+    return interpolator.result;
+}
+
+struct InterpolateColor {
+    Vector3f result;
+    bool& isFound;
+    MEMBERFUNCTION(,InterpolateColor, (bool& isFound), "") : result(0, 0, 0), isFound(isFound) {}
+
+    forEachBoundingVoxel_operate() {
+        result += lerpCoeff * readVoxel(globalPos, isFound).clr.toFloat();
+    }
+};
+
+// TODO should this also have a isFound parameter?
+/// Assumes voxels store color in some type convertible to Vector3f (e.g. Vector3u)
+FUNCTION(Vector3f, readFromSDF_color4u_interpolated,(
+    const Vector3f & point //!< in voxel-fractional world coordinates, comes e.g. from raycastResult
+    ), "", PURITY_ENVIRONMENT_DEPENDENT)
+{
+    bool isFound = true;
+    InterpolateColor interpolator(isFound);
+    forEachBoundingVoxel(point, interpolator);
+    return interpolator.result;
+}
+
+
+#define lookup(dx,dy,dz) readVoxel(pos + Vector3i(dx,dy,dz), isFound).getSDF()
+
+// TODO test and visualize
+// e.g. round to voxel position when rendering and draw this
+FUNCTION(UnitVector, computeSingleNormalFromSDFByForwardDifference,(
+    const Vector3i &pos, //!< [in] global voxel position
+    bool& isFound //!< [out] whether all values needed existed;
+    ), "", PURITY_ENVIRONMENT_DEPENDENT) {
+    float sdf0 = lookup(0, 0, 0);
+    if (!isFound) return Vector3f();
+
+    // TODO handle !isFound
+    Vector3f n(
+        lookup(1, 0, 0) - sdf0,
+        lookup(0, 1, 0) - sdf0,
+        lookup(0, 0, 1) - sdf0
+        );
+    return n.normalised(); // TODO in a distance field, normalization should not be necessary? But this is not a true distance field.
+}
+
+/// Compute SDF normal by interpolated symmetric differences
+/// Used in processPixelGrey
+// Note: this gets the localVBA list, not just a *single* voxel block.
+FUNCTION(Vector3f, computeSingleNormalFromSDF, (
+    const Vector3f &point), "", PURITY_ENVIRONMENT_DEPENDENT)
+{
+
+    Vector3f ret;
+    COMPUTE_COEFF_POS_FROM_POINT();
+    Vector3f ncoeff = Vector3f(1, 1, 1) - coeff;
+
+    bool isFound; // swallow
+
+    /*
+    x direction gradient at point is evaluated by computing interpolated sdf value in next (1 -- 2, v2) and previous (-1 -- 0, v1) cell:
+
+    -1  0   1   2
+    *---*---*---*
+    |v1 |   | v2|
+    *---*---*---*
+
+    0 z is called front, 1 z is called back
+
+    gradient is then
+    v2 - v1
+    */
+
+    /* using xyzw components of vector4f to store 4 sdf values as follows:
+
+    *---0--1-> x
+    |
+    0   x--y
+    |   |  |
+    1   z--w
+    \/
+    y
+    */
+
+    // all 8 values are going to be reused several times
+    Vector4f front, back;
+    front.x = lookup(0, 0, 0);
+    front.y = lookup(1, 0, 0);
+    front.z = lookup(0, 1, 0);
+    front.w = lookup(1, 1, 0);
+    back.x = lookup(0, 0, 1);
+    back.y = lookup(1, 0, 1);
+    back.z = lookup(0, 1, 1);
+    back.w = lookup(1, 1, 1);
+
+    Vector4f tmp;
+    float p1, p2, v1;
+    // gradient x
+    // v1
+    // 0-layer
+    p1 = front.x * ncoeff.y * ncoeff.z +
+        front.z *  coeff.y * ncoeff.z +
+        back.x  * ncoeff.y *  coeff.z +
+        back.z  *  coeff.y *  coeff.z;
+    // (-1)-layer
+    tmp.x = lookup(-1, 0, 0);
+    tmp.y = lookup(-1, 1, 0);
+    tmp.z = lookup(-1, 0, 1);
+    tmp.w = lookup(-1, 1, 1);
+    p2 = tmp.x * ncoeff.y * ncoeff.z +
+        tmp.y *  coeff.y * ncoeff.z +
+        tmp.z * ncoeff.y *  coeff.z +
+        tmp.w *  coeff.y *  coeff.z;
+
+    v1 = p1 * coeff.x + p2 * ncoeff.x;
+
+    // v2
+    // 1-layer
+    p1 = front.y * ncoeff.y * ncoeff.z +
+        front.w *  coeff.y * ncoeff.z +
+        back.y  * ncoeff.y *  coeff.z +
+        back.w  *  coeff.y *  coeff.z;
+    // 2-layer
+    tmp.x = lookup(2, 0, 0);
+    tmp.y = lookup(2, 1, 0);
+    tmp.z = lookup(2, 0, 1);
+    tmp.w = lookup(2, 1, 1);
+    p2 = tmp.x * ncoeff.y * ncoeff.z +
+        tmp.y *  coeff.y * ncoeff.z +
+        tmp.z * ncoeff.y *  coeff.z +
+        tmp.w *  coeff.y *  coeff.z;
+
+    ret.x = (
+        p1 * ncoeff.x + p2 * coeff.x // v2
+        -
+        v1);
+
+    // gradient y
+    p1 = front.x * ncoeff.x * ncoeff.z +
+        front.y *  coeff.x * ncoeff.z +
+        back.x  * ncoeff.x *  coeff.z +
+        back.y  *  coeff.x *  coeff.z;
+    tmp.x = lookup(0, -1, 0);
+    tmp.y = lookup(1, -1, 0);
+    tmp.z = lookup(0, -1, 1);
+    tmp.w = lookup(1, -1, 1);
+    p2 = tmp.x * ncoeff.x * ncoeff.z +
+        tmp.y *  coeff.x * ncoeff.z +
+        tmp.z * ncoeff.x *  coeff.z +
+        tmp.w *  coeff.x *  coeff.z;
+    v1 = p1 * coeff.y + p2 * ncoeff.y;
+
+    p1 = front.z * ncoeff.x * ncoeff.z +
+        front.w *  coeff.x * ncoeff.z +
+        back.z  * ncoeff.x *  coeff.z +
+        back.w  *  coeff.x *  coeff.z;
+    tmp.x = lookup(0, 2, 0);
+    tmp.y = lookup(1, 2, 0);
+    tmp.z = lookup(0, 2, 1);
+    tmp.w = lookup(1, 2, 1);
+    p2 = tmp.x * ncoeff.x * ncoeff.z +
+        tmp.y *  coeff.x * ncoeff.z +
+        tmp.z * ncoeff.x *  coeff.z +
+        tmp.w *  coeff.x *  coeff.z;
+
+    ret.y = (p1 * ncoeff.y + p2 * coeff.y - v1);
+
+    // gradient z
+    p1 = front.x * ncoeff.x * ncoeff.y +
+        front.y *  coeff.x * ncoeff.y +
+        front.z * ncoeff.x *  coeff.y +
+        front.w *  coeff.x *  coeff.y;
+    tmp.x = lookup(0, 0, -1);
+    tmp.y = lookup(1, 0, -1);
+    tmp.z = lookup(0, 1, -1);
+    tmp.w = lookup(1, 1, -1);
+    p2 = tmp.x * ncoeff.x * ncoeff.y +
+        tmp.y *  coeff.x * ncoeff.y +
+        tmp.z * ncoeff.x *  coeff.y +
+        tmp.w *  coeff.x *  coeff.y;
+    v1 = p1 * coeff.z + p2 * ncoeff.z;
+
+    p1 = back.x * ncoeff.x * ncoeff.y +
+        back.y *  coeff.x * ncoeff.y +
+        back.z * ncoeff.x *  coeff.y +
+        back.w *  coeff.x *  coeff.y;
+    tmp.x = lookup(0, 0, 2);
+    tmp.y = lookup(1, 0, 2);
+    tmp.z = lookup(0, 1, 2);
+    tmp.w = lookup(1, 1, 2);
+    p2 = tmp.x * ncoeff.x * ncoeff.y +
+        tmp.y *  coeff.x * ncoeff.y +
+        tmp.z * ncoeff.x *  coeff.y +
+        tmp.w *  coeff.x *  coeff.y;
+
+    ret.z = (p1 * ncoeff.z + p2 * coeff.z - v1);
+#undef lookup
+    return ret;
+}
+
+#undef COMPUTE_COEFF_POS_FROM_POINT
+#undef lookup
+
+FUNCTION(void, assertApproximatelyUnitVector, (UnitVector normal), "undefined if v does not have unit length") {
+    assert(abs(length(normal) - 1) < 0.01, "invalid normal n = (%f %f %f), |n| = %f", xyz(normal), length(normal));
+}
+
+TEST(computeSingleNormalFromSDFByForwardDifference1) {
+    auto scene = new Scene();
+
+    scene->performVoxelBlockAllocation(VoxelBlockPos(0, 0, 0));
+    scene->getVoxel(Vector3i(0, 0, 0))->setSDF(-1.f);
+    scene->getVoxel(Vector3i(1, 0, 0))->setSDF(1.f);
+    scene->getVoxel(Vector3i(0, 1, 0))->setSDF(1.f);
+    scene->getVoxel(Vector3i(0, 0, 1))->setSDF(1.f);
+
+    CURRENT_SCENE_SCOPE(scene);
+    bool found = true;
+    UnitVector v = computeSingleNormalFromSDFByForwardDifference(Vector3i(0, 0, 0), found);
+    assert(found);
+
+    assertApproximatelyUnitVector(v);
+    assert(approximatelyEqualv(v.toFloat(), Vector3f(1.f, 1.f, 1.f).normalised()));
+
+
+    v = computeSingleNormalFromSDFByForwardDifference(Vector3i(-1, -1, -1), found);
+    assert(!found);
+
+    delete scene;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 namespace meshing {
 
     CONSTANTD int edgeTable[256] = {0x0, 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c, 0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09, 0xf00,
@@ -8128,7 +8785,7 @@ namespace meshing {
     {
         Vertex vertices[8];  float sdfVals[8];
 
-        if (!findPointNeighbors<Shader>(vertices, sdfVals, globalPos)) return -1;
+        if (!findPointNeighbors<Shader>(vertices, sdfVals, globalPos)) return (unsigned int)-1;
 
         unsigned int cubeIndex = 0;
         if (sdfVals[0] < 0) cubeIndex |= 1; if (sdfVals[1] < 0) cubeIndex |= 2;
@@ -8681,6 +9338,3215 @@ using namespace fusion;
 
 
 
+
+
+
+
+
+
+
+
+namespace sopd {
+    // SparseOptimizationProblem(Decomposed) (SOPD) library
+    /*
+    Solves least-squares problems with energies of the form
+
+    \sum_{P \in Q} \sum_{p \in P} ||f(select_p(x))||_2^2
+
+    Q gives a partitioning of the domain. In the simplest case, there is only one partition.
+
+    The solution to this may or may not be close to the solution to
+
+    \sum_{p \in \Cup Q} ||f(select_p(x))||_2^2
+
+    */
+
+    // --- Memory pool passed to the csparse library ---
+    // used in buildFxAndJFxAndSolve
+
+    // this is ideally some __shared__ memory in CUDA: In CUDA (I think) 
+    // C-style "stack" memory is first register based but then spills to main memory
+    // (is shared memory also used for the registers? Just another way to access the register file?)
+    // this memory does not need to be manually freed
+
+    // DEBUG TODO moved memory to global space for debugging -- move to __shared__ again.
+    // down the stack, no two functions should be calling SOMEMEM at the same time!
+
+    //__managed__ char memory[40000/*"Maximum Shared Memory Per Block" -> 49152*/ * 1000]; // TODO could allocate 8 byte sized type, should be aligned then (?)
+    //__managed__ bool claimedMemory = false; // makes sure that SOMEMEM is only called by one function on the stack
+
+    // "A default heap of eight megabytes is allocated if any program uses malloc() without explicitly specifying the heap size." -- want more 
+
+#ifdef __CUDACC__
+    // TODO run this to increase the tiny heap size
+    CPU_FUNCTION(void, prepareCUDAHeap, (), "") { // using a constructor to do this seems not to work
+        int const mb = 400;
+        printf("setting cuda malloc heap size to %d mb\n", mb);
+        cudaDeviceSetLimit(cudaLimitMallocHeapSize, mb * 1000 * 1000); // basically the only memory we will use, so have some! // TODO changes when this is run from InfiniTAM
+        CUDA_CHECK_ERRORS();
+    }
+#endif
+    // TODO easily exceeded with lots of partitions on big scenes - small partitions don't need that much memory
+
+
+#define SOMEMEM() \
+    const size_t memory_size = 16 * 1000  * 1000;\
+    char* const memory = (char*)malloc(memory_size);/*use global memory afterall*/\
+    char* mem = (char*)(((unsigned long long)memory+7) & (~ 0x7ull)); /* align on 8 byte boundary */\
+    assert(aligned(mem, 8) && after(mem, memory));\
+    int memsz = memory_size - 8;/*be safe*/ \
+    assert(memsz>0);\
+    bool claimedMemory = true;\
+    printf("allocated %d bytes at %#p using malloc\n", memory_size, memory);\
+    assert(memory); /*attempting to access a null pointer just gives a kernel launch failure on GPU most of the time - at least when debugger cannot be attached */
+
+#define FREESOMEMEM() {assert(claimedMemory); claimedMemory = false; ::free(memory); mem = 0;}
+
+
+#define SOMEMEMP mem, memsz
+
+    // --- end of memory pool stuff ---
+
+    template<typename f> class SOPDProblem;
+
+    // f as in SOPDProblem
+    // one separate SOP (for one P in Q), shares only "x" with the global problem
+    // has custom y, p and values derived from that
+    // pointers are all nonzero to __managed__ memory
+    // instances of SOPPartition shall live in managed memory
+    //
+    // Note: Conceptually, F() is another function for each partition P: It is defined as
+    //   F(x) = (f(sigma_p(x)))_{p in P}
+    template<typename f>
+    struct SOPPartition {
+        typedef f fType;
+
+        float* minusFx; unsigned int lengthFx; // "-F(x)", length > 0, manually kept up-to-date using xIndices and the x vector in the parent sopd
+        float* h; unsigned int lengthY; // > 0 "h, the update to y (subset of x, the parameters currently optimized over)"
+
+        /*
+        > 0
+        "amount of 'points' at which the function f is evaluated."
+        "lengthP * lengthz is the length of xIndices, "
+        "and sparseDerivativeZtoYIndices contains lengthP sequences of the form (k [k many z indices] [k many y indices]) "
+        */
+        unsigned int lengthP;
+
+        // integer matrix of dimensions lengthz x lengthP, indexing into x to find the values to pass to f
+        unsigned int* xIndices;
+
+        // Used to construct J, c.f. SOPJF
+        unsigned int* sparseDerivativeZtoYIndices; // serialized form of this ragged array
+
+        /*
+        "the indices into x that indicate where the y are"
+        "needed to write out the final update h to the parameters"
+        */
+        unsigned int* yIndices; /* lengthY */
+
+        // parent (stores shared x and lengthx)
+        SOPDProblem<f> const * /*const*/ sopd;
+    };
+
+    // Extract information about global SOPD from sop partition
+
+    // assumes the template-parameter is always called f
+#define _lengthz(sop) f::lengthz //((sop)->sopd->lengthz)
+#define _lengthfz(sop) f::lengthfz //((sop)->sopd->lengthfz)
+
+#define _lengthx(sop) ((sop)->sopd->lengthx)
+#define _x(sop) ((sop)->sopd->x)
+
+
+    template<typename f>
+    FUNCTION(void, buildFxandJFx, (SOPPartition<f>* const sop, cs* const J, const bool buildFx), "");
+    template<typename f>
+    FUNCTION(void, solve, (SOPPartition<f>* const sop, cs const * const J, MEMPOOL), "");
+    template<typename f>
+    FUNCTION(float, getPartitionEnergy, (SOPPartition<f>* const sop), "");
+
+    /*
+    The type f provides the following static members:
+    * const unsigned int lengthz, > 0
+    * const unsigned int lengthfz, > 0
+    * void f(_In_reads_(lengthz) const float* const input,  _Out_writes_all_(lengthfz) float* const out)
+    * void df(_In_range_(0, lengthz-1) int const i, _In_reads_(lengthz) float const * const input, _Out_writes_all_(lengthfz) float * const out)
+    df(i) must be the derivative of f by the i-th argument
+
+    Note: Functions f and df should be CPU and GPU compilable.
+
+    Instances of this must live in GPU heap memory (allocate using new), because their pointer to the data vector x is dereferenced.
+    They can be handled only from the CPU.
+    */
+    template<typename f>
+    class SOPDProblem : public Managed {
+    private:
+        void operator=(SOPDProblem<f>); // undefined
+
+    public:
+        typedef f fType;
+
+
+
+        CPU_MEMBERFUNCTION(,
+            SOPDProblem, (
+            _In_ const vector<float>& x,
+            _In_ const vector<vector<unsigned int>>& xIndicesPerPartition,
+            _In_ const vector<vector<unsigned int>>& yIndicesPerPartition,
+            _In_ const vector<vector<unsigned int>>& sparseDerivativeZtoYIndicesPerPartition), "") :
+            partitions(restrictSize(xIndicesPerPartition.size())),
+            lengthx(restrictSize(x.size())),
+            partitionTable(0)
+            //,lengthz(f::lengthz), lengthfz(f::lengthfz)
+        {
+
+
+            assert(x.size() > 0);
+            // forall(i) assert(xIndicesPerPartition[i].size() >= ps[i].size()); // there are at least as many indices into x as there are points, since f has at least 1 argument
+            assert(xIndicesPerPartition.size() > 0);
+            assert(yIndicesPerPartition.size() == xIndicesPerPartition.size());
+            assert(yIndicesPerPartition.size() == sparseDerivativeZtoYIndicesPerPartition.size());
+            static_assert(f::lengthz > 0, "");
+            static_assert(f::lengthfz > 0, "");
+
+            assert(partitions >= 0);
+            allocatePartitions();
+            assert(partitionTable);
+
+            // TODO repeat and or externalize parameter checks (occur at quite a few places now but being safe is free)
+
+            receiveSharedOptimizationData(x.data());
+            DO(partition, partitions) {
+
+#define r restrictSize
+#if _DEBUG
+                receiveAndPrintOptimizationData(f::lengthz, f::lengthfz,
+                    x.data(), r(x.size()),
+                    sparseDerivativeZtoYIndicesPerPartition[partition].data(), r(sparseDerivativeZtoYIndicesPerPartition[partition].size()),
+                    xIndicesPerPartition[partition].data(), r(xIndicesPerPartition[partition].size()),
+                    yIndicesPerPartition[partition].data(), r(yIndicesPerPartition[partition].size())
+                    );
+#endif
+                receiveOptimizationData(partition,
+                    sparseDerivativeZtoYIndicesPerPartition[partition].data(), r(sparseDerivativeZtoYIndicesPerPartition[partition].size()),
+                    xIndicesPerPartition[partition].data(), r(xIndicesPerPartition[partition].size()),
+                    yIndicesPerPartition[partition].data(), r(yIndicesPerPartition[partition].size())
+                    );
+#undef r
+            }
+        }
+
+        CPU_MEMBERFUNCTION(float, getEnergy, (), "TODO could be parallelized" /*const, conceptually pure -- but will recompute Fx to be sure*/){
+            assert(this);
+            assert((__int64)(this) != 0xccccccccccccccccull);
+            float e = 0.f;
+            DO(i, partitions) e += getPartitionEnergy(&partitionTable[i]);
+            return e;
+        }
+
+        MEMBERFUNCTION(void, solve, (_In_ const unsigned int iterations = 1), "Modifies x to contain the solution and uses temporaries (Fx, h) in each partition.") {
+
+            dprintf("SOPDProblem::solve\n");
+
+            // TODO (GPU) parallelize solving individual partitions
+            // The only shared read-write data is the vector x, which we tolerate being modified and read in any order 
+            // (additive-multiplicative alternating schwarz procedure)
+            DO(partition, partitions) {
+
+                //if (partition != 44) continue;// TODO remove, just for debugging
+
+                buildFxAndJFxAndSolveRepeatedly(partition, iterations); 
+            }
+
+        }
+
+        CPU_MEMBERFUNCTION(vector<float>, getX, () const, "", PURITY_PURE /* except for memory allocation */) {
+            auto xv = vector<float>(x, x + lengthx);
+            return xv;
+        }
+
+        CPU_MEMBERFUNCTION(, ~SOPDProblem, (), "") {
+            // free old stuff 
+            FOREACH(sop, partitionTable, partitions) {
+                memoryFree(sop.sparseDerivativeZtoYIndices);
+                memoryFree(sop.xIndices);
+                memoryFree(sop.yIndices);
+                memoryFree(sop.minusFx);
+                memoryFree(sop.h);
+            }
+
+            memoryFree(partitionTable);
+            memoryFree(x);
+        }
+
+        // accessed externally:
+
+        // "stores the current data vector 'x' which is updated to reduce the energy ||F(x)||^2", of length lengthx
+        float* /*const*/ x; // to __managed__ memory
+        const unsigned int lengthx; // > 0 
+
+        //const unsigned int lengthz; // > 0  const unsigned int lengthfz; // > 0 
+
+    private:
+        SOPPartition<f>* /*const*/ partitionTable; // to __managed__ memory
+        const unsigned int partitions; // > 0
+
+
+
+        //  "set the amount of partitions"
+        CPU_MEMBERFUNCTION(void, allocatePartitions, (), "") {
+            assert(partitions >= 0);
+            // allocate
+            partitionTable = tmalloczeroed<SOPPartition<f>>(partitions); // pointers not yet initialized
+        }
+
+        // "Receives x"
+        CPU_MEMBERFUNCTION(void,
+            receiveSharedOptimizationData,
+            (
+            _In_reads_(lengthx) const float* const xI
+            ), "") {
+            x = mallocmemcpy(xI, lengthx);
+        }
+
+
+
+        // macro for indexing into partitionTable, sop = partitionTable[partition]
+#define extractSop(partition) assert(partition >= 0 && partition < partitions); SOPPartition<f>* const sop = &partitionTable[partition];
+
+        CPU_MEMBERFUNCTION(
+            void,
+            receiveOptimizationData,
+            (
+            const unsigned int partition,
+            _In_reads_(sparseDerivativeZtoYIndicesLength) const unsigned int* const sparseDerivativeZtoYIndicesI, const unsigned int sparseDerivativeZtoYIndicesLength,
+            _In_reads_(xIndicesLength) const unsigned int* const xIndicesI, const unsigned int xIndicesLength,
+            _In_reads_(yIndicesLength) const unsigned int* const yIndicesI, const unsigned int yIndicesLength
+            ),
+            "Receives sparseDerivativeZtoYIndices, xIndices and yIndices"
+            "Appropriately sized vectors for receiving these data items are newly allocated in __managed__ memory, hence this is a CPU only function"
+            ) {
+            extractSop(partition);
+
+            sop->sparseDerivativeZtoYIndices = mallocmemcpy(sparseDerivativeZtoYIndicesI, sparseDerivativeZtoYIndicesLength);
+            sop->xIndices = mallocmemcpy(xIndicesI, xIndicesLength);
+            sop->yIndices = mallocmemcpy(yIndicesI, yIndicesLength);
+
+            static_assert(f::lengthz > 0, "");
+            assert(divisible(xIndicesLength, f::lengthz));
+            static_assert(f::lengthfz > 0, "");
+
+            sop->lengthP = xIndicesLength / f::lengthz;
+            sop->lengthY = yIndicesLength;
+            sop->lengthFx = f::lengthfz * sop->lengthP;
+
+            sop->minusFx = tmalloc<float>(sop->lengthFx);
+
+            sop->h = tmalloc<float>(sop->lengthY);
+
+            sop->sopd = this;
+        }
+
+        // trivially parallel over the partitions
+
+        // note that these have to be members for accessing partitions
+
+        // this could be a non-member if I find out how to access lengthz
+        MEMBERFUNCTION(
+            void,
+            buildFxAndJFxAndSolve,
+            (SOPPartition<f> * const sop, bool buildFx),
+            "using current data, builds JFx (and Fx) and solves the least squares problem"
+            "optionally does not compute Fx, assuming it is current with the x data (true after every solve)"
+            ""
+            "Note that we must do the solving right here, because this function handles the memory needed by J"
+            "the solution is then accessible in h for further processing (updating x at yIndices)"
+            ""
+            "sop is passed here, not partition. Use buildFxAndJFxAndSolveRepeatedly as the external interface"
+            )
+        {
+            // Build F and JF
+
+            const unsigned int maxNNZ = MIN((
+                f::lengthfz
+                *
+                f::lengthz
+                ) * sop->lengthP // very pessimistic estimate/overestimation: assume every derivative figures for every P -- usually not all of them will be needed
+
+                // LIMIT by matrix size (usually much bigger except in very small cases)
+                ,
+                sop->lengthFx * sop->lengthY
+                );
+
+            // ^^ e.g. in vsfs the 3 color channels are all not optimized over, neither doriginal
+
+            // consider using dynamic allocation in SOMEMEM!
+
+            SOMEMEM();
+            printf("allocating %d x %d sparse matrix for %d entries, needs %d bytes\n", sop->lengthFx, sop->lengthY, maxNNZ,
+                cs_spalloc_size(sop->lengthFx, sop->lengthY, maxNNZ, 1));
+            assert(cs_spalloc_size(sop->lengthFx, sop->lengthY, maxNNZ, 1) < memsz, "%d", memsz);
+
+            cs* J = cs_spalloc(sop->lengthFx, sop->lengthY, maxNNZ, 1, SOMEMEMP); // might run out of memory here
+
+            dprintf("buildFxandJFx\n");
+            buildFxandJFx(sop, J, buildFx);
+
+            printf("used %d of %d allocated spaces in J\n", J->nz, J->nzmax);
+            assert(J->nz > 0); // there must be at least one (nonzero) entry in the jacobian, otherwise we have taken the derivative only over variables no ocurring (or no variables at all!)
+
+            J = cs_triplet(J, SOMEMEMP); // "optimizes storage of J, after which it may no longer be modified" 
+            // TODO recycle memory
+
+            // State
+            dprintf("-F(x):\n");
+            printv(sop->minusFx, sop->lengthFx);
+            dprintf("JF(x):\n");
+            printJ(J);
+
+            // Solve
+            dprintf("solve:\n");
+            sopd::solve(sop, J, SOMEMEMP); // TODO allocates even more memory
+
+            FREESOMEMEM();
+        }
+
+        MEMBERFUNCTION(
+            void,
+            buildFxAndJFxAndSolveRepeatedly,
+            (const unsigned int partition, const unsigned int iterations),
+            "using current data, builds JFx (and Fx) and solves the least squares problem"
+            "then does a gradient descent step"
+            "reapeats this whole process as often as desired"
+            )
+        {
+            extractSop(partition);
+
+            // TODO we might want to do this externally
+            printf("\n=== buildFxAndJFxAndSolveRepeatedly %d times in partition %d of %d ===\n", iterations, partition, partitions);
+            assert(iterations > 0); // TODO iterations should be size_t
+
+            DO(i, iterations) {
+                printf("\n--- iteration %d of %d in partition %d of %d ===\n", i, iterations, partition, partitions);
+
+                bool buildFx = i == 0; // Fx is always up-to date after first iteration
+
+                buildFxAndJFxAndSolve(sop, buildFx);
+                const float delta = addContinuouslySmallerMultiplesOfHtoXUntilNorm2FxIsSmallerThanBefore(sop);
+                if (delta > -0.001) {
+                    dprintf("delta was only %f, stopping optimization\n", delta);
+                    return;
+                }
+            }
+        }
+
+        /*
+        FUNCTION(
+        void,
+        buildFxAndJFxAndSolveRepeatedlyThreadIdPartition,
+        (const int iterations),
+        "buildFxAndJFxAndSolveRepeatedly on the partition given by linear_global_threadId."
+        "does nothing when linear_global_threadId is >= partitions"
+        ""
+        "TODO this should be the block id, threads in the same block should cooperate in the same partition"
+        )
+        {
+        if (linear_global_threadId() >= partitions) {
+        dprintf("\n--- thread id %d has nothing to do  - there are only %d partitions\n", linear_global_threadId(), partitions);
+        return;
+        }
+
+        printf("\n=== Starting work on partition %d in the thread of the same id ===\n", linear_global_threadId());
+        buildFxAndJFxAndSolveRepeatedly(linear_global_threadId(), iterations);
+        }
+        */
+    };
+
+    FUNCTION(void, writeJFx, (_Inout_ cs* const J, const unsigned int i, const unsigned int j, const float x),
+        "set J(i, j) = x"
+        ) {
+        assert(J);
+        assert(cs_is_triplet(J));
+        assert(i < J->m && j < J->n);
+        assert(J->nz + 1 <= (int)J->nzmax); // matrix should not become overful
+        assertFinite(x);
+
+        cs_entry(J, i, j, x);
+    }
+
+    template<typename f>
+    FUNCTION(void, writeFx, (_Inout_ SOPPartition<f>* const sop, const unsigned int i, const float val), "F(x)_i = val") {
+        assert(i < sop->lengthFx);
+        assert(sop->minusFx);
+        assertFinite(val);
+
+        sop->minusFx[i] = -val;
+    }
+
+    // -----------------------
+    /*
+    Given access to :
+
+    global:
+
+    int lengthP
+    int lengthY
+    const int lengthz
+    const int lengthfz
+    f(fz_out, z)
+    df(i, fz_out, z)
+
+    float* x <--
+
+    per partition:
+
+    int* xIndices (a list of indices into x, lengthfz * n many)
+    int* sparseDerivativeZtoYIndices (a list of n lists of integers of the structure {k   (deriveby - k integers from 0 to argcount(f)-1) (store at - k integers from 0 to y_length-1)
+
+    This creates the vector
+    Fx
+    and the sparse matrix
+    JFx
+
+    By calling
+
+    void writeFx(int i, float val)
+    void writeJFx(int i, int j, float val)
+
+    using only elementary C constructs
+    */
+    // TODO move these functions to SOPPartition instead of passing the pointer all the time
+    template<typename f>
+    FUNCTION(void, readZ, (
+        _In_ SOPPartition<f> const * const sop,
+
+        _Out_writes_all_(lengthz) float* z,
+        const size_t rowz
+        ), "z = x[[xIndices[[rowz;;rowz+lengthz-1]]]]", PURITY_OUTPUT_POINTERS){
+        assert(divisible(rowz, _lengthz(sop)));
+
+        extract(z, sop->sopd->x, sop->sopd->lengthx, sop->xIndices + rowz, _lengthz(sop)); // z = x[[xIndices]] // only place where x & lengthz is accessed
+    }
+
+
+    template<typename f>
+    FUNCTION(void, readZandSetFxRow, (
+        _Inout_ SOPPartition<f>* const sop,
+        _Out_writes_all_(lengthz) float* z,
+        const unsigned int rowz,
+        const unsigned int rowfz
+        ), "compute and store Fx[[rowfz;;rowfz+lengthfz-1]] = f(z) and return the z = x[[xIndices[[rowz;;rowz+lengthz-1]]]] required for that", PURITY_OUTPUT_POINTERS){
+        assert(divisible(rowz, _lengthz(sop)));
+        assert(divisible(rowfz, _lengthfz(sop)));
+
+        readZ(sop, z, rowz); // z = x[[xIndices]]
+
+        float fz[_lengthfz(sop)];
+        f::f(z, fz); // fz = f(z) // the only place f is called
+
+        DO(i, _lengthfz(sop)) writeFx(sop, rowfz + i, fz[i]); // Fx[[rowfz;;rowfz+lengthfz-1]] = fz
+    }
+
+    template<typename f>
+    FUNCTION(void, setFxRow, (
+        _Inout_ SOPPartition<f>* const sop,
+        const unsigned int rowz,
+        const unsigned int rowfz
+        ), "compute and store Fx[[rowfz;;rowfz+lengthfz-1]]", PURITY_OUTPUT_POINTERS){
+        float z[_lengthz(sop)];
+        readZandSetFxRow(sop, z, rowz, rowfz);
+    }
+
+    template<typename f>
+    FUNCTION(void, buildFx, (_Inout_ SOPPartition<f>* const sop), "from the current x, computes just F(x)"){
+        unsigned int rowz = 0;
+        unsigned int rowfz = 0;
+
+        FOR(unsigned int, i, 0, sop->lengthP, (rowz += _lengthz(sop), rowfz += _lengthfz(sop), 1)) MAKE_CONST(rowz) MAKE_CONST(rowfz) {
+            DBG_UNREFERENCED_LOCAL_VARIABLE(i);
+            setFxRow(sop, rowz, rowfz);
+        }
+    }
+
+    template<typename f>
+    FUNCTION(void, buildFxandJFx, (_Inout_ SOPPartition<f>* const sop, cs* const J, const bool buildFx),
+        "from the current x, computes F(x) [if buildFx == true] and JF(x)"
+        "Note that J is stored into the matrix pointed to"
+        "this J must by in triplet form and have allocated enough space to fill in the computed df"
+        ) {
+        assert(cs_is_triplet(J));
+        auto* currentSparseDerivativeZtoYIndices = sop->sparseDerivativeZtoYIndices;
+        unsigned int rowz = 0;
+        unsigned int rowfz = 0;
+
+        FOR(unsigned int, i, 0, sop->lengthP, (rowz += _lengthz(sop), rowfz += _lengthfz(sop), 1)) MAKE_CONST(rowz) MAKE_CONST(rowfz) {
+            DBG_UNREFERENCED_LOCAL_VARIABLE(i);
+            float z[_lengthz(sop)];
+            if (buildFx)
+                readZandSetFxRow(sop, z, rowz, rowfz);
+            else
+                readZ(sop, z, rowz);
+
+            // MAKE_CONST(z) {
+
+            // deserialize sparseDerivativeZtoYIndices, c.f. flattenSparseDerivativeZtoYIndices
+            // convert back to two lists of integers of the same length (K)
+            const unsigned int K = *currentSparseDerivativeZtoYIndices++;
+            assert(K <= _lengthz(sop));
+            const unsigned int* const zIndices = currentSparseDerivativeZtoYIndices; currentSparseDerivativeZtoYIndices += K;
+            const unsigned int* const yIndices = currentSparseDerivativeZtoYIndices; currentSparseDerivativeZtoYIndices += K;
+
+            // construct & insert localJ columnwise
+            DO(k, K) {
+                const unsigned int zIndex = zIndices[k];
+                const unsigned int yIndex = yIndices[k];
+
+                assert(zIndex < _lengthz(sop));
+                assert(yIndex < sop->lengthY);
+
+                float localJColumn[_lengthfz(sop)];
+                f::df(zIndex, z, localJColumn);// the only place df is called
+                // MAKE_CONST(localJColumn) {
+
+                // put in the right place (starting at rowfz, column yIndex)
+                DO(j, _lengthfz(sop)) {
+                    assert(abs(localJColumn[j]) < 1e5, "enormous derivative created: %f - probably will not converge later on", localJColumn[j]);
+                    writeJFx(J, rowfz + j, yIndex, assertFinite(localJColumn[j]));
+                }
+            }
+        }
+    }
+    // -----------------------
+
+    // Core algorithms
+
+    template<typename f>
+    FUNCTION(void,
+        solve,
+        (_Inout_ SOPPartition<f>* const sop, _In_ cs const * const J, MEMPOOL),
+        "assumes x, -Fx and J have been built"
+        "computes the adjustment fvector h, which is the least-squares solution to the system"
+        "Jh = -Fx"
+        , PURITY_OUTPUT_POINTERS) {
+        assert(J && sop && _lengthx(sop) && _x(sop) && sop->minusFx && sop->h);
+        assert(cs_is_compressed_col(J));
+
+        printf("sparse leastSquares (cg) %d x %d... (this might take a while)\n",
+            J->m, J->n);
+
+        // dump J
+#define DUMP_LS 1
+#if !GPU_CODE && DUMP_LS
+        if (J->n > 1000) {
+            {
+                puts("dumping to J2.txt\n");
+                FILE* file; fopen_s(&file, "J2.txt", "wb");
+                assert(file, "could not open J2.txt");
+                cs_dump2(J, file);
+                mustSucceed(0 == fclose(file));
+            }
+
+        {
+            puts("dumping to minusFx.txt\n");
+            FILE* file; fopen_s(&file, "minusFx.txt", "wb");
+            assert(file, "could not open minusFx.txt");
+            dump(vector_wrapper(sop->minusFx, sop->lengthFx), file);
+            mustSucceed(0 == fclose(file));
+        }
+        }
+#endif
+        //
+
+        assert(sop->lengthY > 0);
+
+        cs_cg_0guess(J, sop->minusFx, sop->h, MEMPOOLPARAM);
+
+
+#if !GPU_CODE && DUMP_LS
+        {
+            puts("dumping least squares solution to h.txt\n");
+            FILE* file; fopen_s(&file, "h.txt", "wb");
+            assert(file, "could not open h.txt");
+            dump(vector_wrapper(sop->h, sop->lengthY), file);
+            mustSucceed(0 == fclose(file));
+        }
+#endif
+
+        dprintf("h:\n"); printv(sop->h, sop->lengthY);
+        assertFinite(sop->h, sop->lengthY);
+    }
+
+    template<typename f>
+    FUNCTION(
+        float,
+        norm2Fx,
+        (_In_ SOPPartition<f> const * const sop), "Assuming F(x) is already computed, returns ||F(x)||_2^2", PURITY_PURE
+        ) {
+        assert(sop->minusFx);
+        float x = 0;
+        FOREACHC(y, sop->minusFx, sop->lengthFx) x += y * y;
+        return assertFinite(x);
+    }
+
+
+    template<typename f>
+    FUNCTION(float, getPartitionEnergy, (_Inout_ SOPPartition<f>* const sop), "Returns the 2-norm of the Fx vector, computing it from the current x first.", PURITY_OUTPUT_POINTERS) {
+        buildFx(sop);
+        return norm2Fx(sop);
+    }
+
+    template<typename f>
+    FUNCTION(
+        float,
+        addContinuouslySmallerMultiplesOfHtoXUntilNorm2FxIsSmallerThanBefore,
+        (_Inout_ SOPPartition<f> * const sop),
+        "scales h such that F(x0 + h) < F(x) in the 2-norm and updates x = x0 + h"
+        "returns total energy delta achieved which should be negative but might not be when the iteration count is exceeded"
+        , PURITY_OUTPUT_POINTERS) {
+        assert(sop);
+        assert(sop->yIndices);
+        assert(sop->minusFx);
+        assert(_x(sop));
+
+        // determine old norm
+        const float norm2Fatx0 = norm2Fx(sop);
+        dprintf("||F[x0]||_2^2 = %f\n", norm2Fatx0);
+
+        // add full h
+        float lambda = 1.;
+        dprintf("x = "); printv(_x(sop), _lengthx(sop));
+        axpyWithReindexing(_x(sop), _lengthx(sop), lambda, sop->h, sop->yIndices, sop->lengthY); // xv = x0 + h
+        dprintf("x = x0 + h = "); printv(_x(sop), _lengthx(sop));
+
+        buildFx(sop);
+        float norm2Faty0 = norm2Fx(sop);
+        dprintf("||F[x0 + h]||_2^2 = %f\n", norm2Faty0);
+
+
+        // Reduce step-size if chosen step does not lead to reduction by subtracting lambda * h
+        size_t n = 0; // safety net, limit iterations
+        while (norm2Faty0 > norm2Fatx0 && n++ < 20) {
+            lambda /= 2.;
+            axpyWithReindexing(_x(sop), _lengthx(sop), -lambda, sop->h, sop->yIndices, sop->lengthY); // xv -= lambda * h // note the -!
+
+            dprintf("x = "); printv(_x(sop), _lengthx(sop));
+
+            buildFx(sop); // rebuild Fx after this change to x
+            norm2Faty0 = norm2Fx(sop); // reevaluate norm
+            dprintf("reduced stepsize, lambda =  %f, ||F[y0]||_2^2 = %f\n", lambda, norm2Faty0);
+        }
+        dprintf("optimization finishes, total energy change: %f\n", norm2Faty0 - norm2Fatx0);
+        /*assert(norm2Faty0 - norm2Fatx0 <= 0.);*/ // might not be true if early out was used
+        return assertFinite(norm2Faty0 - norm2Fatx0);
+    }
+
+    // Interface
+
+
+
+
+
+    // Prototyping functions
+
+    FUNCTION(void,
+        receiveAndPrintOptimizationData,
+        (
+        const unsigned int lengthz,
+        const unsigned int lengthfz,
+
+        _In_reads_(xLength) const float* const x, const unsigned int xLength,
+        _In_reads_(sparseDerivativeZtoYIndicesLength) const unsigned int* const sparseDerivativeZtoYIndices, const unsigned int sparseDerivativeZtoYIndicesLength,
+        _In_reads_(xIndicesLength) const unsigned int* const xIndices, const unsigned int xIndicesLength,
+        _In_reads_(yIndicesLength) const unsigned int* const yIndices, const unsigned int yIndicesLength
+        ),
+        "Receives x, sparseDerivativeZtoYIndices, xIndices and yIndices, checks and prints them,"
+        "emulating arbitrary lengthz, lengthfz"
+        "Note: lengthz, lengthfz are fixed at compile-time for other functions"
+        "This is a prototyping function that does not allocate or copy anything"
+        "use for testing"
+        , PURITY_PURE) {
+
+        const unsigned int lengthP = xIndicesLength / lengthz;
+        const unsigned int lengthY = yIndicesLength;
+        const unsigned int lengthFx = lengthfz * lengthP;
+        const unsigned int maxNNZ = (lengthfz*lengthz) * lengthP; // could go down from lengthz to maximum k in sparseDerivativeZtoYIndices
+        // or just the actual sum of all such k
+
+        dprintf("lengthz: %d\n", lengthz);
+        dprintf("lengthfz: %d\n", lengthfz);
+        dprintf("lengthP: %d\n", lengthP);
+        dprintf("lengthY: %d\n", lengthY);
+        dprintf("lengthFx: %d\n", lengthFx);
+        dprintf("maxNNZ: %d\n", maxNNZ);
+
+        assert(lengthz > 0);
+        assert(lengthfz > 0);
+        assert(lengthY > 0);
+
+        dprintf("x:\n");
+        printv(x, xLength);
+
+        dprintf("sparseDerivativeZtoYIndices:\n");
+        const unsigned int* p = sparseDerivativeZtoYIndices;
+
+        REPEAT(lengthP) {
+            const unsigned int k = *p++;
+            assert(k <= lengthz);
+            dprintf("---\n");
+            printd(p, k); p += k;
+            dprintf("-->\n");
+            printd(p, k); p += k;
+            dprintf("---\n");
+        }
+        assert(p == sparseDerivativeZtoYIndices + sparseDerivativeZtoYIndicesLength);
+
+        dprintf("xIndices:\n");
+        p = xIndices;
+        REPEAT(lengthP) {
+            printd(p, lengthz);
+            p += lengthz;
+        }
+        assert(p == xIndices + xIndicesLength);
+        assertLess(xIndices, xIndicesLength, xLength);
+
+        dprintf("yIndices:\n");
+        printd(yIndices, yIndicesLength);
+        assertLess(yIndices, yIndicesLength, xLength);
+    }
+
+
+
+    FUNCTION(
+        void,
+        makeAndPrintSparseMatrix,
+        (
+        const unsigned int m,
+        const unsigned int n,
+        _In_reads_(xlen) float const * /*const */x,
+        /*const */unsigned int xlen,
+        _In_reads_(ijlen) int const * /*const */ ij,
+        const unsigned int ijlen
+        ),
+        "Creates a sparse matrix from a list of values and a list of pairs of (i, j) indices specifying where to put the corresponding values (triplet form)"
+        "Note: This is a prototyping function without any further purpose"
+        , PURITY_PURE) {
+        assert(2 * xlen == ijlen);
+        assert(xlen <= m*n); // don't allow repeated entries
+
+        SOMEMEM();
+        cs* const A = cs_spalloc(m, n, xlen, 1, SOMEMEMP);
+
+        while (xlen--) {
+            int i = *ij++;
+            int j = *ij++;
+            cs_entry(A, i, j, *x++);
+        }
+
+        cs_print(A);
+
+        printf("compress and print again:\n");
+        const cs* const B = cs_triplet(A, SOMEMEMP);
+        cs_print(B);
+        printf("done--\n");
+
+
+        FREESOMEMEM();
+    }
+
+    TEST(makeAndPrintSparseMatrix1) {
+        unsigned int const count = 1;
+        float x[] = {1.};
+        int ij[] = {0, 0};
+        makeAndPrintSparseMatrix(1, 1, x, count, ij, 2 * count);
+    }
+
+
+
+
+
+
+
+
+    // Misc
+
+    // "collection of some tests"
+    TEST(testMain) {
+        float x[] = {1, 2};
+        printv(x, 2);
+        float y[] = {1};
+        printv(y, 1);
+
+        unsigned int to[] = {1};
+        axpyWithReindexing(x, 2, 1., y, to, 1); // expect 1.000000 3.000000
+        printv(x, 2);
+        assert(1.f == x[0]);
+        assert(3.f == x[1]);
+
+        float z[] = {0, 0};
+        unsigned int from[] = {1, 0};
+        extract(z, x, 2, from, 2); // expect 3.000000 1.000000
+        printv(z, 2);
+        assert(3.f == z[0]);
+        assert(1.f == z[1]);
+
+        // expect i: 0-9
+        FOR(int, i, 0, 10, 1) {
+            dprintf("i: %d\n", i);
+            //i = 0; // i is const!
+        }
+
+        int i = 0;
+        REPEAT(10)
+            dprintf("rep i: %d\n", i++);
+    }
+
+
+    // exercise SOMEMEM and cs_
+    TEST(mainc) {
+
+        int cij[] = {0, 0};
+        int xlen = 1;
+        float xc[] = {0.1f};
+        float* x = xc;
+        int m = 1, n = 1;
+        int* ij = cij;
+
+        SOMEMEM();
+        cs* A = cs_spalloc(m, n, xlen, 1, SOMEMEMP);
+
+        while (xlen--) {
+            int i = *ij++;
+            int j = *ij++;
+            cs_entry(A, i, j, *x++);
+        }
+
+        cs_print(A);
+        assert(cs_is_triplet(A));
+        assert(!cs_is_compressed_col(A));
+
+        printf("compress and print again:\n");
+        A = cs_triplet(A, SOMEMEMP);
+        assert(!cs_is_triplet(A));
+        assert(cs_is_compressed_col(A));
+        cs_print(A);
+
+        FREESOMEMEM();
+    }
+
+
+    // --- end of SOPCompiled framework ---
+
+
+
+
+
+
+
+
+
+    // --- SOPCompiled interface for C++ ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    template<typename A>
+    CPU_FUNCTION(
+        void, build_locator, (_In_ const vector<A>& v, _Out_ unordered_map<A, unsigned int>& locator),
+
+        "Given nonempty v, build locator such that for all a"
+        "either locator[a] is undefined or"
+        "v[locator[a]] == a"
+        ""
+        "locator should initially be empty"
+
+        , PURITY_OUTPUT_POINTERS){
+        assert(v.size() > 0);
+        assert(locator.size() == 0); // locator's constructor will have been called, so 6001 doesn't apply here
+
+        locator.reserve(v.size());
+
+        unsigned int i = 0;
+        for (const auto& a : v) {
+            locator[a] = i;
+            // now:
+            // assert(v[locator[a]] == a);
+            i++;
+        }
+        assert(i == v.size());
+        assert(v.size() == locator.size());
+    }
+
+    TEST(build_locator1) {
+        typedef int In;
+        vector<In> v = {42, 0};
+        unordered_map<In, unsigned int> locator;
+        build_locator(v, locator);
+
+        // check constraints
+        assert(v.size() == locator.size());
+        assert(0 == locator[42]);
+        assert(1 == locator[0]);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /*
+    Given the FiniteMapping f, return a vector v of the same size as f and an injective function g such that
+
+    f(a) == v[g(a)] for all a for which f is defined
+
+    g crashes when supplied an argument for which f was not defined.
+    v & g should be empty initially.
+
+    A and B must be valid parameters for unordered_map.
+    */
+    template<typename A, typename B>
+    CPU_FUNCTION(
+        void, linearize, (_In_ const unordered_map<A, B>& f, _Out_ vector<B>& v, _Out_ unordered_map<A, unsigned int>& g), "", PURITY_OUTPUT_POINTERS) {
+        printf("linearize start %d\n", f.size());
+        assert(f.size() > 0);
+        assert(f.size() <= UINT_MAX);
+        assert(v.size() == 0);
+        assert(g.size() == 0);
+
+        v.resize(f.size());
+        g.reserve(f.size());
+
+        unsigned int i = 0;
+        for (const auto& fa : f) {
+            v[i] = fa.second;
+            g[fa.first] = i;
+            // Now the following holds:
+            // assert(v[g_map[fa.first]] == fa.second);
+
+            i++;
+        }
+        assert(i == f.size());
+    }
+
+    TEST(linearize1) {
+        // Construct some f
+        typedef int In;
+        typedef float Out;
+
+        unordered_map<In, Out> f;
+        f[0] = 1.;
+        f[1] = 2.;
+
+        // Call linearize
+        vector<Out> v; unordered_map<In, unsigned int> g;
+        linearize(f, v, g);
+
+        // check constraints
+        assert(v.size() == f.size());
+        for (auto& fa : f) {
+            assert(fa.second == v[g[fa.first]]);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    /*
+    Change the FiniteMapping f, such that
+
+    f(a) == v[g(a)]
+
+    whenever f(a) was already defined.
+    g must be injective and defined for every a that f is defined for and return a valid index into v for these a.
+    v must have the same size as f.
+    g and v returned by linearize satisfy these constraints relative to the input f.
+
+    ! "Impure"/reference-modifying function for performance. Other parts of the system will be influenced indirectly (side-effect) if f is referenced from elsewhere.
+    */
+    template<typename A, typename B>
+    CPU_FUNCTION(
+        void, update_from_linearization, (
+        _Inout_ unordered_map<A, B>& f,
+        _In_ const vector<B>& v,
+        _In_ const unordered_map<A, unsigned int>& g
+        ), "", PURITY_OUTPUT_POINTERS) {
+        assert(f.size() > 0);
+
+        assert(v.size() == f.size());
+        assert(g.size() == f.size());
+
+        for (auto& fa : f) {
+            auto i = g.at(fa.first);
+            f[fa.first] = v[i];
+        }
+    }
+
+    TEST(update_from_linearization1) {
+        // Construct some f
+        typedef int In;
+        typedef float Out;
+        unordered_map<In, Out> f;
+        f[0] = 1.;
+        f[1] = 2.;
+
+        vector<Out> v; unordered_map<In, unsigned int> g;
+        linearize(f, v, g);
+
+        // Modify v
+        for (auto& x : v) x += 2.;
+
+        // Propagate updates to f
+
+        assert(f.size() == 2);
+        assert(f[0] == 1.);
+        assert(f[1] == 2.);
+
+        update_from_linearization(f, v, g);
+
+        assert(f.size() == 2);
+        assert(f[0] == 3.);
+        assert(f[1] == 4.);
+    }
+
+
+
+
+
+
+
+
+    /*
+    Evaluate sigma at each p in P to obtain the lengthz many names (list of v \in X) of the variables that should be supplied to f at p.
+    Convert this list to a set of indices into the variable-name |-> value list x.
+    Concatenate all of these index-lists.
+
+    locateInX should give a valid index into the (implied) variable-value list x or crash when supplied a variable name that does not occur there
+    It is an injective function.
+
+    xIndices should be empty initially
+    */
+    template<typename X, typename PT, unsigned int lengthz>
+    CPU_FUNCTION(
+        void, SOPxIndices, (
+        _In_ const unordered_map<X, unsigned int>& locateInX,
+        _In_ const vector<PT>& P,
+        _In_ const function<void(PT, X*)>& sigma,
+        _Out_ vector<unsigned int>& xIndices
+        ), "", PURITY_OUTPUT_POINTERS) {
+
+        printf("SOPxIndices\n");
+        assert(P.size() > 0);
+        assert(locateInX.size());
+        assert(sigma);
+        assert(xIndices.size() == 0);
+
+        //const unsigned int lengthz_ = restrictSize(sigma(P[0]).size());
+        //assert(lengthz_ > 0);
+
+        xIndices.resize(lengthz * P.size());
+
+        X zatp[lengthz]; // sigma(p), read out at each p
+
+        unsigned int i = 0;
+        for (const auto& p : P) {
+            sigma(p, zatp); //zatp  // const auto zatp = sigma(p);
+
+            for (const auto& z : zatp) {
+                assert(definedQ(locateInX, z), "attempted to locate a variable in x that is not there");
+                xIndices[i++] = locateInX.at(z);
+                // 'fatal program exit requested' if you call this with a z that is not defined
+                // (can happen if the set of data and the set of points are such that sigma tries to access points that don't exist).
+            }
+        }
+        assert(i == xIndices.size());
+    }
+
+    TEST(SOPxIndices1) {
+        // X === int, {0, -1} in this order
+        // P === short, {0, 1}
+        // sigma: at point p, supply variables {-p}
+        unordered_map<int, unsigned int> locateInX = {{0, 0}, {-1, 1}};
+        vector<short> P = {0, 1};
+        auto sigma = [](short p, _Out_writes_(1) int* sigmap) {sigmap[0] = -p; };
+
+        //const unsigned int lengthz = restrictSize(sigma(P[0]).size());
+        //assert(1 == lengthz);
+
+        vector<unsigned int> xIndices;
+        SOPxIndices<int, short, 1>(locateInX, P, sigma, xIndices);
+        //assert(xIndices == {0,1});
+        assert(xIndices.size() == 2);
+        assert(0 == xIndices[0]);
+        assert(1 == xIndices[1]);
+
+        // Retry with different P:
+        P = {1, 0};
+        xIndices.clear();
+        SOPxIndices<int, short, 1>(locateInX, P, sigma, xIndices);
+        //assert(xIndices == {1,0});
+        assert(xIndices.size() == 2);
+        assert(1 == xIndices[0]);
+        assert(0 == xIndices[1]);
+    }
+
+    /*
+    locateInX /@ Y
+
+    where Y contains only elements for which locateInX is defined.
+
+    locateInX should give a valid index into the variable-value list x or crash when supplied a variable name that does not occur there
+    locateInX should be injective.
+
+    yIndices should be void initially
+    */
+    template<typename X>
+    CPU_FUNCTION(
+        void, SOPyIndices, (
+        _In_ const unordered_map<X, unsigned int>& locateInX, const _In_ vector<X>& Y,
+        _Out_ vector<unsigned int>& yIndices
+        ), "", PURITY_OUTPUT_POINTERS) {
+
+        printf("SOPyIndices\n");
+        assert(Y.size() > 0);
+        assert(locateInX.size());
+        assert(yIndices.size() == 0);
+
+        yIndices.resize(Y.size());
+
+        // --
+        //transform(Y.begin(), Y.end(),
+        //    yIndices.begin(), locateInX);
+        // or
+
+        unsigned int i = 0;
+        for (const auto& y : Y) {
+            yIndices[i++] = locateInX.at(y);
+        }
+        assert(i == yIndices.size());
+
+        // --
+    }
+
+    TEST(SOPyIndices1) {
+        // X === int, {0, -1} in this order
+        // Y = {-1,0}
+        unordered_map<int, unsigned int> locateInX = {{0, 0}, {-1, 1}};
+        vector<int> Y = {-1, 0};
+
+        vector<unsigned int> yIndices;
+        SOPyIndices<int>(locateInX, Y, yIndices);
+
+        //assert(yIndices == {1,0});
+        assert(2 == yIndices.size());
+        assert(1 == yIndices[0]);
+        assert(0 == yIndices[1]);
+
+        // Retry with another Y
+        Y = {0, -1};
+        yIndices.clear();
+        SOPyIndices<int>(locateInX, Y, yIndices);
+        assert(2 == yIndices.size());
+        assert(0 == yIndices[0]);
+        assert(1 == yIndices[1]);
+    }
+
+
+    /*
+    for each p in P
+    * figure out the variables that will be supplied to f (sigma(p))
+    * create empty lists zIndices and yIndices
+    * find the indices of these variables, listed as z \in 0:lengthz-1 in Y using locateInY
+    if locateInY(variable-z) is undefined, continue;
+    push_back(zIndices, z) push_back(yIndices, locateInY(variable-v))
+    * let K = size(zIndices) == size(yIndices)
+    * append the list {K} <> zIndices <> yIndices to sparseDerivativeZtoYIndices
+
+    This list of indices will allow us to figure out which derivatives of f we need and where these vectors are to be placed in the
+    jacobian matrix d F / d y, where F(x) = (f(sigma_p(x))_{p in P}
+
+    locateInX should crash for undefined x
+    locateInY is unordered_map because we need to be able to judge whether something is an y or not
+
+    The linearization format in sparseDerivativeZtoYIndices is detailed in SOPCompiledFramework.
+    {{zindices}, {yindices}} /; both of length k
+
+    {k, zindices, yindices}
+
+    TODO maybe this could be done more efficiently using the SOPxIndices-result and a function that
+    translates from x-indices to y-indices.
+
+    sparseDerivativeZtoYIndices should be initially empty
+    */
+    template<typename X, typename PT, unsigned int lengthz>
+    CPU_FUNCTION(
+        void, SOPsparseDerivativeZtoYIndices, (
+        _In_ const unordered_map<X, unsigned int>& locateInY,
+        _In_ const vector<PT>& P,
+        _In_ const function<void(PT, X*)>& sigma,
+
+        _Out_ vector<unsigned int>& sparseDerivativeZtoYIndices
+        ), "", PURITY_OUTPUT_POINTERS) {
+        printf("SOPsparseDerivativeZtoYIndices\n");
+        assert(P.size() > 0);
+        assert(locateInY.size() > 0);
+        assert(sigma);
+        assert(sparseDerivativeZtoYIndices.size() == 0);
+
+        // for checking sigma-constraint
+        //const unsigned int lengthz_ = restrictSize(sigma(P[0]).size());
+        //assert(lengthz_ > 0);
+
+        X zatp[lengthz]; // sigma(p), read out at each p
+
+        for (const auto& p : P) {
+            sigma(p, zatp); //zatp = sigma(p);
+            //assert(zatp.size() == lengthz); // sigma-constraint
+
+            vector<unsigned int> yIndices, zIndices;
+
+            // try to locate each z in y
+            unsigned int zIndex = 0;
+            for (const auto& z : zatp) {
+
+                unsigned int positionInY;
+                if (!definedQ<X, unsigned int>(locateInY, z, positionInY)) goto nextz;
+
+                zIndices.push_back(zIndex);
+                yIndices.push_back(positionInY);
+
+            nextz:
+                zIndex++;
+            }
+
+            assert(zIndex == lengthz);
+            const unsigned int K = restrictSize(zIndices.size());
+            assert(K <= lengthz);
+            assert(K == yIndices.size());
+            assertLess(zIndices, lengthz);
+            //assertLess(yIndices, Y.size())
+
+            sparseDerivativeZtoYIndices.push_back(K);
+            sparseDerivativeZtoYIndices.insert(sparseDerivativeZtoYIndices.end(), zIndices.begin(), zIndices.end());
+            sparseDerivativeZtoYIndices.insert(sparseDerivativeZtoYIndices.end(), yIndices.begin(), yIndices.end());
+        }
+
+        // Post
+        assert(sparseDerivativeZtoYIndices.size() >= P.size()); // at least {0, no z-indices, no y-indices} per point
+    }
+
+    /*
+    Given the data vector x (implicitly), the variables optimized for (y), the points where f is evaluated (p) and the per-point data selection function (sigma),
+    prepare the index arrays needed by a single SOPCompiled partition.
+
+    * sigma(p) must have the same nonzero length for all p in P. It gives the names of variables in x that should be passed to f for the point p.
+    * xIndices, sparseDerivativeZtoYIndices and yIndices are defined as for the SOPCompiled framework.
+    The outputs should initially be empty. They will be initialized for you.
+
+    x is given as locator function (locateInX) for efficiency: It can be reused for all partitions.
+    Use linearize to compute it.
+
+    Note that this function is not specific to any function f. However, the result should be used with a SOPCompiledFramework-instance created for a function f
+    that matches sigma (i.e. same amount of parameters and same meaning & order).
+    */
+    template<typename X, typename PT, unsigned int lengthz>
+    CPU_FUNCTION(
+        void, prepareSOPCompiledInputForOnePartition, (
+        _In_ const unordered_map<X, unsigned int>& locateInX,
+        _In_ const vector<X>& Y,
+        _In_ const vector<PT>& P,
+        _In_ const function<void(PT, X*)>& sigma,
+
+        _Out_ vector<unsigned int>& xIndices, _Out_ vector<unsigned int>& sparseDerivativeZtoYIndices, _Out_ vector<unsigned int>& yIndices
+        ), "", PURITY_OUTPUT_POINTERS) {
+
+        printf("prepareSOPCompiledInputForOnePartition\n");
+        assert(locateInX.size());
+        assert(Y.size() > 0);
+        //assert(y.size() <= x.size()); // at most as many variables optimized over as there are x // cannot be verified because x is given implicitly
+        // y should be a set (no repeated elements)
+        assert(P.size() > 0);
+        assert(sigma);
+
+        assert(xIndices.size() == 0);
+        assert(sparseDerivativeZtoYIndices.size() == 0);
+        assert(yIndices.size() == 0);
+
+        // Precompute location functions
+        unordered_map<X, unsigned int> locateInY;
+        build_locator(Y, locateInY);
+        assert(locateInY.size() > 0);
+
+        // Compute index sets
+        SOPxIndices<X, PT, lengthz>(locateInX, P, sigma,
+            xIndices);
+        SOPyIndices(locateInX, Y,
+            yIndices);
+        SOPsparseDerivativeZtoYIndices<X, PT, lengthz>(locateInY, P, sigma,
+            sparseDerivativeZtoYIndices);
+
+        // Post
+        assert(xIndices.size() >= P.size()); // at least one parameter per point
+        assert(sparseDerivativeZtoYIndices.size() >= P.size()); // at least {0, no z-indices, no y-indices} per point
+        assert(yIndices.size() == Y.size());
+        // assert(allLessThan(yIndices, X.size()))
+        // assert(allLessThan(sparseDerivativeZtoYIndices, X.size())) // assuming X is larger than lengthz -- wait it has to be!
+    }
+
+    template<typename X, typename PT, unsigned int lengthz>
+    CPU_FUNCTION(
+        void
+        , prepareSOPCompiledInput
+        , (
+        _In_ const unordered_map<X, float>& x,
+        _In_ const vector<vector<PT>>& ps,
+        _In_ const vector<vector<X>>& ys,
+        _In_ const function<void(PT, X*)>& sigma,
+
+        _Out_ vector<float>& xVector,
+        _Out_ vector<vector<unsigned int>>& xIndicesPerPartition,
+        _Out_ vector<vector<unsigned int>>& yIndicesPerPartition,
+        _Out_ vector<vector<unsigned int>>& sparseDerivativeZtoYIndicesPerPartition,
+        _Out_ unordered_map<X, unsigned int>& locateInX
+        )
+        , ""
+        , PURITY_OUTPUT_POINTERS
+        ) {
+
+        printf("prepareSOPCompiledInput start\n");
+        assert(ps.size() > 0);
+        assert(ps.size() == ys.size()); // amount of partitions
+        assert(x.size() > 0);
+        assert(ys[0].size() > 0);
+        assert(ps[0].size() > 0);
+
+        //assert(sigma(ps[0][0]).size() > 0);
+
+        const unsigned int partitions = restrictSize(ps.size());
+        assert(partitions > 0);
+
+        // prepare x
+        assert(locateInX.size() == 0);
+        linearize(x, xVector, locateInX);
+
+        // prepare indices
+        assert(0 == xIndicesPerPartition.size());
+        assert(0 == yIndicesPerPartition.size());
+        assert(0 == sparseDerivativeZtoYIndicesPerPartition.size());
+        xIndicesPerPartition.resize(partitions);
+        yIndicesPerPartition.resize(partitions);
+        sparseDerivativeZtoYIndicesPerPartition.resize(partitions);
+
+        DO(i, partitions) {
+            printf("partition %d\n", i);
+
+            prepareSOPCompiledInputForOnePartition<X, PT, lengthz>(
+                /* in */
+                locateInX, ys[i], ps[i], /*not &!*/ sigma,
+                /* out */
+                xIndicesPerPartition[i], sparseDerivativeZtoYIndicesPerPartition[i], yIndicesPerPartition[i]
+                );
+
+            assert(xIndicesPerPartition[i].size() > 0);
+            assert(sparseDerivativeZtoYIndicesPerPartition[i].size() > 0); // todo there should be at least one row {k, y-ind,z-ind} in this array with k!=0
+            assert(yIndicesPerPartition[i].size() > 0);
+        }
+    }
+
+    /*
+    The type fSigma provides the following static members:
+    * const unsigned int lengthz, > 0
+    * const unsigned int lengthfz, > 0
+    * void f(_In_reads_(lengthz) const float* const input,  _Out_writes_all_(lengthfz) float* const out)
+    * void df(_In_range_(0, lengthz-1) int const i, _In_reads_(lengthz) float const * const input, _Out_writes_all_(lengthfz) float * const out)
+    df(i) must be the derivative of f by the i-th argument
+    * void sigma(_In_ P p, _Out_writes(lengthz) X* sigmap) gives names of variables supplied to f at p
+
+    Note: Functions f and df should be CPU and GPU compilable.
+
+    ! Modifies x in-place to contain the solution for efficiency. Other parts of system might be influenced by this *side-effect*!
+    */
+    template<typename X, typename PT, typename fSigma>
+    class SOPDNamed {
+    private:
+        void operator=(SOPDNamed&);
+        SOPDNamed(SOPDNamed&);
+
+    public:
+        SOPDProblem<fSigma>* sopd;
+        _Inout_ unordered_map<X, float>& x;
+        unordered_map<X, unsigned int> locateInX;
+
+        CPU_MEMBERFUNCTION(, ~SOPDNamed, (), "") {
+            delete sopd;
+        }
+
+        CPU_MEMBERFUNCTION(
+            , SOPDNamed, (
+            _Inout_ unordered_map<X, float>& x,
+            _In_ const vector<vector<PT>>& ps,
+            _In_ const vector<vector<X>>& ys), "", PURITY_OUTPUT_POINTERS) : x(x) {
+
+            static_assert(fSigma::lengthz > 0, "lengthz must be positive");
+            static_assert(fSigma::lengthfz > 0, "lengthfz must be positive");
+            /*static_*/assert(&fSigma::sigma, "fSigma must define static function sigma");
+            /*static_*/assert(&fSigma::f, "fSigma must define static function f");
+            /*static_*/assert(&fSigma::df, "fSigma must define static function df");
+
+            vector<float> xVector;
+            vector<vector<unsigned int>> xIndicesPerPartition;
+            vector<vector<unsigned int>> yIndicesPerPartition;
+            vector<vector<unsigned int>> sparseDerivativeZtoYIndicesPerPartition;
+            prepareSOPCompiledInput<X, PT, fSigma::lengthz>(x, ps, ys, &fSigma::sigma,
+                xVector, xIndicesPerPartition, yIndicesPerPartition, sparseDerivativeZtoYIndicesPerPartition, locateInX);
+
+            // dump [[ TODO cannot seem to reconstruct vector<vector<unsigned int>
+            /*
+            archive(xVector, "xVector");
+            archive(xIndicesPerPartition, "xIndicesPerPartition");
+            archive(yIndicesPerPartition, "yIndicesPerPartition");
+            archive(sparseDerivativeZtoYIndicesPerPartition, "sparseDerivativeZtoYIndicesPerPartition");
+            */
+            // ]]
+
+            // prepare 
+            sopd = new SOPDProblem<fSigma>(xVector, xIndicesPerPartition, yIndicesPerPartition, sparseDerivativeZtoYIndicesPerPartition);
+        }
+
+        CPU_MEMBERFUNCTION(void, solve, (unsigned int iterations = 1), "") {
+            assert(iterations > 0);
+            sopd->solve(iterations);
+            auto x1Vector = sopd->getX();
+            assert(x1Vector.size() == x.size());
+
+            // copy to output x
+            update_from_linearization(x, x1Vector, locateInX);
+        }
+
+        CPU_MEMBERFUNCTION(float, energy, (void), "") {
+            return sopd->getEnergy();
+        }
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /* example
+
+    PTest[
+
+    Block[{select, sop, x},
+
+    select[i_] := {IdentityRule[x]};
+    sop = SparseOptimizationProblemDecomposedMake[{1-x},
+    select, {{0}}, {x -> 2.`}, {{x}}];
+
+    SOPDDataAsRules[SOPDSolve[sop, Method -> "SOPCompiled"]]
+
+    ] (*end of Block*)
+
+    ,
+    {x -> 1.`}
+    ]
+
+    */
+    enum Example1X { e1x };
+    enum Example1P { e1p0 };
+
+    struct Example1fSigma {
+        static
+            CPU_FUNCTION(void, sigma, (_In_ Example1P p, _Out_writes_(lengthz) Example1X* sigmap), "the per-point data selector function") {
+            DBG_UNREFERENCED_PARAMETER(p);
+            sigmap[0] = e1x;
+        }
+
+        static const unsigned int lengthz = 1, lengthfz = 1;
+
+        static
+            MEMBERFUNCTION(void, f, (_In_reads_(lengthz) const float* const input, _Out_writes_all_(lengthfz) float* const out),
+            "per point energy"){
+            out[0] = 1.f - input[0];
+        }
+
+        static
+            MEMBERFUNCTION(void, df, (_In_range_(0, lengthz - 1) unsigned int const i, _In_reads_(lengthz) float const * const input, _Out_writes_all_(lengthfz) float * const out), "the partial derivatives of f") {
+            DBG_UNREFERENCED_PARAMETER(input);
+            assert(i < lengthz);
+            out[0] = -1.f;
+        }
+    };
+
+    TEST(SOPDSolve1) {
+        unordered_map<Example1X, float> x = {{e1x, 2.f}};
+        assert(x[e1x] == 2.f);
+
+        SOPDNamed<Example1X, Example1P, Example1fSigma> sopd(x, {{e1p0}}, {{e1x}});
+        sopd.solve();
+
+        assert(1 == x.size());
+        assert(approximatelyEqual(x[e1x], 1.f), "%f", x[e1x]);
+    }
+
+
+    // Energy: 1.f for non solved, 0. for solved
+    TEST(SOPDEnergy1) {
+        unordered_map<Example1X, float> x = {{e1x, 2.f}};
+
+        SOPDNamed<Example1X, Example1P, Example1fSigma> sopd(x, {{e1p0}}, {{e1x}});
+        assert(sopd.energy() == 1.f);
+        sopd.solve();
+        assert(sopd.energy() == 0.f);
+    }
+
+    /* example 2, nonlinear: root of 2.
+
+    PTest[
+    Block[{select, sop, x}, select[i_] := {IdentityRule[x]};
+    sop = SparseOptimizationProblemDecomposedMake[{2 - x*x},
+    select, {{0}}, {x -> 2.`}, {{x}}];
+    SOPDGetX0[SOPDSolve[sop, MaxIterations -> 16]]] (*end of Block*)
+    , Sqrt@2., {SameTest -> ApproximatelyEqual}]
+
+    */
+
+    struct Example2fSigma {
+        static
+            CPU_FUNCTION(void, sigma, (_In_ Example1P p, _Out_writes_(lengthz) Example1X* sigmap), "the per-point data selector function") {
+            Example1fSigma::sigma(p, sigmap);
+        }
+
+        static const unsigned int lengthz = 1, lengthfz = 1;
+
+        static
+            MEMBERFUNCTION(void, f, (_In_reads_(lengthz) const float* const input, _Out_writes_all_(lengthfz) float* const out),
+            "per point energy"){
+            out[0] = 2.f - input[0] * input[0];
+        }
+
+        static
+            MEMBERFUNCTION(void, df, (_In_range_(0, lengthz - 1) unsigned int const i, _In_reads_(lengthz) float const * const input, _Out_writes_all_(lengthfz) float * const out), "the partial derivatives of f") {
+            DBG_UNREFERENCED_PARAMETER(input);
+            assert(i < lengthz);
+            out[0] = -2.f* input[0];
+        }
+    };
+
+    TEST(SOPDSolve2) {
+        unordered_map<Example1X, float> x = {{e1x, 2.f}};
+        assert(x[e1x] == 2.f);
+
+
+        SOPDNamed<Example1X, Example1P, Example2fSigma> sopd(x, {{e1p0}}, {{e1x}});
+        sopd.solve(16);
+
+        assert(1 == x.size());
+        assert(::approximatelyEqual(x[e1x], sqrtf(2.f)), "%f", x[e1x]);
+    }
+
+    /* example 3, nonlinear & multi-variable, not optimized over everything: root of 2. and 3.
+    data:
+
+    -1 -> 2.
+    1 -> x
+
+    -2 -> 3.
+    2 -> y
+
+    sigma(p): P = {1,2}
+
+    a -> p
+    b -> -p
+
+    f(a,b) = b - a*a
+
+    Y = {1,2}
+    */
+    typedef int Example3X;
+    typedef int Example3P;
+
+    struct Example3fSigma {
+        static
+            CPU_FUNCTION(void, sigma, (_In_ Example3P p, _Out_writes_(lengthz) Example3X* sigmap), "the per-point data selector function") {
+            sigmap[0] = p;
+            sigmap[1] = -p;
+        }
+
+        static const unsigned int lengthz = 2, lengthfz = 1;
+
+        static
+            MEMBERFUNCTION(void, f, (_In_reads_(lengthz) const float* const input, _Out_writes_all_(lengthfz) float* const out),
+            "per point energy"){
+            out[0] = input[1] - input[0] * input[0];
+        }
+
+        static
+            MEMBERFUNCTION(void, df, (_In_range_(0, lengthz - 1) unsigned int const i, _In_reads_(lengthz) float const * const input, _Out_writes_all_(lengthfz) float * const out), "the partial derivatives of f") {
+            DBG_UNREFERENCED_PARAMETER(input);
+            assert(i < lengthz);
+            switch (i) {
+            case 0: out[0] = -2.f * input[0]; return;
+            case 1: out[1] = 1.f;
+                fatalError("this derivative should not be needed in the given objective");
+                return;
+            }
+        }
+    };
+
+    TEST(SOPDSolve3) {
+        unordered_map<Example3X, float> x = {{-1, 2.f}, {1, 2.f}, {-2, 3.f}, {2, 3.f}};
+        SOPDNamed<Example3X, Example3P, Example3fSigma> sopd(x, /*p*/{{1, 2}}, /*Y*/{{1, 2}});
+        sopd.solve(16);
+
+        assert(4 == x.size());
+        assert(approximatelyEqual(x[1], sqrtf(2.f)), "%f", x[1]);
+        assert(approximatelyEqual(x[2], sqrtf(3.f)), "%f", x[2]);
+        // rest perfectly unchanged
+        assert(x[-1] == 2.f);
+        assert(x[-2] == 3.f);
+    }
+
+
+    /* example 4: same as example 3, but with the Y in two separate partitions
+    the result should be exactly the same, but the computation is parallelizable now*/
+
+    TEST(SOPDSolve4) {
+        unordered_map<Example3X, float> x = {{-1, 2.f}, {1, 2.f}, {-2, 3.f}, {2, 3.f}};
+        SOPDNamed<Example3X, Example3P, Example3fSigma> sopd(x, /*p*/{{1}, {2}}, /*Y*/{{1}, {2}});
+        sopd.solve(/*iterations*/16);
+
+
+        assert(4 == x.size());
+        assert(approximatelyEqual(x[1], sqrtf(2.f)), "%f", x[1]);
+        assert(approximatelyEqual(x[2], sqrtf(3.f)), "%f", x[2]);
+        // rest perfectly unchanged
+        assert(x[-1] == 2.f);
+        assert(x[-2] == 3.f);
+    }
+
+
+}
+using namespace sopd;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CPU_FUNCTION(float, random01f, (), "primitive uniform random number generator, for ad-hoc testing") {
+    return rand()*1.f / RAND_MAX;
+}
+
+CPU_FUNCTION(Vector3f, random01v3, (), "") {
+    return Vector3f(random01f(), random01f(), random01f());
+}
+
+CPU_FUNCTION(vector<float>, random01vn,(_In_range_(>,0) const unsigned int n), "") {
+	assert(n);
+	vector<float> x(n);
+	for (auto& y : x) y = random01f();
+	return x;
+}
+
+CPU_FUNCTION(vector<float>, fconst, (_In_range_(>, 0) const unsigned int n, const float c), "", PURITY_PURE) {
+	assert(n);
+	vector<float> x(n);
+	for (auto& y : x) y = c;
+	return x;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Dumping lists of points
+template<typename T>
+CPU_FUNCTION(
+void,writePoints,(const Vector3f& color01rgb, vector<Vector3<T>> const & points, FILE* f), "", PURITY_OUTPUT_POINTERS /* MODIFIES FILE */)
+{
+    assert(points.size() > 0);
+    assert(color01rgb.r >= 0.f && color01rgb.r <= 1.f);
+
+    for (auto& p : points)
+        fprintf(f, "v %f %f %f %f %f %f\n", xyz(p.toFloat()), xyz(color01rgb));
+}
+
+
+template<typename T>
+CPU_FUNCTION(
+void, writePointsRandomColor,(vector<Vector3<T>> const & points, FILE* f), "", PURITY_OUTPUT_POINTERS /* MODIFIES FILE */)
+{
+    writePoints(random01v3(), points, f);
+}
+
+template<typename T>
+CPU_FUNCTION(
+    void, writePointsRandomColor, (const string baseFileName, vector<vector<Vector3<T>>> const & pointsLists), "", PURITY_OUTPUT_POINTERS /* MODIFIES FILE */) {
+    assert(pointsLists.size() > 0);
+    FILE *f;  fopen_s(&f, (baseFileName + ".obj").c_str(), "wb");
+    assert(f);
+
+    for (auto& x : pointsLists)
+        writePointsRandomColor(x, f);
+
+    fclose(f);
+}
+
+template<typename T>
+CPU_FUNCTION(
+void, writePointsRandomColor,(const string baseFileName, vector<Vector3<T>> const & pointsLists), "", PURITY_OUTPUT_POINTERS /* MODIFIES FILE */){
+    vector<vector<Vector3<T>>> pl = {pointsLists};
+    writePointsRandomColor(baseFileName, pl);
+}
+
+TEST(testWritePoints) {
+    vector<Vector3i> v = {Vector3i(0, 0, 0)};
+    writePointsRandomColor("test.points", v);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Dumping voxel positions
+
+// adds SDF_BLOCK_SIZE3 points
+CPU_FUNCTION(
+void, getVoxelPositions,(_Inout_ vector<Vector3i>& p, ITMVoxelBlock const * const vb), "", PURITY_OUTPUT_POINTERS) {
+    XYZ_over_SDF_BLOCK_SIZE{
+        Vector3i localPos(x, y, z);
+        p.push_back(vb->getPos().toInt()  * SDF_BLOCK_SIZE + localPos);
+    }
+}
+
+CPU_FUNCTION(
+vector<Vector3i>, getVoxelPositions,(Scene const* const scene), "", PURITY_PURE /* except for vector allocating memory with malloc or new somewhere with the default allocator */){
+    vector<Vector3i> p;
+    p.reserve(scene->countVoxelBlocks() * SDF_BLOCK_SIZE3); // optimization hint
+    DO1(i, scene->countVoxelBlocks()) {
+        getVoxelPositions(p, scene->getVoxelBlockForSequenceNumber(i));
+    }
+    assert(p.size() > 0);
+    return p;
+}
+
+CPU_FUNCTION(
+    vector<vector<Vector3i>>, getVoxelPositionsBlockwise,(Scene const* const scene), "", PURITY_PURE) {
+
+    printf("getVoxelPositionsBlockwise start\n");
+    vector<vector<Vector3i>> ps;
+    ps.reserve(scene->countVoxelBlocks()); // optimization hint
+    DO1(i, scene->countVoxelBlocks()) {
+        vector<Vector3i> p;
+        p.reserve(SDF_BLOCK_SIZE3);// optimization hint
+        getVoxelPositions(p, scene->getVoxelBlockForSequenceNumber(i));
+        assert(p.size() > 0);
+        ps.push_back(p);
+    }
+    assert(ps.size() > 0);
+    printf("getVoxelPositionsBlockwise end\n");
+    return ps;
+}
+
+CPU_FUNCTION(
+void, dumpVoxelPositions,(Scene const* const scene, const string baseFileName), "") {
+    writePointsRandomColor(baseFileName, getVoxelPositions(scene));
+}
+
+CPU_FUNCTION(
+void, dumpVoxelPositionsBlockwise,(Scene const* const scene, const string baseFileName), "") {
+    writePointsRandomColor(baseFileName, getVoxelPositionsBlockwise(scene));
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Determine optimizeable positions 
+
+// returns empty list if any offset block point does not have full 1-neighborhood
+// TODO optimization would test whether neighborhood exists only for outer points? (but couldn't there be interior holes? probably not
+// by how the blocks are arranged
+CPU_FUNCTION(
+    vector<Vector3i>, getOptimizationBlock,
+    (Scene const*  /* const*/ scene, ITMVoxelBlock const * const vb, Vector3i const offset), "") {
+    vector<Vector3i> p;
+    p.reserve(SDF_BLOCK_SIZE3);// optimization hint
+
+    // --
+    // as long as the blocks are as big as the data-structure blocks, it is sufficient to check the inner and outer corners
+    // if the blocks are smaller than the datastructure blocks (SDF_BLOCK_SIZE), it would be enough even to check the outer corners 
+
+    // check
+    Vector3i globalPos = vb->getPos().toInt()  * SDF_BLOCK_SIZE + offset;
+#define corner(x,y,z)       (globalPos + Vector3i(x,y,z) * SDF_BLOCK_SIZE)
+#define outer_corner(x,y,z) (corner(x,y,z) + Vector3i(-1+2*x,-1+2*y,-1+2*z))
+
+    if (
+        !scene->voxelExistsQ(corner(0, 0, 0)) ||
+        !scene->voxelExistsQ(corner(0, 1, 0)) ||
+        !scene->voxelExistsQ(corner(1, 0, 0)) ||
+        !scene->voxelExistsQ(corner(1, 1, 0)) ||
+        !scene->voxelExistsQ(corner(0, 0, 1)) ||
+        !scene->voxelExistsQ(corner(0, 1, 1)) ||
+        !scene->voxelExistsQ(corner(1, 0, 1)) ||
+        !scene->voxelExistsQ(corner(1, 1, 1)) ||
+
+        !scene->voxelExistsQ(outer_corner(0, 0, 0)) ||
+        !scene->voxelExistsQ(outer_corner(0, 1, 0)) ||
+        !scene->voxelExistsQ(outer_corner(1, 0, 0)) ||
+        !scene->voxelExistsQ(outer_corner(1, 1, 0)) ||
+        !scene->voxelExistsQ(outer_corner(0, 0, 1)) ||
+        !scene->voxelExistsQ(outer_corner(0, 1, 1)) ||
+        !scene->voxelExistsQ(outer_corner(1, 0, 1)) ||
+        !scene->voxelExistsQ(outer_corner(1, 1, 1))
+        )
+        return vector<Vector3i>();
+
+#undef corner
+#undef outer_corner
+
+    // enter
+
+
+    XYZ_over_SDF_BLOCK_SIZE{
+        const Vector3i localPos(x, y, z);
+        Vector3i globalPos = vb->getPos().toInt()  * SDF_BLOCK_SIZE + localPos;
+        globalPos += offset;
+
+        p.push_back(globalPos);
+    }
+
+        // or
+        /*
+        for (int z = -1; z < SDF_BLOCK_SIZE+1; z++)
+        for (int y = -1; y < SDF_BLOCK_SIZE+1; y++)
+        for (int x = -1; x < SDF_BLOCK_SIZE+1; x++) {
+
+        const Vector3i localPos(x, y, z);
+        Vector3i globalPos = vb->getPos().toInt()  * SDF_BLOCK_SIZE + localPos;
+        globalPos += offset;
+
+        if (!scene->voxelExistsQ(globalPos)) return vector<Vector3i>();
+
+        // push only inner positions
+        if (x >= 0 && x < SDF_BLOCK_SIZE &&
+        y >= 0 && y < SDF_BLOCK_SIZE &&
+        z >= 0 && z < SDF_BLOCK_SIZE)
+        p.push_back(globalPos);
+        }
+        */
+        // or
+        /*
+        XYZ_over_SDF_BLOCK_SIZE {
+        const Vector3i localPos(x, y, z);
+        Vector3i globalPos = vb->getPos().toInt()  * SDF_BLOCK_SIZE + localPos;
+        globalPos += offset;
+
+        if (!scene->voxel1NeighborhoodExistsQ(globalPos)) return vector<Vector3i>();
+
+        p.push_back(globalPos);
+        }*/
+        // --
+
+    return p;
+}
+
+// Finding the blocks (ps) to be optimized individually
+CPU_FUNCTION(
+    vector<vector<Vector3i>>, getOptimizationBlocks, (Scene const* const scene, Vector3i const offset), "") {
+
+    printf("getOptimizationBlocks %d %d %d takes a while\n", xyz(offset));
+
+    assert(abs(offset.x) < SDF_BLOCK_SIZE);
+    assert(abs(offset.y) < SDF_BLOCK_SIZE);
+    assert(abs(offset.z) < SDF_BLOCK_SIZE);
+
+    vector<vector<Vector3i>> ps;
+    ps.reserve(scene->countVoxelBlocks()); // optimization hint -- note that there might be less blocks in the end
+
+    DO1(i, scene->countVoxelBlocks()) {
+
+        auto p = getOptimizationBlock(scene, scene->getVoxelBlockForSequenceNumber(i), offset);
+
+        if (p.size() > 0) {
+            assert(p.size() == SDF_BLOCK_SIZE3);
+            ps.push_back(p);
+        }
+        //else
+        //   printf("cannot optimize %d %d %d\n", xyz(scene->getVoxelBlockForSequenceNumber(i)->getPos()));
+    }
+
+    printf("can optimize %d of %d blocks\n", ps.size(), scene->countVoxelBlocks());
+    assert(ps.size() > 0); // there should be SOMETHING to optimize over
+    return ps;
+}
+
+
+
+TEST(getOptimizationBlocks1) {
+    Scene* scene = new Scene();
+
+    // exactly one block should be optimizable here
+    scene->performVoxelBlockAllocation(VoxelBlockPos(0, 0, 0));
+    scene->performVoxelBlockAllocation(VoxelBlockPos(1, 0, 0));
+    scene->performVoxelBlockAllocation(VoxelBlockPos(0, 1, 0));
+    scene->performVoxelBlockAllocation(VoxelBlockPos(1, 1, 0));
+    scene->performVoxelBlockAllocation(VoxelBlockPos(0, 0, 1));
+    scene->performVoxelBlockAllocation(VoxelBlockPos(1, 0, 1));
+    scene->performVoxelBlockAllocation(VoxelBlockPos(0, 1, 1));
+    scene->performVoxelBlockAllocation(VoxelBlockPos(1, 1, 1));
+
+    auto blocks = getOptimizationBlocks(scene, Vector3i(1, 1, 1));
+    assert(blocks.size() == 1);
+    assert(blocks[0][0] == Vector3i(1, 1, 1));
+
+    delete scene;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+struct InitAD {
+    doForEachAllocatedVoxel_process() {
+        v->refinedDistance = v->getSDF();
+        v->luminanceAlbedo = 1.f;
+    }
+};
+
+void initAD(Scene* scene) {
+    assert(scene);
+    CURRENT_SCENE_SCOPE(scene);
+
+    scene->doForEachAllocatedVoxel<InitAD>();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Converting scene data to named x-vector (data linearization), suitable for passing to SOP-framework
+
+// TODO very efficient code would skip the conversion process
+// an intermediate speedup would be to do it in parallel
+
+
+
+#define LIGHT_MODEL_PARAMETER_COUNT 3
+
+
+struct XVarName;
+template <>
+struct hash<XVarName>;
+
+// Set of all possible variable names
+class XVarName {
+public:
+    MEMBERFUNCTION(, XVarName, (), "") {} // default constructor, so that we can fill an array of these later
+
+    MEMBERFUNCTION(bool, operator==, (_In_ const XVarName& o) const, "", PURITY_PURE) {
+        return key == o.key;
+    }
+
+    static FUNCTION(XVarName, d, (Vector3i globalPos), "", PURITY_PURE) {
+        return Vector4i(xyz(globalPos), 0);
+    }
+
+    static FUNCTION(XVarName, a, (Vector3i globalPos), "", PURITY_PURE) {
+        return Vector4i(xyz(globalPos), 1);
+    }
+
+    static FUNCTION(XVarName, doriginal, (Vector3i globalPos), "", PURITY_PURE) {
+        return Vector4i(xyz(globalPos), 2);
+    }
+
+    static FUNCTION(XVarName, c, (Vector3i globalPos, unsigned int channel), "", PURITY_PURE) {
+        assert(channel < 3);
+        return Vector4i(xyz(globalPos), 3 + channel);
+    }
+
+    static FUNCTION(XVarName, eg, (), "", PURITY_PURE)  { return Vector4i(0, 0, 0, 10); }
+    static FUNCTION(XVarName, er, (), "", PURITY_PURE)  { return Vector4i(0, 0, 0, 11); }
+    static FUNCTION(XVarName, es, (), "", PURITY_PURE)  { return Vector4i(0, 0, 0, 12); }
+    static FUNCTION(XVarName, ea, (), "", PURITY_PURE)  { return Vector4i(0, 0, 0, 13); }
+
+    static FUNCTION(XVarName, l, (unsigned int i), "", PURITY_PURE)  {
+        assert(i < LIGHT_MODEL_PARAMETER_COUNT);
+        return Vector4i(0, 0, 0, 14 + i);
+    }
+
+private:
+
+    MEMBERFUNCTION(, XVarName, (Vector4i v), "") : key(v)  {}
+
+    friend hash<XVarName>;
+    Vector4i key;
+};
+
+template <>
+struct hash<XVarName> // TODO make the above HashMap take this kind of standard hasher, maybe implement unordered_map interface
+{
+    size_t operator()(const XVarName& k) const
+    {
+        // adapted from z3 hasher
+        // TODO check performance of this (unordered_map collision factor...)
+        return
+            (((unsigned int)k.key.x * 73856093u) ^ ((unsigned int)k.key.y * 19349669u) ^ ((unsigned int)k.key.z * 83492791u)) ^ (hash<int>()(k.key.w) << 1);
+    }
+};
+
+TEST(XVarName1) {
+    auto x1 = XVarName::d(Vector3i(1, 1, 1));
+    auto x2 = XVarName::d(Vector3i(1, 1, 2));
+
+    assert(x1 == x1);
+    assert(!(x1 == x2));
+
+    hash<XVarName> h;
+    assert(h(x1) != h(x2));
+
+    unordered_map<XVarName, int> m;
+    m[x1] = 0;
+    m[x2] = 1;
+    assert(0 == m[x1]);
+    assert(1 == m[x2]);
+
+    auto x3 = XVarName::doriginal(Vector3i(1, 1, 1));
+    assert(!(x1 == x3));
+    assert(!(x2 == x3));
+}
+
+CPU_FUNCTION(
+    void, enterVoxelData, (_Inout_ unordered_map<XVarName, float>& x, VoxelBlockPos const vbp, Vector3ui localPos, ITMVoxel const * const v), "", PURITY_OUTPUT_POINTERS) {
+    Vector3i pos = vbp.toInt() * SDF_BLOCK_SIZE + localPos.toInt(); // globalPos
+
+    // convert to naming used by the Mathematica research
+    // TODO unify this
+
+
+    x[XVarName::d(pos)] = v->refinedDistance;
+
+    // TODO unless the conditions enforce this (which they cannot)
+    // we cannot either -- must make SDF encoder aware of out-of-range data (clamp)
+
+    //assert(x[XVarName::d(pos)] >= -1.001f, "%f", x[XVarName::d(pos)]);
+    //assert(x[XVarName::d(pos)] <= 1.001f, "%f", x[XVarName::d(pos)]);
+
+
+
+    x[XVarName::doriginal(pos)] = v->getSDF();
+    //assert(x[XVarName::doriginal(pos)] >= -1.001f, "%f", x[XVarName::doriginal(pos)]);
+    //assert(x[XVarName::doriginal(pos)] <= 1.001f, "%f", x[XVarName::doriginal(pos)]);
+
+    x[XVarName::a(pos)] = v->luminanceAlbedo;
+    //assert(x[XVarName::a(pos)] >= 0.f, "%f", x[XVarName::a(pos)]);
+    //assert(x[XVarName::a(pos)] <= 1.f, "%f", x[XVarName::a(pos)]);
+
+    DO(i, 3) {
+        x[XVarName::c(pos, i)] = v->clr[i] / 255.f;
+        //assert(x[XVarName::c(pos, i)] >= 0.f, "%f", x[XVarName::c(pos, i)]);
+        //assert(x[XVarName::c(pos, i)] <= 1.f, "%f", x[XVarName::c(pos, i)]);
+    }
+}
+
+
+CPU_FUNCTION(
+void, enterVoxelBlockData,(_Inout_ unordered_map<XVarName, float>& xm, ITMVoxelBlock const * const vb), "", PURITY_OUTPUT_POINTERS) {
+    XYZ_over_SDF_BLOCK_SIZE{
+        Vector3ui localPos(x, y, z);
+        enterVoxelData(xm, vb->getPos(), localPos, vb->getVoxel(localPos));
+    }
+}
+
+
+//CPU_FUNCTION( // cannot because of , in template params
+unordered_map<XVarName, float> getSceneData(const Scene* const scene)
+//, "when calling this, d and a must have been initialized", PURITY_PURE) 
+{
+    printf("getSceneData start\n");
+
+    unordered_map<XVarName, float> x;
+    x.reserve(scene->countVoxelBlocks() * SDF_BLOCK_SIZE3);
+
+    DO1(i, scene->countVoxelBlocks()) {
+        enterVoxelBlockData(x, scene->getVoxelBlockForSequenceNumber(i));
+    }
+
+    printf("getSceneData end\n");
+
+    return x;
+}
+
+TEST(getSceneData1) {
+    Scene* scene = new Scene();
+    VoxelBlockPos p(1, 2, 3);
+    scene->performVoxelBlockAllocation(p);
+    auto vb = scene->getVoxelBlock(p);
+
+    vb->resetVoxels();
+    initAD(scene);
+
+    auto data = getSceneData(scene);
+
+    assert(SDF_BLOCK_SIZE3 * (3 + 3 /* d a doriginal 3*c*/) == data.size());
+    assert(definedQ(data, XVarName::d(p.toInt() * SDF_BLOCK_SIZE)));
+    assert(definedQ(data, XVarName::doriginal(p.toInt() * SDF_BLOCK_SIZE)));
+    assert(1.f == data[XVarName::a(p.toInt() * SDF_BLOCK_SIZE)]);
+    assert(!definedQ(data, XVarName::d(Vector3i(0, 0, 0))));
+
+    delete scene;
+}
+
+
+// updating, de-linearization
+CPU_FUNCTION(
+    void, updateVoxelData, (_In_ unordered_map<XVarName, float> const & x, VoxelBlockPos const vbp, const Vector3ui localPos, _Out_ /*inout*/ ITMVoxel * const v), "initializes v based on the data available for it in x (translation using XVarName) ", PURITY_OUTPUT_POINTERS) {
+    Vector3i pos = vbp.toInt() * SDF_BLOCK_SIZE + localPos.toInt(); // globalPos
+
+    // convert to naming used by the Mathematica research
+    // TODO unify this
+
+
+    // TODO unless the conditions enforce this (which they cannot)
+    // we cannot either -- must make SDF encoder aware of out-of-range data (clamp)
+
+    //assert(x[XVarName::d(pos)] >= -1.001f, "%f", x[XVarName::d(pos)]);
+    //assert(x[XVarName::d(pos)] <= 1.001f, "%f", x[XVarName::d(pos)]);
+
+
+    v->refinedDistance = CLAMP(x.at(XVarName::d(pos)), -1.f, 1.f); // TODO is this ok?
+    //assert(x.at(XVarName::d(pos)) >= -1.001f, "%f", v->refinedDistance);
+    //assert(x.at(XVarName::d(pos)) <= 1.001f, "%f", v->refinedDistance);
+
+    v->setSDF(CLAMP(x.at(XVarName::doriginal(pos)), -1.f, 1.f));
+    //assert(x.at(XVarName::doriginal(pos)) >= -1.001f, "%f", x.at//(XVarName::doriginal(pos)));
+    //assert(x.at(XVarName::doriginal(pos)) <= 1.001f, "%f", x.at(XVarName::doriginal(pos)));
+
+    v->luminanceAlbedo = CLAMP(x.at(XVarName::a(pos)), 0.f, 1.f);
+    //assert(x.at(XVarName::a(pos)) >= 0.f, "%f", x.at(XVarName::a(pos)));
+    // assert(x.at(XVarName::a(pos)) <= 1.f, "%f", x.at(XVarName::a(pos)));
+
+    DO(i, 3) {
+        v->clr[i] = CLAMP(x.at(XVarName::c(pos, i)), 0.f, 1.f) * 255.f; // TODO we don't need to clamp this if we don't optimize over it (it stays unchanged)
+        //assert(x.at(XVarName::c(pos, i)) >= 0.f, "%f", x.at(XVarName::c(pos, i)));
+        //assert(x.at(XVarName::c(pos, i)) <= 1.f, "%f", x.at(XVarName::c(pos, i)));
+    }
+}
+
+CPU_FUNCTION(
+    void, updateVoxelBlockData, (_In_ unordered_map<XVarName, float> const & xm, ITMVoxelBlock * const vb), "", PURITY_OUTPUT_POINTERS)  {
+    for (int x = 0; x < SDF_BLOCK_SIZE; x++)
+        for (int y = 0; y < SDF_BLOCK_SIZE; y++)
+            for (int z = 0; z < SDF_BLOCK_SIZE; z++) {
+                Vector3ui localPos(x, y, z);
+                updateVoxelData(xm, vb->getPos(), localPos, vb->getVoxel(localPos));
+            }
+}
+
+CPU_FUNCTION(
+    void, updateFromSceneData, (_Inout_ Scene* scene, _In_ unordered_map<XVarName, float> const & x), "", PURITY_OUTPUT_POINTERS){
+
+    printf("updateFromSceneData start\n");
+
+    DO1(i, scene->countVoxelBlocks()) {
+        updateVoxelBlockData(x, scene->getVoxelBlockForSequenceNumber(i));
+    }
+
+
+    printf("updateFromSceneData end\n");
+}
+
+TEST(updateSceneData1) {
+    Scene* scene = new Scene();
+    VoxelBlockPos p(1, 2, 3);
+    scene->performVoxelBlockAllocation(p);
+    auto vb = scene->getVoxelBlock(p);
+
+    vb->resetVoxels();
+    initAD(scene);
+
+    assert(1.f == vb->getVoxel(Vector3ui(0, 0, 0))->luminanceAlbedo, "%f", vb->getVoxel(Vector3ui(0, 0, 0))->luminanceAlbedo);
+
+    auto data = getSceneData(scene);
+
+    auto vp = p.toInt() * SDF_BLOCK_SIZE;
+
+    data[XVarName::a(vp)] = 0.5f;
+
+    updateFromSceneData(scene, data);
+
+    auto vbu = scene->getVoxelBlock(p);
+    assert(vb == vbu); // still at the same place
+    assert(.5f == vb->getVoxel(Vector3ui(0, 0, 0))->luminanceAlbedo);
+
+    delete scene;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Computes x, points and ys as needed for the SOP describing the optimization
+// Output lists should initially be empty.
+CPU_FUNCTION(void, refinement_x_points_ys, (
+    _In_ Scene const * const scene,
+    // energy term weights // TODO make more generic
+    _In_ const float eg, _In_ const float er, _In_ const float es, _In_ const float ea,
+    // lighting model parameters
+    _In_ const const float* const l, _In_ const unsigned int lSize,
+
+    _Out_ unordered_map<XVarName, float>& x,
+    _Out_ vector<vector<Vector3i>>& points,
+    _Out_ vector<vector<XVarName>>& ys
+
+    ), PURITY_OUTPUT_POINTERS) {
+    printf("refinement_x_points_ys start\n");
+    assert(0 == x.size());
+    assert(0 == points.size());
+    assert(0 == ys.size());
+
+    // 1. translate infinitam data to x vector
+    assert(lSize < 100); // sanity check
+    assert(lSize == LIGHT_MODEL_PARAMETER_COUNT);
+    assert(eg >= 0); // sanity check
+    assert(er >= 0); // sanity check
+    assert(es >= 0); // sanity check
+    assert(ea >= 0); // sanity check
+
+    printf("refineScene start\n");
+    x = getSceneData(scene);
+    assert(x.size() > 0);
+
+    x[XVarName::eg()] = eg;
+    x[XVarName::er()] = er;
+    x[XVarName::es()] = es;
+    x[XVarName::ea()] = ea;
+
+    DO(i, lSize) x[XVarName::l(i)] = l[i];
+
+    printf("scene data stats: size %d, load_factor %f\n", x.size(), x.load_factor());
+
+    // 2. determine points at which the energy can be computed, decomposed into independent blocks
+    //points = getVoxelPositionsBlockwise(scene);// TODO should use getOptimizationBlocks for real energy, which accesses the whole 1-neighborhood
+
+    points = getOptimizationBlocks(scene, Vector3i(1, 1, 1));// TODO should let the user supply the offset
+
+    assert(points.size() > 0, "no points where found over which we can optimize!");
+
+    // 3. determine variables over which we optimize (y)
+
+    // TODO externalize to a function
+    // optimizing over a and d at each point where the energy is computed
+
+
+    printf("building y start\n");
+    for (const auto& block : points) {
+        vector<XVarName> y;
+        for (const auto& p : block) {
+            y.push_back(XVarName::a(p));
+            y.push_back(XVarName::d(p));
+        }
+        ys.push_back(y);
+    }
+    printf("building y end\n");
+
+    assert(ys.size() > 0);
+    assert(ys.size() == points.size());
+    printf("refinement_x_points_ys end\n");
+}
+
+
+
+
+
+
+
+
+
+
+
+// --- f optimization energies ---
+#include "sopd/$CFormDefines.cpp"  /* generated for problem, rarely changes */  // Required for including *working* definitions of f and df -- this defines what times(x,y) etc. mean
+
+
+
+/*
+Local energy function defining the refinement objective.
+
+Mostly generated from mathematica code defining f in a generic way, c.f.
+*/
+
+
+/*
+Forces the mesh to move (actually to smooth...) along the z direction
+*/
+struct fSigmaSimpleMoveZ {
+
+    static
+        MEMBERFUNCTION(void, sigma, (Vector3i p, _Out_writes_(lengthz) XVarName* sigmap), "the per-point data selector function", PURITY_OUTPUT_POINTERS) {
+        DBG_UNREFERENCED_PARAMETER(p);
+
+#define sigmap(i) ([]{static_assert(0 <= i && i < fSigmaSimpleMoveZ::lengthz, #i);}, sigmap[i]) /* definitions of f/df use x(i) to refer to input[], c.f. RIFunctionCForm* */
+
+#include "sopd/simplefmovez/sigmap.cpp"
+        ;
+#undef sigmap
+    }
+
+    static const unsigned int lengthz =
+#include "sopd/simplefmovez/lengthz.cpp"
+        , lengthfz =
+#include "sopd/simplefmovez/lengthfz.cpp"
+        ;
+
+#define x(i) ([]{static_assert(i < fSigmaSimpleMoveZ::lengthz,"");}, input[i]) /* definitions of f/df use x(i) to refer to input[], c.f. RIFunctionCForm* */
+#define out(i) ([]{static_assert(0 <= i && i < fSigmaSimpleMoveZ::lengthfz, #i);}, out[i]) 
+
+    static
+        MEMBERFUNCTION(void, f, (_In_reads_(lengthz) const float* const input, _Out_writes_all_(lengthfz) float* const out),
+        "per point energy", PURITY_OUTPUT_POINTERS){
+#include "sopd/simplefmovez/f.cpp"
+    }
+    static
+        MEMBERFUNCTION(void, df, (_In_range_(0, lengthz - 1) unsigned int const i, _In_reads_(lengthz) float const * const input, _Out_writes_all_(lengthfz) float * const out), "the partial derivatives of f", PURITY_OUTPUT_POINTERS) {
+        
+        assert(i < lengthz);
+#include "sopd/simplefmovez/df.cpp"
+    }
+#undef x
+};
+
+
+template<typename fSigma>
+void testSigmaFor(const vector<float>& i) {
+    assertFinite(i);
+    assert(fSigma::lengthz == i.size());
+    vector<float> o;
+
+    o = fconst(fSigma::lengthfz, INFINITY);
+    fSigma::f(i.data(), o.data());
+    assertFinite(o);
+    assertEachInRange(o, -1.e5f, 1.e5f); // large values will lead to problems while solving
+
+    DO(j, fSigma::lengthz) {
+        printf("j %u\n", j);
+        o = fconst(fSigma::lengthfz, INFINITY);
+        fSigma::df(j, i.data(), o.data());
+        assertFinite(o);
+
+        assertEachInRange(o, -1.e5f, 1.e5f);
+    }
+}
+
+template<typename fSigma>
+void testSigma(bool minus1 = true) {
+
+    if (minus1)testSigmaFor< fSigma>(fconst(fSigma::lengthz, -1.f));
+	testSigmaFor< fSigma>(fconst(fSigma::lengthz, 1.f));
+	testSigmaFor< fSigma>(fconst(fSigma::lengthz, 0.f));
+    
+    testSigmaFor< fSigma>(random01vn(fSigma::lengthz));
+	
+}
+
+TEST(fSigmaSimpleMoveZ1) {
+	testSigma<fSigmaSimpleMoveZ>();
+}
+
+
+
+struct fSigmaReal {
+
+    static
+        MEMBERFUNCTION(void, sigma, (Vector3i p, _Out_writes_(lengthz) XVarName* sigmap), "the per-point data selector function", PURITY_OUTPUT_POINTERS) {
+        DBG_UNREFERENCED_PARAMETER(p);
+
+        // prepare syntax used in generated sigmap, c.f. realf_prepare
+#define x p.x
+#define y p.y
+#define z p.z
+#define d XVarName::d
+#define doriginal XVarName::doriginal
+#define a XVarName::a
+#define c XVarName::c
+#define l XVarName::l
+
+#define eg XVarName::eg
+#define er XVarName::er
+#define es XVarName::es
+#define ea XVarName::ea
+
+#define sigmap(i) ([]{static_assert(0 <= i && i < fSigmaReal::lengthz, #i);}, sigmap[i]) /* definitions of f/df use x(i) to refer to input[], c.f. RIFunctionCForm* */
+
+
+#include "sopd/realf/sigmap.cpp"
+        ;
+
+#undef sigmap
+#undef x
+#undef y
+#undef z
+#undef d
+#undef doriginal
+#undef a
+#undef c
+#undef l
+#undef eg 
+#undef er 
+#undef es 
+#undef ea 
+
+    }
+
+    static const unsigned int lengthz =
+#include "sopd/realf/lengthz.cpp"
+        , lengthfz =
+#include "sopd/realf/lengthfz.cpp"
+        ;
+
+
+#define x(i) ([]{static_assert(0 <= i && i < fSigmaReal::lengthz, #i);}, input[i]) /* definitions of f/df use x(i) to refer to input[], c.f. RIFunctionCForm* */
+#define out(i) ([]{static_assert(0 <= i && i < fSigmaReal::lengthfz, #i);}, out[i]) 
+
+    static
+        MEMBERFUNCTION(void, f, (_In_reads_(lengthz) const float* const input, _Out_writes_all_(lengthfz) float* const out),
+        "per point energy", PURITY_OUTPUT_POINTERS){
+#include "sopd/realf/f.cpp"
+    }
+    static
+        MEMBERFUNCTION(void, df, (_In_range_(0, lengthz - 1) unsigned int const i, _In_reads_(lengthz) float const * const input, _Out_writes_all_(lengthfz) float * const out), "the partial derivatives of f", PURITY_OUTPUT_POINTERS) {
+        assert(i < lengthz);
+		// this function might be very large - handle the individual cases in subfunctions to avoid execessive spill space
+		// allocation in debug mode compilations (stack overflow @ _chkstk)
+#include "sopd/realf/df.cpp"
+    }
+#undef x
+};
+
+
+TEST(fSigmaReal1) {
+	testSigma<fSigmaReal>(false // intensity should not be -1 by how gamma is defined, c.f. SceneXEnergyf
+		// TODO should be able to formally specify constraints, maybe even solve with considering them
+		);
+
+    // example input that might have large derivatives
+    testSigmaFor<fSigmaReal>(undump_vector_float("../TestFixtures/fSigmaRealInputZ.txt"));
+}
+
+
+
+
+
+// select energy to optimize over
+// TODO pixk simple one in tests
+#define fSigma fSigmaReal//fSigmaSimpleMoveZ// fSigmaReal
+
+// --- end f optimization energies ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// d and a must have been initialized (sanity checks for their range, even if not used in optimization)
+CPU_FUNCTION(
+    void, refineScene, (Scene* scene,
+    // energy term weights // TODO make more generic
+    float eg, float er, float es, float ea,
+    // lighting model parameters
+    const float* const l, unsigned int lSize
+    ), "") {
+    assert(lSize == LIGHT_MODEL_PARAMETER_COUNT);
+
+    printf("refineScene start\n");
+    unordered_map<XVarName, float> x;
+    vector<vector<Vector3i>> points;
+    vector<vector<XVarName>> ys;
+    refinement_x_points_ys(scene, eg, er, es, ea, l, lSize,
+        x, points, ys);
+
+    // 4. solve, enhance x using fSigma
+    SOPDNamed<XVarName, Vector3i, fSigma> sopd(x, points, ys);
+    sopd.solve();
+
+    // 5. Convert back the result
+    updateFromSceneData(scene, x);
+    printf("refineScene end\n");
+}
+
+CPU_FUNCTION(
+    float,
+    sceneEnergy, (Scene* scene,
+    // energy term weights // TODO make more generic
+    float eg, float er, float es, float ea,
+    // lighting model parameters
+    const float* const l, unsigned int lSize
+    ), "") {
+    printf("sceneEnergy start\n");
+    unordered_map<XVarName, float> x;
+    vector<vector<Vector3i>> points;
+    vector<vector<XVarName>> ys;
+    refinement_x_points_ys(scene, eg, er, es, ea, l, lSize,
+        x, points, ys);
+
+    SOPDNamed<XVarName, Vector3i, fSigma> sopd(x, points, ys);
+
+    float energy = sopd.energy();
+    printf("sceneEnergy = %f\n", energy);
+    return energy;
+}
+
+TEST(refineScene1) {
+    Scene* scene = new Scene();
+
+    // at least one block should be optimizable here
+    scene->performVoxelBlockAllocation(VoxelBlockPos(0, 0, 0));
+    scene->performVoxelBlockAllocation(VoxelBlockPos(1, 0, 0));
+    scene->performVoxelBlockAllocation(VoxelBlockPos(0, 1, 0));
+    scene->performVoxelBlockAllocation(VoxelBlockPos(1, 1, 0));
+    scene->performVoxelBlockAllocation(VoxelBlockPos(0, 0, 1));
+    scene->performVoxelBlockAllocation(VoxelBlockPos(1, 0, 1));
+    scene->performVoxelBlockAllocation(VoxelBlockPos(0, 1, 1));
+    scene->performVoxelBlockAllocation(VoxelBlockPos(1, 1, 1));
+
+    initAD(scene);
+
+    const unsigned int exampleLSize = 3;
+    const float exampleL[] = {1., 1., 1.};
+    const float eg = 1.f, er = 1.f, es = 1.f, ea = 1.f;
+
+    const float e0 = sceneEnergy(scene, eg, er, es, ea, exampleL, exampleLSize);
+    assert(assertFinite(e0) >= 0.f);
+
+    refineScene(scene, eg, er, es, ea, exampleL, exampleLSize);
+
+    const float e1 = sceneEnergy(scene, eg, er, es, ea, exampleL, exampleLSize);
+    assert(e1 <= /* <, but no reduction for some possible energies */ e0, "%f %f", e1, e0);
+    assert(0.f <= e1);
+    delete scene;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/// c.f. chapter "Lighting Estimation with Signed Distance Fields"
+namespace Lighting {
+
+    struct LightingModel {
+        static const int b2 = 9;
+
+        /// \f[a \sum_{m = 1}^{b^2} l_m H_m(n)\f]
+        /// \f$v\f$ is some voxel (inside the truncation band)
+        // TODO wouldn't the non-refined voxels interfere with the updated, refined voxels, 
+        // if we just cut them off hard from the computation?
+        CPU_MEMBERFUNCTION(float, getReflectedIrradiance, (float albedo, //!< \f$a(v)\f$
+            Vector3f normal //!< \f$n(v)\f$
+            ) const, "", PURITY_PURE){
+            assert(albedo >= 0);
+            float o = 0;
+            for (int m = 0; m < b2; m++) {
+                o += l[m] * sphericalHarmonicHi(m, normal);
+            }
+            return albedo * o;
+        }
+
+        // original paper uses svd to compute the solution to the linear system, but how this is done should not matter
+        LightingModel(std::array<float, b2>& l) : l(l){
+            assert(l[0] > 0); // constant term should be positive - otherwise the lighting will be negative in some places (?)
+        }
+        LightingModel(const LightingModel& m) : l(m.l){}
+
+        static FUNCTION(float, sphericalHarmonicHi, (const int i, const Vector3f& n), "", PURITY_PURE) {
+            assert(i >= 0 && i < b2);
+            switch (i) {
+            case 0: return 1.f;
+            case 1: return n.y;
+            case 2: return n.z;
+            case 3: return n.x;
+            case 4: return n.x * n.y;
+            case 5: return n.y * n.z;
+            case 6: return -n.x * n.x - n.y * n.y + 2.f * n.z * n.z;
+            case 7: return n.z * n.x;
+            case 8: return n.x - n.y * n.y;
+
+            default: fatalError("sphericalHarmonicHi not defined for i = %d", i);
+            }
+            return 0.f;
+        }
+
+
+        const std::array<float, b2> l;
+
+        OSTREAM(LightingModel) {
+            for (auto & x : o.l) os << x << ", ";
+            return os;
+        }
+    };
+
+    /// for constructAndSolve
+    struct ConstructLightingModelEquationRow {
+        // Amount of columns, should be small
+        static const unsigned int m = LightingModel::b2;
+
+        /*not really needed */
+        struct ExtraData {
+            // User specified payload to be summed up alongside:
+            unsigned int count;
+
+            // Empty constructor must generate neutral element
+            MEMBERFUNCTION(ExtraData()) : count(0) {}
+
+            static FUNCTION(void, add, (_Inout_ ExtraData& l, const ExtraData& r), "") {
+                l.count += r.count;
+            }
+            static FUNCTION(void, atomicAdd, (_Inout_ ExtraData& result, const ExtraData& integrand), "") {
+                ::_atomicAdd(&result.count, integrand.count);
+            }
+        };
+
+        // This operates on half-blocks:
+        /// should be executed with (blockIdx.x/2) == valid localVBA index (0 ignored) 
+        /// annd blockIdx.y,z from 0 to 1 (parts of one block)
+        /// and threadIdx <==> voxel localPos / 2..
+        /// Thus, SDF_BLOCK_SIZE must be even
+        static FUNCTION(bool, generate, 
+            (
+            const unsigned int i,
+            _In_ const Vector3ui& _blockIdx,
+            _In_ const Vector3ui& _threadIdx,
+
+            VectorX<float, m>& out_ai,
+            float& out_bi, //[1], 
+            ExtraData& extra_count /*not really needed */
+            
+            ), "") {
+            static_assert(0 == SDF_BLOCK_SIZE % 2, "SDF_BLOCK_SIZE must be even");
+
+            const unsigned int blockSequenceId = _blockIdx.x / 2;
+            if (blockSequenceId == 0) return false; // unused
+            assert(blockSequenceId < SDF_LOCAL_BLOCK_NUM);
+
+            assert(blockSequenceId < Scene::getCurrentScene()->voxelBlockHash->getLowestFreeSequenceNumber());
+
+            assert(_threadIdx.x < SDF_BLOCK_SIZE / 2 &&
+                   _threadIdx.y < SDF_BLOCK_SIZE / 2 &&
+                   _threadIdx.z < SDF_BLOCK_SIZE / 2);
+
+            assert(_blockIdx.y <= 1);
+            assert(_blockIdx.z <= 1);
+            // voxel position
+            const Vector3ui localPos = _threadIdx + Vector3ui(_blockIdx.x % 2, _blockIdx.y % 2, _blockIdx.z % 2) * SDF_BLOCK_SIZE / 2;
+
+            assert(localPos.x >= 0 &&
+                localPos.y >= 0 &&
+                localPos.z >= 0);
+            assert(localPos.x < SDF_BLOCK_SIZE  &&
+                localPos.y < SDF_BLOCK_SIZE &&
+                localPos.z < SDF_BLOCK_SIZE);
+
+            ITMVoxelBlock const * const voxelBlock = Scene::getCurrentScene()->getVoxelBlockForSequenceNumber(blockSequenceId);
+            assert(voxelBlock);
+            const ITMVoxel* const voxel = voxelBlock->getVoxel(localPos);
+            assert(voxel);
+            const Vector3i globalPos = (voxelBlock->pos.toInt() * SDF_BLOCK_SIZE + localPos.toInt());
+            /*
+            const Vector3i globalPos = vb->pos.toInt() * SDF_BLOCK_SIZE;
+
+            const THREADPTR(Point) & voxel_pt_world =  Point(
+            CoordinateSystem::global(),
+            (globalPos.toFloat() + localPos.toFloat()) * voxelSize
+            ));
+
+            .toFloat();
+            Vector3f worldPos = CoordinateSystems::global()->convert(globalPos);
+            */
+            const float worldSpaceDistanceToSurface = assertFinite(abs(voxel->getSDF() * mu));
+            assert(worldSpaceDistanceToSurface <= mu);
+
+            // Is this voxel within the truncation band? Otherwise discard this term (consider it unreliable for lighting estimation)
+            if (worldSpaceDistanceToSurface > t_shell) return false;
+
+            // also fail if we cannot compute the normal
+            bool found = true;
+            const UnitVector normal = computeSingleNormalFromSDFByForwardDifference(globalPos, found);
+            if (!found) return false;
+
+            assertApproximatelyUnitVector(normal);
+
+            // i-th (voxel-th) row of A shall contain H_{0..b^2-1}(n(v))
+            DO(j, LightingModel::b2) {
+                out_ai[j] = LightingModel::sphericalHarmonicHi(j, normal);
+            }
+
+            // corresponding entry of b is I(v) / a(v)
+            out_bi = voxel->intensity() / voxel->luminanceAlbedo;
+
+            assert(out_bi >= 0); // && out_bi <= 1);
+
+            // Set extra data
+            // TODO not really needed
+            extra_count.count = 1;
+            return true;
+        }
+
+    };
+
+    // todo should we really discard the existing lighting model the next time? maybe we could use it as an initialization
+    // when solving
+    LightingModel estimateLightingModel() {
+        assert(Scene::getCurrentScene());
+        // Maximum number of entries
+
+        const int validBlockNum = Scene::getCurrentScene()->voxelBlockHash->getLowestFreeSequenceNumber();
+
+        const auto gridDim = Vector3ui(validBlockNum * 2, 2, 2);
+        const auto blockDim = Vector3ui(SDF_BLOCK_SIZE / 2, SDF_BLOCK_SIZE / 2, SDF_BLOCK_SIZE / 2); // cannot use full SDF_BLOCK_SIZE: too much shared data (in reduction) -- TODO could just use the naive reduction algorithm. Could halve the memory use even now with being smart.
+
+        const int n = validBlockNum * SDF_BLOCK_SIZE3; // maximum number of entries: total amount of currently allocated voxels (unlikely)
+        assert(n == volume(gridDim) * volume(blockDim));
+
+        ConstructLightingModelEquationRow::ExtraData extra_count;
+        const auto l_harmonicCoefficients = LeastSquares::constructAndSolve<ConstructLightingModelEquationRow>(n, gridDim, blockDim, extra_count);
+        assert(extra_count.count > 0 && extra_count.count <= n); // sanity check
+        assert(l_harmonicCoefficients.size() == LightingModel::b2);
+
+        // VectorX to std::array
+        std::array<float, LightingModel::b2> l_harmonicCoefficients_a;
+        DO(i, LightingModel::b2)
+            l_harmonicCoefficients_a[i] = assertFinite(l_harmonicCoefficients[i]);
+
+        LightingModel lightingModel(l_harmonicCoefficients_a);
+        return lightingModel;
+    }
+
+
+    // Computing artificial lighting
+
+    template<typename F>
+    struct ComputeLighting {
+        doForEachAllocatedVoxel_process() {
+            // skip voxels without computable normal
+            bool found = true;
+            const UnitVector normal = computeSingleNormalFromSDFByForwardDifference(globalPos, found);
+            if (!found) return;
+
+            v->clr = F::operate(normal);
+
+            v->w_color = 1;
+        }
+    };
+
+    // Artificial lighting 'shaders'
+    GLOBAL_UNINITIALIZED(Vector3f, lightNormal, "Direction towards directional light source");
+    struct DirectionalArtificialLighting {
+        static FUNCTION(Vector3u, operate,(UnitVector normal), "") {
+            const float cos = MAX(0.f, dot(normal, lightNormal));
+            assertFinite(cos);
+            assert(cos >= 0.f && cos <= 1.001f);
+            return Vector3u(cos * 255, cos * 255, cos * 255);
+        }
+    };
+
+    // compute voxel color according to given functor f from normal
+    // c(v) := F::operate(n(v))
+    // 'lighting shader baking' (lightmapping)
+    template<typename F>
+    CPU_FUNCTION(void, computeArtificialLighting, (), "", PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS) {
+        assert(Scene::getCurrentScene());
+
+        Scene::getCurrentScene()->doForEachAllocatedVoxel<ComputeLighting<F>>();
+    }
+
+    CPU_FUNCTION(void, computeArtificialDirectionalLighting, (Scene* scene, Vector3f _lightNormal), "", PURITY_OUTPUT_POINTERS){
+        lightNormal = _lightNormal;
+        assert(abs(length(lightNormal) - 1) < 0.001f);
+
+        CURRENT_SCENE_SCOPE(scene);
+        computeArtificialLighting<DirectionalArtificialLighting>();
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// INSERTIONPOINT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 GLOBAL(int, x, 0, "x value");
 
 FUNCTION(void, f, (), "sets x to 100") {
@@ -8764,25 +12630,6 @@ extern "C" int RunTestsM() {
     runTests();
     return 1;
 }
-
-// TODO this setup code should be run whether we use the WL interface or not
-void preWsMain() {
-    //_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF); // catch malloc errors // TODO this prints a report when the program gracefully terminates. Anything else?
-    // TODO I think this program still leaks lots of (cuda and cpu) memory, e.g. images
-
-    // TODO init cuda memory
-
-    _controlfp_s(NULL,
-        0, // By default, the run-time libraries mask all floating-point exceptions. (11111...). We set to 0 (unmask) the following:
-        _EM_OVERFLOW | _EM_ZERODIVIDE | _EM_INVALID
-        ); // enable all floating point exceptions' trapping behaviour except for the following exceptions: denormal-result (can not be changed by _controlfp_s anyways), underflow and inexact which we tolerate
-}
-
-void preWsExit() {
-    runTests();
-    return;
-}
-
 
 
 
@@ -9131,4 +12978,160 @@ extern "C" {
         //else 
         WL_RETURN_VOID(); // only changes state, no immediate result
     }
+
+
+
+
+    // init d from doriginal and a = 1
+    // TODO all these int parameters should be unsigned int
+    void initAD(int id) {
+        assert(id >= 0);
+        initAD(getScene(id));
+        WL_RETURN_VOID();
+    }
+
+    void refineScene(int id,
+        // energy term weights // TODO make more generic
+        double eg, double er, double es, double ea,
+        // lighting model parameters
+        double* l, long lSize
+        ) {
+        assert(lSize >= 1);
+        auto lf = new float[lSize];
+        DO(i, lSize) lf[i] = l[i];
+
+        refineScene(getScene(id), eg, er, es, ea, lf, lSize);
+
+        delete[] lf;
+
+
+        WL_RETURN_VOID(); // don't forget
+    }
+
+    double sceneEnergy(int id,
+        // energy term weights // TODO make more generic
+        double eg, double er, double es, double ea,
+        // lighting model parameters
+        double* l, long lSize
+        ) {
+        assert(lSize >= 1);
+        auto lf = new float[lSize];
+        DO(i, lSize) lf[i] = l[i];
+
+        float y = sceneEnergy(getScene(id), eg, er, es, ea, lf, lSize);
+
+        delete[] lf;
+
+        return y;
+    }
+
+
+
+
+
+
+    // dumpSceneVoxelPositions[id_Integer ? NonNegative, fn_String]
+    void dumpSceneVoxelPositions(int id, const char* const fn) {
+        dumpVoxelPositions(getScene(id), fn);
+        WL_RETURN_VOID();
+    }
+
+    void dumpSceneVoxelPositionsBlockwise(int id, const char* const fn) {
+        dumpVoxelPositionsBlockwise(getScene(id), fn);
+        WL_RETURN_VOID();
+    }
+
+    // dumpSceneOptimizationBlocks[id_Integer ? NonNegative, fn_String, {offsetx_Integer, offsety_Integer, offsett_Integer}]
+    void dumpSceneOptimizationBlocks(int id, const char* const fn, int ox, int oy, int oz) {
+        assert(abs(ox) < SDF_BLOCK_SIZE);
+        assert(abs(oy) < SDF_BLOCK_SIZE);
+        assert(abs(oz) < SDF_BLOCK_SIZE);
+
+        vector<vector<Vector3i>> optimizationBlocks = getOptimizationBlocks(getScene(id), Vector3i(ox, oy, oz));
+        writePointsRandomColor(fn, optimizationBlocks);
+
+        WL_RETURN_VOID();
+    }
+}
+
+
+
+// TODO this setup code should be run whether we use the WL interface or not
+// called always, even when exit  was passed
+void preWsMain() {
+    // enable float traps to catch bugs and prepare cuda heap (malloc used extensively in device code)
+
+    //_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF); // catch malloc errors // TODO this prints a report when the program gracefully terminates. Anything else?
+    // TODO I think this program still leaks lots of (cuda and cpu) memory, e.g. images
+
+    _controlfp_s(NULL,
+        0, // By default, the run-time libraries mask all floating-point exceptions. (11111...). We set to 0 (unmask) the following:
+        _EM_OVERFLOW | _EM_ZERODIVIDE | _EM_INVALID
+        ); // enable all floating point exceptions' trapping behaviour except for the following exceptions: denormal-result (can not be changed by _controlfp_s anyways), underflow and inexact which we tolerate
+
+#ifdef __CUDACC__
+    prepareCUDAHeap();
+#endif
+}
+
+
+
+void preWsExit() {
+    //boosthello();
+
+
+
+    /*
+    fvector b = undump("../s3d132 partition 0 of 27/minusFx.txt");
+    cs* A = cs_undump2("../s3d132 partition 0 of 27/J2.txt");
+
+    SOMEMEM();
+    A = cs_triplet(A, SOMEMEMP);
+    fvector x = vector_allocate(A->n, SOMEMEMP);
+    cs_cg_0guess(A, b.x, x.x, SOMEMEMP);
+    FREESOMEMEM();
+    
+
+    vector<float> xVector =
+        unarchive<vector<float>>("../partition 44 of 59/xVector");
+
+    vector<vector<unsigned int>> xIndicesPerPartition =
+        unarchive< vector<vector<unsigned int>>>("../partition 44 of 59/xIndicesPerPartition"); // archive error: input stream error
+    vector<vector<unsigned int>> yIndicesPerPartition =
+        unarchive< vector<vector<unsigned int>>>("../partition 44 of 59/yIndicesPerPartition");
+    vector<vector<unsigned int>> sparseDerivativeZtoYIndicesPerPartition =
+        unarchive< vector<vector<unsigned int>>>("../partition 44 of 59/sparseDerivativeZtoYIndicesPerPartition");
+
+    // prepare 
+    auto sopd = new SOPDProblem<fSigmaReal>(xVector, xIndicesPerPartition, yIndicesPerPartition, sparseDerivativeZtoYIndicesPerPartition);
+    sopd->solve(1);
+    */
+
+    /*
+    fSigmaReal1();
+
+    // or
+    int s = createScene(1.);
+    deserializeScene(s, "serial7_1ad.bin");
+    double l[] = {1, 1, 1};
+    refineScene(s, 1., 1., 1., 1., l, 3);
+
+
+
+    fvector b = undump("partition 18 of 59_4/minusFx.txt");
+    cs* A = cs_undump2("partition 18 of 59_4/J2.txt");
+
+    SOMEMEM();
+    A = cs_triplet(A, SOMEMEMP);
+    fvector x = vector_allocate(A->n, SOMEMEMP);
+    cs_cg_0guess(A, b.x, x.x, SOMEMEMP);
+    FREESOMEMEM();
+
+
+
+    fSigmaSimpleMoveZ1();
+    */
+
+    runTests();
+    return;
 }

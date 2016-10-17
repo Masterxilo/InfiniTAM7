@@ -22,5 +22,16 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source.cu" />
+    <ClCompile Include="cpputil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="J:\Masterarbeit\Implementation\CPPLibraries\boost_1_61_0\lib64-msvc-12.0\libboost_system-vc120-mt-gd-1_61.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="cpputil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

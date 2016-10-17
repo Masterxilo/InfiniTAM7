@@ -1,0 +1,325 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 11.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     11612,        317]
+NotebookOptionsPosition[     10508,        275]
+NotebookOutlinePosition[     10851,        290]
+CellTagsIndexPosition[     10808,        287]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["1. Grab the functions", "Chapter",
+ CellChangeTimes->{{3.6842199957858286`*^9, 3.68421999830598*^9}, {
+  3.685382500423795*^9, 3.6853825010019455`*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"$f", "=", 
+   RowBox[{"SceneXEnergyf", "[", 
+    RowBox[{"3", ",", "Scene3DEnergyLightIntensity", ",", "3", ",", "3"}], 
+    "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"$select", "=", 
+    RowBox[{"SceneXEnergySelect", "[", 
+     RowBox[{"3", ",", "3", ",", "3"}], "]"}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"$s0", "=", 
+    RowBox[{"$select", "@", 
+     RowBox[{"{", 
+      RowBox[{"x", ",", "y", ",", "z"}], "}"}]}]}], ";"}], 
+  "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{
+   "added", " ", "support", " ", "for", " ", "variables", " ", "in", " ", 
+    "select", " ", "to", " ", "be", " ", "able", " ", "to", " ", "do", " ", 
+    "this"}], "*)"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"$vars", "=", 
+   RowBox[{"Keys", "@", "$s0"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"$rif", "=", 
+   RowBox[{"RIFunctionMakeFromExpressionList", "[", 
+    RowBox[{"$f", ",", "$vars"}], "]"}]}], ";"}]}], "Input",
+ CellChangeTimes->{{3.684129780176304*^9, 3.684129784645889*^9}, {
+  3.6841298182769146`*^9, 3.684129844113201*^9}, {3.6841298927489967`*^9, 
+  3.684129898597286*^9}, {3.6842200020536757`*^9, 3.684220057282694*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["2. Export what we need for f and df", "Chapter",
+ CellChangeTimes->{{3.684220040365538*^9, 3.6842200616361337`*^9}, {
+  3.685382502517644*^9, 3.685382502720767*^9}, {3.6854312816603117`*^9, 
+  3.685431284535432*^9}}],
+
+Cell["sigma is a bit more manual for now...", "Text",
+ CellChangeTimes->{{3.685431286457404*^9, 3.68543129173882*^9}, {
+  3.685431353434594*^9, 3.685431353887704*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Export", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"NotebookDirectory", "[", "]"}], "~", "FileNameJoin", "~", 
+    "\"\<$CFormDefines.cpp\>\""}], ",", 
+   RowBox[{"CFormDefinesCUDAFloat", "[", "]"}], ",", "\"\<String\>\""}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.685431810484008*^9, 3.6854318445791817`*^9}}],
+
+Cell[BoxData["\<\"J:\\\\Masterarbeit\\\\Implementation\\\\InfiniTAM6\\\\$\
+CFormDefines.cpp\"\>"], "Output",
+ CellChangeTimes->{3.685431846985518*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"Dir", "[", "fn_", "]"}], ":=", 
+  RowBox[{
+   RowBox[{"NotebookDirectory", "[", "]"}], "~", "FileNameJoin", "~", 
+   "\"\<realf\>\"", "~", "FileNameJoin", "~", "fn"}]}], "\[IndentingNewLine]", 
+ RowBox[{"Export", "[", 
+  RowBox[{
+   RowBox[{"Dir", "@", "\"\<lengthz.cpp\>\""}], ",", 
+   RowBox[{"$rif", "//", "RIFunctionArgumentsLength"}], ",", 
+   "\"\<String\>\""}], "]"}], "\[IndentingNewLine]", 
+ RowBox[{"Export", "[", 
+  RowBox[{
+   RowBox[{"Dir", "@", "\"\<lengthfz.cpp\>\""}], ",", 
+   RowBox[{"$rif", "//", "RIFunctionOutputsLength"}], ",", "\"\<String\>\""}],
+   "]"}], "\[IndentingNewLine]", 
+ RowBox[{"Export", "[", 
+  RowBox[{
+   RowBox[{"Dir", "@", "\"\<f.cpp\>\""}], ",", 
+   RowBox[{
+    RowBox[{"$rif", "//", "RIFunctionCFormOutputArrayAssignments"}], "//", 
+    "ToCCodeString"}], ",", "\"\<String\>\""}], "]"}], "\[IndentingNewLine]", 
+ RowBox[{"Export", "[", 
+  RowBox[{
+   RowBox[{"Dir", "@", "\"\<df.cpp\>\""}], ",", 
+   RowBox[{
+    RowBox[{"$rif", "//", "RIFunctionCFormAllDerivativesIndexed"}], "//", 
+    "ToCCodeString"}], ",", "\"\<String\>\""}], "]"}]}], "Input",
+ CellChangeTimes->{{3.684130155317092*^9, 3.684130193169415*^9}, {
+  3.6842200696070786`*^9, 3.684220069743266*^9}, {3.6842201188856735`*^9, 
+  3.6842201877257*^9}, {3.68422037583475*^9, 3.68422037865127*^9}, {
+  3.684220836576507*^9, 3.684220837463631*^9}, {3.685431809624558*^9, 
+  3.6854318308911157`*^9}}],
+
+Cell[BoxData["\<\"J:\\\\Masterarbeit\\\\Implementation\\\\InfiniTAM6\\\\realf\
+\\\\lengthz.cpp\"\>"], "Output",
+ CellChangeTimes->{{3.6841301881220856`*^9, 3.6841301936229587`*^9}, {
+   3.6842201793071632`*^9, 3.6842201953211746`*^9}, 3.6854313729666286`*^9, 
+   3.685431437270999*^9, 3.6854324391123185`*^9, 3.685436720370811*^9}],
+
+Cell[BoxData["\<\"J:\\\\Masterarbeit\\\\Implementation\\\\InfiniTAM6\\\\realf\
+\\\\lengthfz.cpp\"\>"], "Output",
+ CellChangeTimes->{{3.6841301881220856`*^9, 3.6841301936229587`*^9}, {
+   3.6842201793071632`*^9, 3.6842201953211746`*^9}, 3.6854313729666286`*^9, 
+   3.685431437270999*^9, 3.6854324391123185`*^9, 3.6854367204176936`*^9}],
+
+Cell[BoxData["\<\"J:\\\\Masterarbeit\\\\Implementation\\\\InfiniTAM6\\\\realf\
+\\\\f.cpp\"\>"], "Output",
+ CellChangeTimes->{{3.6841301881220856`*^9, 3.6841301936229587`*^9}, {
+   3.6842201793071632`*^9, 3.6842201953211746`*^9}, 3.6854313729666286`*^9, 
+   3.685431437270999*^9, 3.6854324391123185`*^9, 3.6854367205739293`*^9}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "StringTrim","strse",
+   "\"String or list of strings expected at position \\!\\(\\*RowBox[{\\\"1\\\
+\"}]\\) in \\!\\(\\*RowBox[{\\\"StringTrim\\\", \\\"[\\\", \\\"0\\\", \\\"]\\\
+\"}]\\).\"",2,421,45,25658984016433486899,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.6854313860130777`*^9, 3.6854314811670294`*^9, 
+  3.685432535632387*^9, 3.685436762759601*^9}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "StringTrim","strse",
+   "\"String or list of strings expected at position \\!\\(\\*RowBox[{\\\"1\\\
+\"}]\\) in \\!\\(\\*RowBox[{\\\"StringTrim\\\", \\\"[\\\", \\\"1\\\", \\\"]\\\
+\"}]\\).\"",2,421,46,25658984016433486899,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.6854313860130777`*^9, 3.6854314811670294`*^9, 
+  3.685432535632387*^9, 3.6854367630108957`*^9}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "StringTrim","strse",
+   "\"String or list of strings expected at position \\!\\(\\*RowBox[{\\\"1\\\
+\"}]\\) in \\!\\(\\*RowBox[{\\\"StringTrim\\\", \\\"[\\\", \\\"2\\\", \\\"]\\\
+\"}]\\).\"",2,421,47,25658984016433486899,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.6854313860130777`*^9, 3.6854314811670294`*^9, 
+  3.685432535632387*^9, 3.6854367632652135`*^9}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "General","stop",
+   "\"Further output of \\!\\(\\*StyleBox[RowBox[{\\\"StringTrim\\\", \
+\\\"::\\\", \\\"strse\\\"}], \\\"MessageName\\\"]\\) will be suppressed \
+during this calculation.\"",2,421,48,25658984016433486899,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.6854313860130777`*^9, 3.6854314811670294`*^9, 
+  3.685432535632387*^9, 3.685436763475494*^9}],
+
+Cell[BoxData["\<\"J:\\\\Masterarbeit\\\\Implementation\\\\InfiniTAM6\\\\realf\
+\\\\df.cpp\"\>"], "Output",
+ CellChangeTimes->{{3.6841301881220856`*^9, 3.6841301936229587`*^9}, {
+   3.6842201793071632`*^9, 3.6842201953211746`*^9}, 3.6854313729666286`*^9, 
+   3.685431437270999*^9, 3.6854324391123185`*^9, 3.685436765889507*^9}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Generating *sigma* almost ready-to-use", "Chapter",
+ CellChangeTimes->{{3.6842203810002427`*^9, 3.684220392736888*^9}, {
+  3.685431279410179*^9, 3.6854312805196*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"UnprotectClearAll", "@", "Vector3i"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"$sigmap", "=", 
+   RowBox[{"Values", "@", "$s0"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"$sigmap", "=", 
+    RowBox[{"Replace", "[", 
+     RowBox[{"$sigmap", ",", 
+      RowBox[{"{", "\[IndentingNewLine]", "\[IndentingNewLine]", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"x_Symbol", "[", "pos_List", "]"}], "\[RuleDelayed]", 
+         RowBox[{"x", "[", 
+          RowBox[{"Vector3i", "@@", "pos"}], "]"}]}], ",", 
+        "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"c", "[", 
+          RowBox[{"pos_List", ",", "channel_Integer"}], "]"}], 
+         "\[RuleDelayed]", 
+         RowBox[{"c", "[", 
+          RowBox[{
+           RowBox[{"Vector3i", "@@", "pos"}], ",", 
+           RowBox[{"channel", "-", "1"}]}], "]"}]}], ",", 
+        "\[IndentingNewLine]", 
+        RowBox[{"x_Symbol", "\[RuleDelayed]", 
+         RowBox[{"x", "[", "]"}]}], ",", "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"l", "[", "i_Integer", "]"}], "\[RuleDelayed]", 
+         RowBox[{"l", "[", 
+          RowBox[{"i", "-", "1"}], "]"}]}]}], "\[IndentingNewLine]", 
+       "\[IndentingNewLine]", "}"}], ",", 
+      RowBox[{"{", "1", "}"}]}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+  "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{"assign", " ", "to", " ", "array", " ", "sigmap"}], 
+   "*)"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"$sigmap", "=", 
+    RowBox[{"MapIndexed", "[", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{
+       RowBox[{
+        RowBox[{"CArray", "[", 
+         RowBox[{"sigmap", ",", 
+          RowBox[{"{", 
+           RowBox[{
+            RowBox[{"First", "@", "#2"}], "//", "CIndex"}], "}"}]}], "]"}], 
+        "~", "CAssign", "~", 
+        RowBox[{"ToString", "@", 
+         RowBox[{"CForm", "@", "#1"}]}]}], "&"}], ",", "$sigmap"}], 
+     "\[IndentingNewLine]", "]"}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{"Export", "[", 
+  RowBox[{
+   RowBox[{"Dir", "@", "\"\<sigmap.cpp\>\""}], ",", "\[IndentingNewLine]", 
+   RowBox[{"PrintEcho", "[", 
+    RowBox[{
+     RowBox[{"CBlock", "@", "$sigmap"}], "//", "ToCCodeString"}], "]"}], 
+   "\[IndentingNewLine]", ",", "\"\<String\>\""}], 
+  "]"}], "\[IndentingNewLine]"}], "Input",
+ CellChangeTimes->{{3.684220396444524*^9, 3.6842204420004473`*^9}, {
+  3.6842204988454847`*^9, 3.6842208486636124`*^9}}],
+
+Cell[BoxData["\<\"J:\\\\Masterarbeit\\\\Implementation\\\\InfiniTAM6\\\\realf\
+\\\\sigmap.cpp\"\>"], "Output",
+ CellChangeTimes->{
+  3.684220400464528*^9, {3.6842206199448147`*^9, 3.6842206551127596`*^9}, {
+   3.684220738942501*^9, 3.684220768250125*^9}, 3.684220811914706*^9, 
+   3.6842208492593565`*^9}]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{944, 879},
+WindowMargins->{{Automatic, 240}, {Automatic, 25}},
+FrontEndVersion->"11.0 for Microsoft Windows (64-bit) (July 28, 2016)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 158, 2, 64, "Chapter"],
+Cell[741, 26, 1270, 33, 147, "Input"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2048, 64, 222, 3, 64, "Chapter"],
+Cell[2273, 69, 167, 2, 30, "Text"],
+Cell[CellGroupData[{
+Cell[2465, 75, 335, 8, 33, "Input"],
+Cell[2803, 85, 150, 2, 30, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2990, 92, 1438, 32, 118, "Input"],
+Cell[4431, 126, 331, 4, 30, "Output"],
+Cell[4765, 132, 334, 4, 30, "Output"],
+Cell[5102, 138, 327, 4, 30, "Output"],
+Cell[5432, 144, 418, 8, 22, "Message"],
+Cell[5853, 154, 420, 8, 22, "Message"],
+Cell[6276, 164, 420, 8, 22, "Message"],
+Cell[6699, 174, 418, 8, 22, "Message"],
+Cell[7120, 184, 326, 4, 30, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[7495, 194, 172, 2, 64, "Chapter"],
+Cell[CellGroupData[{
+Cell[7692, 200, 2480, 64, 408, "Input"],
+Cell[10175, 266, 305, 5, 30, "Output"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
