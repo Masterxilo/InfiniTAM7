@@ -499,12 +499,35 @@ L0:	return res;
 } /* _tr13 */
 
 
-void refineScene P(( int _tp1, double _tp2, double _tp3, double _tp4, double _tp5, double * _tp6, long _tpl6));
+void initFineADFromCoarseAD P(( int _tp1, int _tp2));
 
 #if WSPROTOTYPES
 static int _tr14( WSLINK mlp)
 #else
 static int _tr14(mlp) WSLINK mlp;
+#endif
+{
+	int	res = 0;
+	int _tp1;
+	int _tp2;
+	if ( ! WSGetInteger( mlp, &_tp1) ) goto L0;
+	if ( ! WSGetInteger( mlp, &_tp2) ) goto L1;
+	if ( ! WSNewPacket(mlp) ) goto L2;
+
+	initFineADFromCoarseAD(_tp1, _tp2);
+
+	res = 1;
+L2: L1: 
+L0:	return res;
+} /* _tr14 */
+
+
+void refineScene P(( int _tp1, double _tp2, double _tp3, double _tp4, double _tp5, double * _tp6, long _tpl6));
+
+#if WSPROTOTYPES
+static int _tr15( WSLINK mlp)
+#else
+static int _tr15(mlp) WSLINK mlp;
 #endif
 {
 	int	res = 0;
@@ -529,15 +552,15 @@ static int _tr14(mlp) WSLINK mlp;
 L6:	WSReleaseReal64List(mlp, _tp6, _tpl6);
 L5: L4: L3: L2: L1: 
 L0:	return res;
-} /* _tr14 */
+} /* _tr15 */
 
 
 double sceneEnergy P(( int _tp1, double _tp2, double _tp3, double _tp4, double _tp5, double * _tp6, long _tpl6));
 
 #if WSPROTOTYPES
-static int _tr15( WSLINK mlp)
+static int _tr16( WSLINK mlp)
 #else
-static int _tr15(mlp) WSLINK mlp;
+static int _tr16(mlp) WSLINK mlp;
 #endif
 {
 	int	res = 0;
@@ -564,15 +587,15 @@ static int _tr15(mlp) WSLINK mlp;
 L6:	WSReleaseReal64List(mlp, _tp6, _tpl6);
 L5: L4: L3: L2: L1: 
 L0:	return res;
-} /* _tr15 */
+} /* _tr16 */
 
 
 void dumpSceneVoxelPositions P(( int _tp1, const char * _tp2));
 
 #if WSPROTOTYPES
-static int _tr16( WSLINK mlp)
+static int _tr17( WSLINK mlp)
 #else
-static int _tr16(mlp) WSLINK mlp;
+static int _tr17(mlp) WSLINK mlp;
 #endif
 {
 	int	res = 0;
@@ -588,15 +611,15 @@ static int _tr16(mlp) WSLINK mlp;
 L2:	WSReleaseString(mlp, _tp2);
 L1: 
 L0:	return res;
-} /* _tr16 */
+} /* _tr17 */
 
 
 void dumpSceneVoxelPositionsBlockwise P(( int _tp1, const char * _tp2));
 
 #if WSPROTOTYPES
-static int _tr17( WSLINK mlp)
+static int _tr18( WSLINK mlp)
 #else
-static int _tr17(mlp) WSLINK mlp;
+static int _tr18(mlp) WSLINK mlp;
 #endif
 {
 	int	res = 0;
@@ -612,15 +635,15 @@ static int _tr17(mlp) WSLINK mlp;
 L2:	WSReleaseString(mlp, _tp2);
 L1: 
 L0:	return res;
-} /* _tr17 */
+} /* _tr18 */
 
 
 void dumpSceneOptimizationBlocks P(( int _tp1, const char * _tp2, int _tp3, int _tp4, int _tp5));
 
 #if WSPROTOTYPES
-static int _tr18( WSLINK mlp)
+static int _tr19( WSLINK mlp)
 #else
-static int _tr18(mlp) WSLINK mlp;
+static int _tr19(mlp) WSLINK mlp;
 #endif
 {
 	int	res = 0;
@@ -642,7 +665,7 @@ static int _tr18(mlp) WSLINK mlp;
 L5: L4: L3: L2:	WSReleaseString(mlp, _tp2);
 L1: 
 L0:	return res;
-} /* _tr18 */
+} /* _tr19 */
 
 
 static struct func {
@@ -650,7 +673,7 @@ static struct func {
 	int   manual;
 	int   (*f_func)P((WSLINK));
 	const char  *f_name;
-	} _tramps[19] = {
+	} _tramps[20] = {
 		{ 0, 0, _tr0, "Get42" },
 		{ 0, 0, _tr1, "RunTestsM" },
 		{ 1, 0, _tr2, "createScene" },
@@ -665,11 +688,12 @@ static struct func {
 		{ 4, 0, _tr11, "meshSceneWithShader" },
 		{ 1, 2, _tr12, "processFrame" },
 		{ 1, 0, _tr13, "initAD" },
-		{ 6, 0, _tr14, "refineScene" },
-		{ 6, 0, _tr15, "sceneEnergy" },
-		{ 2, 0, _tr16, "dumpSceneVoxelPositions" },
-		{ 2, 0, _tr17, "dumpSceneVoxelPositionsBlockwise" },
-		{ 5, 0, _tr18, "dumpSceneOptimizationBlocks" }
+		{ 2, 0, _tr14, "initFineADFromCoarseAD" },
+		{ 6, 0, _tr15, "refineScene" },
+		{ 6, 0, _tr16, "sceneEnergy" },
+		{ 2, 0, _tr17, "dumpSceneVoxelPositions" },
+		{ 2, 0, _tr18, "dumpSceneVoxelPositionsBlockwise" },
+		{ 5, 0, _tr19, "dumpSceneOptimizationBlocks" }
 		};
 
 static const char* evalstrs[] = {
@@ -724,11 +748,12 @@ int WSInstall(mlp) WSLINK mlp;
 	if (_res) _res = _definepattern(mlp, (char *)"meshSceneWithShader[id_Integer?NonNegative, fn_String, shader_String, shaderParam_Real]", (char *)"{ id, fn, shader, shaderParam }", 11);
 	if (_res) _res = _definepattern(mlp, (char *)"processFrame[     id_Integer?NonNegative     (* Manual *)     , rgbaByteImage_ /;TensorQ[rgbaByteImage, IntegerQ] && Last@Dimensions@rgbaByteImage == 4     , depthData_?NumericMatrixQ     , poseWorldToView_?PoseMatrixQ     , intrinsicsRgb : NamelessIntrinsicsPattern[]     , intrinsicsD : NamelessIntrinsicsPattern[]     , rgbToDepth_?PoseMatrixQ     ]", (char *)"{ id, rgbaByteImage, depthData, poseWorldToView, intrinsicsRgb, intrinsicsD, rgbToDepth }", 12);
 	if (_res) _res = _definepattern(mlp, (char *)"initAD[id_Integer?NonNegative]", (char *)"{ id }", 13);
-	if (_res) _res = _definepattern(mlp, (char *)"refineScene[id_Integer, eg_Real, er_Real, es_Real, ea_Real, l : {__Real}]", (char *)"{ id, eg, er, es, ea, l }", 14);
-	if (_res) _res = _definepattern(mlp, (char *)"sceneEnergy[id_Integer, eg_Real, er_Real, es_Real, ea_Real, l : {__Real}]", (char *)"{ id, eg, er, es, ea, l }", 15);
-	if (_res) _res = _definepattern(mlp, (char *)"dumpSceneVoxelPositions[id_Integer?NonNegative, fn_String]", (char *)"{ id, fn }", 16);
-	if (_res) _res = _definepattern(mlp, (char *)"dumpSceneVoxelPositionsBlockwise[id_Integer?NonNegative, fn_String]", (char *)"{ id, fn }", 17);
-	if (_res) _res = _definepattern(mlp, (char *)"dumpSceneOptimizationBlocks[id_Integer?NonNegative, fn_String, {offsetx_Integer,offsety_Integer,offsetz_Integer}]", (char *)"{ id, fn, offsetx, offsety, offsetz }", 18);
+	if (_res) _res = _definepattern(mlp, (char *)"initFineADFromCoarseAD[fineid_Integer?NonNegative, coarseid_Integer?NonNegative] /; fineid != coarseid", (char *)"{ fineid, coarseid }", 14);
+	if (_res) _res = _definepattern(mlp, (char *)"refineScene[id_Integer, eg_Real, er_Real, es_Real, ea_Real, l : {__Real}]", (char *)"{ id, eg, er, es, ea, l }", 15);
+	if (_res) _res = _definepattern(mlp, (char *)"sceneEnergy[id_Integer, eg_Real, er_Real, es_Real, ea_Real, l : {__Real}]", (char *)"{ id, eg, er, es, ea, l }", 16);
+	if (_res) _res = _definepattern(mlp, (char *)"dumpSceneVoxelPositions[id_Integer?NonNegative, fn_String]", (char *)"{ id, fn }", 17);
+	if (_res) _res = _definepattern(mlp, (char *)"dumpSceneVoxelPositionsBlockwise[id_Integer?NonNegative, fn_String]", (char *)"{ id, fn }", 18);
+	if (_res) _res = _definepattern(mlp, (char *)"dumpSceneOptimizationBlocks[id_Integer?NonNegative, fn_String, {offsetx_Integer,offsety_Integer,offsetz_Integer}]", (char *)"{ id, fn, offsetx, offsety, offsetz }", 19);
 	if (_res) _res = _doevalstr( mlp, 3);
 	if (_res) _res = _doevalstr( mlp, 4);
 	if (_res) _res = _doevalstr( mlp, 5);
@@ -744,7 +769,7 @@ int WSDoCallPacket( WSLINK mlp)
 int WSDoCallPacket( mlp) WSLINK mlp;
 #endif
 {
-	return _WSDoCallPacket( mlp, _tramps, 19);
+	return _WSDoCallPacket( mlp, _tramps, 20);
 } /* WSDoCallPacket */
 
 /******************************* begin trailer ********************************/

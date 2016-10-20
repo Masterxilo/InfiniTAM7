@@ -1632,6 +1632,8 @@ FUNCTION(void, conjgrad_normal, (
 
     fvector Ap;
 
+    // tolerance very much related to SceneXEnergyf's largeEnoughToBeInverted
+    // controls convergence behaviour
     const float sqrtTolerance = 1e-3; // 1e-5 // sqrt(8e-3); <- this tolerance is so large, not even 1-d sqrt(2) can be computed reliably in tens of iterations
     if (sqrt(rsold) < sqrtTolerance) goto end; // low residual: solution found
 
@@ -1656,8 +1658,8 @@ FUNCTION(void, conjgrad_normal, (
         rsold = rsnew;//rsold=rsnew;
 
     }
-    if (n > 100)
-    fatalError("conjgrad_normal ran n (%u) times, that seems odd, probably did not converge. Do something about your equation system or data, and/or use preconditioning. Maybe use smaller or less regular data.\n", b.n);
+    if (n > 100) // for small n, it might very well be that we run all iterations
+    fatalError("conjgrad_normal ran n (%u) times, that seems odd, probably did not converge. Do something about your equation system or data, and/or use preconditioning. Maybe use smaller or less regular data. Or change convergence tolerance.\n", b.n);
 
 end:
     memoryPop(); // free anything allocated since memory push
@@ -1684,6 +1686,9 @@ FUNCTION(
     ""
     "Current value of x is used as initial guess."
     "Uses memory pool to allocate transposed copy of A and four vectors with size m or n"
+    ""
+    "TODO the name of this method suggests a conjugate gradient implementation, but the comment suggests LeastSquares[] as the pure idea"
+    "IMO that name should only be used for the well defined function that returns (one of the/the unique) float representable least squares solution to said system"
 
     // PURITY_OUTPUT_POINTERS conceptually, but MEMPOOL makes the whole thing a bit more complicated
     // uses only stack memory and memory available from MEMPOOL, no calls to malloc
@@ -7020,8 +7025,10 @@ Also, a voxel storing the value 1 has world-space-distance mu from the surface.
 (the stored -1 to 1 SDF values are understood as fractions of mu)
 
 Must be greater than voxelSize -> defined automatically from voxelSize
+
+truncation distance
 */
-#define voxelSize_to_mu(vs) (4*vs)// TODO is this heuristic ok?
+#define voxelSize_to_mu(vs) (12*vs) // (4*vs)// TODO is this heuristic ok? does 4 come fomr the voxel size?
 #define mu voxelSize_to_mu(voxelSize)//0.02f
 
 /**
@@ -8137,10 +8144,11 @@ namespace TestScene {
 // isFound is assumed true initially and set to false when a requested voxel is not found
 // a new voxel is returned in that case
 FUNCTION(ITMVoxel, readVoxel, (
-    const Vector3i & point,
-    bool &isFound, Scene* scene = Scene::getCurrentScene()), "", PURITY_ENVIRONMENT_DEPENDENT)
+    const Vector3i & point
+    , bool &isFound
+    , Scene const * const scene = Scene::getCurrentScene()), "Note: environment-dependent if third parameter is not passed", PURITY_PURE)
 {
-    ITMVoxel* v = scene->getVoxel(point);
+    ITMVoxel const * const v = scene->getVoxel(point);
     if (!v) {
         isFound = false;
         return ITMVoxel();
@@ -12513,6 +12521,110 @@ namespace Lighting {
 
 
 
+namespace resample {
+    GLOBAL(Scene const *, coarse, 0);
+    GLOBAL(Scene*, fine, 0);
+
+
+
+    // -- upsampling A and D (TODO: this is basically the same as the above, make more abstract to support interpolating any attributes)
+    struct InterpolateCoarseToFineAD {
+        float resultRefinedSDF;
+        float resultA;
+
+        bool& isFound;
+
+        MEMBERFUNCTION(,InterpolateCoarseToFineAD,(bool& isFound),"") :
+            resultRefinedSDF(0), resultA(0), // must start with 0 since we add things up to compute a weighted average
+            isFound(isFound) {}
+
+        MEMBERFUNCTION(void, operator(),(const Vector3i globalPos, const float lerpCoeff), "") {
+            assert(lerpCoeff >= 0 && lerpCoeff <= 1, "%f", lerpCoeff);
+
+            const auto v = readVoxel(globalPos, isFound, coarse); // IMPORTANT must read from coarse scene here
+
+            // TODO this is only true if we initialize ad first, even though we will reinitialize them just now?
+            // nah, they just have to be initialized for the mesh we are copying from
+            //assert(v.refinedDistance >= -1.f && v.refinedDistance <= 1.f, "%f", v.refinedDistance); // TODO make sure copying the result of the optimization back this is enforced
+            //assert(v.luminanceAlbedo >= 0.f && v.luminanceAlbedo <= 1.f, "%f", v.luminanceAlbedo); // TODO albedo should also be in 0-1, but our optimization has no such constraint // TODO but when copying the result back we should enforce it
+            // but we will clamp the lighting model to this
+
+            resultRefinedSDF += lerpCoeff * v.refinedDistance;
+            resultA += lerpCoeff * v.luminanceAlbedo;
+        }
+    };
+
+    // call with current scene == fine and fine and coarse pointers initialized correctly
+    struct CoarseToFineAD {
+        doForEachAllocatedVoxel_process() {
+            assert(Scene::getCurrentScene() == fine);
+            assert(coarse != Scene::getCurrentScene());
+
+            // how much bigger is the coarse voxel Size?
+            const float factor = coarse->getVoxelSize() / fine->getVoxelSize(); // optimization would do this once
+
+            // read and interpolate coarse
+            //assert(globalPoint.coordinateSystem == CoordinateSystem::global()); // TODO one of the assertions causes this to hang (=== CUDA exception that is not reported) -- hanging is acceptable undefined behaviour...
+            const auto coarseVoxelCoord = coarse->voxelCoordinates_->convert(globalPoint);
+
+            const Vector3f coarsePoint = coarseVoxelCoord.location;
+
+            /*mutable*/ bool isFound = true;
+            InterpolateCoarseToFineAD interpolator(isFound);
+            forEachBoundingVoxel(coarsePoint, interpolator);
+
+            if (!isFound) interpolator.resultRefinedSDF = v->refinedDistance;
+            //assert(interpolator.resultRefinedSDF >= -1.0001 && interpolator.resultRefinedSDF <= 1.001, "%f", interpolator.resultRefinedSDF);
+
+            // rescale SDF
+            // to world-distance
+            const float coarseMu = voxelSize_to_mu(coarse->getVoxelSize());
+            /*mutable*/ float rsdf = interpolator.resultRefinedSDF * coarseMu; // multiply by normalization factor
+            // to fine
+            rsdf /= mu; // voxelSize_to_mu(Scene::getCurrentScene()->getVoxelSize); // renormalize to fine's mu
+
+            //assert(abs(rsdf) <= factor*1.0001); // this will result in values that are at most factor too big
+
+            rsdf = CLAMP(rsdf, -1.f, 1.f); // truncate again
+
+            // set fine
+            v->refinedDistance = rsdf;
+            v->luminanceAlbedo = CLAMP(interpolator.resultA, 0.f, 1.f); // interpolator.resultA; // interpolator might not work perfectly everywhere, so better clamp this too // TODO we didn't have to do this on color -- because it is of limited range anyways/by design
+        }
+    };
+
+
+    template<typename T>
+    CPU_FUNCTION(void, initFineFromCoarseGen, (_Inout_ Scene * const fine_, _In_ Scene const * const coarse_), "") {
+        assert(fine_ != coarse_);
+        coarse = coarse_;
+        fine = fine_;
+
+        assert(fine, "%p", fine); assert(coarse, "%p", coarse);
+        assert(coarse->getVoxelSize() > fine->getVoxelSize());
+        CURRENT_SCENE_SCOPE(fine);
+
+        fine->doForEachAllocatedVoxel<T>();
+    }
+
+
+    /*
+    UPSAMPLE
+
+    Initialize allocated voxels of *fine* by interpolating
+    the values (d, a) defined for the corresponding coarse voxels.
+
+    Since some a and d might not be initializable, call initAD first anyways to ensure later meshability!
+    */
+    CPU_FUNCTION(void, initFineADFromCoarseAD, (_Inout_ Scene * const fine_, _In_ Scene const * const coarse_), "", PURITY_OUTPUT_POINTERS) {
+        printf("initFineADFromCoarseAD begins\n");
+        initFineFromCoarseGen<CoarseToFineAD>(fine_, coarse_);
+        printf("initFineADFromCoarseAD ends\n");
+    }
+}
+
+
+
 // INSERTIONPOINT
 
 
@@ -12990,6 +13102,16 @@ extern "C" {
         WL_RETURN_VOID();
     }
 
+
+    // init fine d(refined) and a by supersampling coarse
+    void initFineADFromCoarseAD(int idFine, int idCoarse) {
+        assert(idFine != idCoarse);
+
+        resample::initFineADFromCoarseAD(getScene(idFine), getScene(idCoarse));
+
+        WL_RETURN_VOID();
+    }
+
     void refineScene(int id,
         // energy term weights // TODO make more generic
         double eg, double er, double es, double ea,
@@ -13080,10 +13202,16 @@ void preWsExit() {
     //boosthello();
 
 
-
-    /*
-    fvector b = undump("../s3d132 partition 0 of 27/minusFx.txt");
-    cs* A = cs_undump2("../s3d132 partition 0 of 27/J2.txt");
+   
+    
+    // this does not currently converge
+    // Arises in demo scene...
+   // fvector b = undump("../s3d132 partition 0 of 27/minusFx.txt");
+    //cs* A = cs_undump2("../s3d132 partition 0 of 27/J2.txt");
+    
+    // arises in after modifying truncation distance
+    fvector b = undump("../_bigtrunc partition 0/minusFx.txt");
+    cs* A = cs_undump2("../_bigtrunc partition 0/J2.txt");
 
     SOMEMEM();
     A = cs_triplet(A, SOMEMEMP);
@@ -13091,6 +13219,9 @@ void preWsExit() {
     cs_cg_0guess(A, b.x, x.x, SOMEMEMP);
     FREESOMEMEM();
     
+
+
+    /*
 
     vector<float> xVector =
         unarchive<vector<float>>("../partition 44 of 59/xVector");

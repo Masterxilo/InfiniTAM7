@@ -1,0 +1,1 @@
+Status: Usable from Mathematica via InfiniTAM2*[] methods. Compiles with and without CUDA on msvc13 and 15.

@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[    906615,      13998]
-NotebookOptionsPosition[    904044,      13907]
-NotebookOutlinePosition[    904384,      13922]
-CellTagsIndexPosition[    904341,      13919]
+NotebookDataLength[    926566,      14566]
+NotebookOptionsPosition[    922266,      14427]
+NotebookOutlinePosition[    922606,      14442]
+CellTagsIndexPosition[    922563,      14439]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -35,10 +35,10 @@ Cell[BoxData[
    "\"\<temp\>\""}], "]"}]], "Input",
  CellChangeTimes->{{3.6856198273295803`*^9, 3.68561983926499*^9}}],
 
-Cell[BoxData["\<\"C:\\\\Users\\\\Paul'Masterxilo'\\\\Dropbox\\\\Paul\\\\\
+Cell[BoxData["\<\"C:\\\\Users\\\\Paul\\\\Dropbox\\\\Paul\\\\\
 MasterarbeitShared\\\\Research\\\\InfiniTAM7\\\\temp\"\>"], "Output",
  CellChangeTimes->{3.68562185236703*^9, 3.6856226053426995`*^9, 
-  3.685623011432378*^9}]
+  3.685623011432378*^9, 3.685693155358943*^9, 3.685988881834386*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -55,39 +55,28 @@ Cell[BoxData[{
    RowBox[{"Import", "[", 
     RowBox[{"$who", "<>", "\"\<-ps.List.RGBDView.mx\>\""}], "]"}]}], 
   ";"}], "\[IndentingNewLine]", 
- RowBox[{"$views", "//", "Length"}]}], "Input",
- CellChangeTimes->{{3.6856220094531627`*^9, 3.685622011141947*^9}}],
+ RowBox[{"$views", "//", "Length"}], "\[IndentingNewLine]", 
+ RowBox[{"If", "[", 
+  RowBox[{
+   RowBox[{"$who", "\[Equal]", "\"\<relief\>\""}], ",", 
+   RowBox[{"VerificationTest", "[", 
+    RowBox[{
+     RowBox[{"$views", "//", "Length"}], ",", "40"}], "]"}]}], 
+  "]"}]}], "Input",
+ CellChangeTimes->{{3.6856220094531627`*^9, 3.685622011141947*^9}, {
+  3.68569318224382*^9, 3.685693199760089*^9}}],
 
 Cell[BoxData["\<\"relief\"\>"], "Output",
  CellChangeTimes->{
   3.685614184158842*^9, 3.685622608128334*^9, {3.6856230066412215`*^9, 
-   3.6856230138918667`*^9}}],
+   3.6856230138918667`*^9}, {3.685693156147546*^9, 3.6856932002913446`*^9}, 
+   3.685988882240653*^9}],
 
 Cell[BoxData["40"], "Output",
  CellChangeTimes->{
   3.685614184158842*^9, 3.685622608128334*^9, {3.6856230066412215`*^9, 
-   3.685623014722385*^9}}]
-}, Open  ]],
-
-Cell[CellGroupData[{
-
-Cell["Creation", "Chapter",
- CellChangeTimes->{{3.6856144569719276`*^9, 3.685614458101178*^9}}],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[{
- RowBox[{
-  RowBox[{"$scene", "=", 
-   RowBox[{"InfiniTAM2CreateScene", "[", "0.005", "]"}]}], 
-  ";"}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"InfiniTAM2SceneExistsQ", "@", 
-   RowBox[{"InfiniTAM2Scene", "[", "2", "]"}]}], "~", "VerificationTest", "~",
-   "False"}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"InfiniTAM2SceneExistsQ", "@", "$scene"}], "~", "VerificationTest", 
-  "~", "True"}]}], "Input"],
+   3.6856230138918667`*^9}, {3.685693156147546*^9, 3.6856932002913446`*^9}, 
+   3.685988882662546*^9}],
 
 Cell[BoxData[
  InterpretationBox[
@@ -103,7 +92,7 @@ Cell[BoxData[
            
            DynamicBox[FEPrivate`FrontEndResource[
             "FEBitmaps", "SquarePlusIconMedium"],
-            ImageSizeCache->{14., {0., 14.}}],
+            ImageSizeCache->{12., {0., 12.}}],
            Appearance->None,
            ButtonFunction:>(Typeset`open$$ = True),
            Evaluator->Automatic,
@@ -119,7 +108,7 @@ Cell[BoxData[
             
             DynamicBox[FEPrivate`FrontEndResource[
              "MUnitExpressions", "SuccessIcon"],
-             ImageSizeCache->{19., {4., 10.}}],
+             ImageSizeCache->{16., {4., 8.}}],
             Alignment->Center,
             
             ImageSize->
@@ -207,6 +196,265 @@ Cell[BoxData[
             Dynamic[
             3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
              Magnification]]},
+          PlotRange->{{0, 1}, {0, 1}}], GridBox[{
+           {
+            RowBox[{
+             TagBox["\<\"Outcome: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["\<\"Success\"\>",
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Test ID: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["None",
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Input: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox[
+                RowBox[{"Length", "[", "$views", "]"}],
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Expected output: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox["40",
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Actual output: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox["40",
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Time Taken: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox[
+              PaneBox[
+               TagBox[
+                
+                TemplateBox[{
+                 "0``7.1505149978319915","\"s\"","seconds","\"Seconds\""},
+                 "Quantity"],
+                Short[#, 
+                 Rational[2, 3]]& ],
+               BaselinePosition->Baseline,
+               ContentPadding->False,
+               FrameMargins->0,
+               ImageSize->{{1, 500}, Automatic},
+               StripOnInput->True],
+              "SummaryItem"]}]}
+          },
+          AutoDelete->False,
+          
+          BaseStyle->{
+           ShowStringCharacters -> False, NumberMarks -> False, 
+            PrintPrecision -> 3, ShowSyntaxStyles -> False},
+          GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Automatic}}},
+          
+          GridBoxItemSize->{
+           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+          GridBoxSpacings->{"Columns" -> {{2}}, "Rows" -> {{Automatic}}}]}
+       },
+       AutoDelete->False,
+       BaselinePosition->{1, 1},
+       GridBoxAlignment->{"Rows" -> {{Top}}},
+       GridBoxItemSize->{
+        "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}]}, Dynamic[
+      Typeset`open$$],
+      ImageSize->Automatic],
+     BaselinePosition->Baseline],
+    DynamicModuleValues:>{}], "]"}],
+  TestResultObject[
+   Association[
+   "TestIndex" -> 1, "TestID" -> None, "Outcome" -> "Success", "Input" -> 
+    HoldForm[
+      Length[$CellContext`$views]], "ExpectedOutput" -> HoldForm[40], 
+    "ActualOutput" -> HoldForm[40], "ExpectedMessages" -> {}, 
+    "ActualMessages" -> {}, "AbsoluteTimeUsed" -> 
+    Quantity[0``7.1505149978319915, "Seconds"], "CPUTimeUsed" -> 
+    Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[4120, "Bytes"]]],
+  Editable->False,
+  SelectWithContents->True,
+  Selectable->False]], "Output",
+ CellChangeTimes->{
+  3.685614184158842*^9, 3.685622608128334*^9, {3.6856230066412215`*^9, 
+   3.6856230138918667`*^9}, {3.685693156147546*^9, 3.6856932002913446`*^9}, 
+   3.6859888834263277`*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Creation", "Chapter",
+ CellChangeTimes->{{3.6856144569719276`*^9, 3.685614458101178*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"$scene", "=", 
+   RowBox[{"InfiniTAM2CreateScene", "[", "0.005", "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"InfiniTAM2SceneExistsQ", "@", 
+   RowBox[{"InfiniTAM2Scene", "[", "2", "]"}]}], "~", "VerificationTest", "~",
+   "False"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"InfiniTAM2SceneExistsQ", "@", "$scene"}], "~", "VerificationTest", 
+  "~", "True"}]}], "Input"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TagBox["TestResultObject",
+    "SummaryHead"], "[", 
+   DynamicModuleBox[{Typeset`open$$ = False}, 
+    PanelBox[
+     PaneSelectorBox[{False->GridBox[{
+        {
+         PaneBox[
+          ButtonBox[
+           
+           DynamicBox[FEPrivate`FrontEndResource[
+            "FEBitmaps", "SquarePlusIconMedium"],
+            ImageSizeCache->{12., {0., 12.}}],
+           Appearance->None,
+           ButtonFunction:>(Typeset`open$$ = True),
+           Evaluator->Automatic,
+           Method->"Preemptive"],
+          Alignment->{Center, Center},
+          
+          ImageSize->
+           Dynamic[{
+            Automatic, 
+             3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+              Magnification])}]], 
+         GraphicsBox[InsetBox[
+           PaneBox[
+            
+            DynamicBox[FEPrivate`FrontEndResource[
+             "MUnitExpressions", "SuccessIcon"],
+             ImageSizeCache->{16., {4., 8.}}],
+            Alignment->Center,
+            
+            ImageSize->
+             Dynamic[{
+              Automatic, 
+               3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                Magnification])}]]],
+          AspectRatio->1,
+          Axes->False,
+          Background->GrayLevel[0.93],
+          Frame->True,
+          FrameStyle->Directive[
+            Thickness[Tiny], 
+            GrayLevel[0.55]],
+          FrameTicks->None,
+          ImageSize->{Automatic, 
+            Dynamic[
+            3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+              Magnification])]},
+          PlotRange->{{0, 1}, {0, 1}}], GridBox[{
+           {
+            RowBox[{
+             TagBox["\<\"Outcome: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["\<\"Success\"\>",
+              "SummaryItem"]}]},
+           {
+            RowBox[{
+             TagBox["\<\"Test ID: \"\>",
+              "SummaryItemAnnotation"], "\[InvisibleSpace]", 
+             TagBox["None",
+              "SummaryItem"]}]}
+          },
+          AutoDelete->False,
+          
+          BaseStyle->{
+           ShowStringCharacters -> False, NumberMarks -> False, 
+            PrintPrecision -> 3, ShowSyntaxStyles -> False},
+          GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Automatic}}},
+          
+          GridBoxItemSize->{
+           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+          GridBoxSpacings->{"Columns" -> {{2}}, "Rows" -> {{Automatic}}}]}
+       },
+       AutoDelete->False,
+       BaselinePosition->{1, 1},
+       GridBoxAlignment->{"Rows" -> {{Top}}},
+       GridBoxItemSize->{
+        "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], True->GridBox[{
+        {
+         PaneBox[
+          ButtonBox[
+           
+           DynamicBox[FEPrivate`FrontEndResource[
+            "FEBitmaps", "SquareMinusIconMedium"]],
+           Appearance->None,
+           ButtonFunction:>(Typeset`open$$ = False),
+           Evaluator->Automatic,
+           Method->"Preemptive"],
+          Alignment->{Center, Center},
+          
+          ImageSize->
+           Dynamic[{
+            Automatic, 
+             3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+              Magnification])}]], 
+         GraphicsBox[InsetBox[
+           PaneBox[
+            
+            DynamicBox[FEPrivate`FrontEndResource[
+             "MUnitExpressions", "SuccessIcon"]],
+            Alignment->Center,
+            
+            ImageSize->
+             Dynamic[{
+              Automatic, 
+               3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                Magnification])}]]],
+          AspectRatio->1,
+          Axes->False,
+          Background->GrayLevel[0.93],
+          Frame->True,
+          FrameStyle->Directive[
+            Thickness[Tiny], 
+            GrayLevel[0.55]],
+          FrameTicks->None,
+          ImageSize->{Automatic, 
+            Dynamic[
+            3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+              Magnification])]},
           PlotRange->{{0, 1}, {0, 1}}], GridBox[{
            {
             RowBox[{
@@ -340,7 +588,7 @@ Cell[BoxData[
            
            DynamicBox[FEPrivate`FrontEndResource[
             "FEBitmaps", "SquarePlusIconMedium"],
-            ImageSizeCache->{14., {0., 14.}}],
+            ImageSizeCache->{12., {0., 12.}}],
            Appearance->None,
            ButtonFunction:>(Typeset`open$$ = True),
            Evaluator->Automatic,
@@ -349,20 +597,22 @@ Cell[BoxData[
           
           ImageSize->
            Dynamic[{
-            Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-             Magnification]}]], 
+            Automatic, 
+             3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+              Magnification])}]], 
          GraphicsBox[InsetBox[
            PaneBox[
             
             DynamicBox[FEPrivate`FrontEndResource[
              "MUnitExpressions", "SuccessIcon"],
-             ImageSizeCache->{19., {4., 10.}}],
+             ImageSizeCache->{16., {4., 8.}}],
             Alignment->Center,
             
             ImageSize->
              Dynamic[{
-              Automatic, 3.5 CurrentValue["FontCapHeight"]/
-               AbsoluteCurrentValue[Magnification]}]]],
+              Automatic, 
+               3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                Magnification])}]]],
           AspectRatio->1,
           Axes->False,
           Background->GrayLevel[0.93],
@@ -373,8 +623,8 @@ Cell[BoxData[
           FrameTicks->None,
           ImageSize->{Automatic, 
             Dynamic[
-            3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-             Magnification]]},
+            3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+              Magnification])]},
           PlotRange->{{0, 1}, {0, 1}}], GridBox[{
            {
             RowBox[{
@@ -419,8 +669,9 @@ Cell[BoxData[
           
           ImageSize->
            Dynamic[{
-            Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-             Magnification]}]], 
+            Automatic, 
+             3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+              Magnification])}]], 
          GraphicsBox[InsetBox[
            PaneBox[
             
@@ -430,8 +681,9 @@ Cell[BoxData[
             
             ImageSize->
              Dynamic[{
-              Automatic, 3.5 CurrentValue["FontCapHeight"]/
-               AbsoluteCurrentValue[Magnification]}]]],
+              Automatic, 
+               3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                Magnification])}]]],
           AspectRatio->1,
           Axes->False,
           Background->GrayLevel[0.93],
@@ -442,8 +694,8 @@ Cell[BoxData[
           FrameTicks->None,
           ImageSize->{Automatic, 
             Dynamic[
-            3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-             Magnification]]},
+            3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+              Magnification])]},
           PlotRange->{{0, 1}, {0, 1}}], GridBox[{
            {
             RowBox[{
@@ -693,7 +945,7 @@ Cell[BoxData[
               DynamicBox[ToBoxes[
                 FEPrivate`FrontEndResource[
                 "FEStrings", "sizeBriefExplanation"], StandardForm],
-               ImageSizeCache->{84., {3., 11.}}],
+               ImageSizeCache->{71., {3., 10.}}],
               StripOnInput->False,
               DynamicUpdating->True], "SuggestionsBarCategory",
              StripOnInput->False],
@@ -715,7 +967,7 @@ Cell[BoxData[
               DynamicBox[ToBoxes[
                 FEPrivate`FrontEndResource["FEStrings", "sizeShowLess"], 
                 StandardForm],
-               ImageSizeCache->{74., {1., 11.}}],
+               ImageSizeCache->{63., {1., 10.}}],
               StripOnInput->False,
               DynamicUpdating->True], "SuggestionsBarControl",
              StripOnInput->False], True->
@@ -746,7 +998,7 @@ Cell[BoxData[
               DynamicBox[ToBoxes[
                 FEPrivate`FrontEndResource["FEStrings", "sizeShowMore"], 
                 StandardForm],
-               ImageSizeCache->{84., {1., 11.}}],
+               ImageSizeCache->{71., {1., 10.}}],
               StripOnInput->False,
               DynamicUpdating->True], "SuggestionsBarControl",
              StripOnInput->False], True->
@@ -777,7 +1029,7 @@ Cell[BoxData[
               DynamicBox[ToBoxes[
                 FEPrivate`FrontEndResource["FEStrings", "sizeShowAll"], 
                 StandardForm],
-               ImageSizeCache->{62., {1., 11.}}],
+               ImageSizeCache->{54., {1., 10.}}],
               StripOnInput->False,
               DynamicUpdating->True], "SuggestionsBarControl",
              StripOnInput->False], True->
@@ -808,7 +1060,7 @@ Cell[BoxData[
               DynamicBox[ToBoxes[
                 FEPrivate`FrontEndResource["FEStrings", "sizeChangeLimit"], 
                 StandardForm],
-               ImageSizeCache->{109., {1., 11.}}],
+               ImageSizeCache->{93., {1., 10.}}],
               StripOnInput->False,
               DynamicUpdating->True], "SuggestionsBarControl",
              StripOnInput->False], True->
@@ -817,7 +1069,7 @@ Cell[BoxData[
               DynamicBox[ToBoxes[
                 FEPrivate`FrontEndResource["FEStrings", "sizeChangeLimit"], 
                 StandardForm],
-               ImageSizeCache->{109., {1., 11.}}],
+               ImageSizeCache->{93., {1., 10.}}],
               StripOnInput->False,
               DynamicUpdating->True], "SuggestionsBarControlActive",
              StripOnInput->False]}, Dynamic[
@@ -13731,7 +13983,8 @@ Cell[BoxData[
    3.6856170086835194`*^9, 3.6856187082656965`*^9, {3.685619119032625*^9, 
    3.6856191305619307`*^9}, {3.685619219046872*^9, 3.6856192463589745`*^9}, 
    3.6856193067310467`*^9, 3.685621788830163*^9, 3.6856218582821536`*^9, 
-   3.685623041764824*^9, 3.6856233165139017`*^9}]
+   3.685623041764824*^9, 3.6856233165139017`*^9, 3.68569320902077*^9, 
+   3.6856935588771534`*^9, 3.68569420749666*^9, 3.6856945578687057`*^9}]
 }, Open  ]]
 }, Open  ]],
 
@@ -13740,33 +13993,28 @@ Cell[CellGroupData[{
 Cell["Dump points", "Chapter",
  CellChangeTimes->{{3.685617003512422*^9, 3.685617005517268*^9}}],
 
-Cell[CellGroupData[{
-
 Cell[BoxData[
  RowBox[{"InfiniTAM2DumpSceneOptimizationBlocks", "[", 
   RowBox[{
-  "$scene", ",", "\"\<InfiniTAM2DumpSceneOptimizationBlocks.obj\>\""}], 
+  "$scene", ",", "\"\<_InfiniTAM2DumpSceneOptimizationBlocks.obj\>\""}], 
   "]"}]], "Input",
- CellChangeTimes->{{3.6856170103554797`*^9, 3.685617027714445*^9}}],
-
-Cell[BoxData[
- RowBox[{"{", 
-  RowBox[{"1", ",", "1", ",", "1"}], "}"}]], "Echo",
- CellChangeTimes->{3.6856171462151*^9}]
-}, Open  ]],
+ CellChangeTimes->{{3.6856170103554797`*^9, 3.685617027714445*^9}, 
+   3.6857093493579245`*^9}],
 
 Cell[BoxData[
  RowBox[{"InfiniTAM2DumpSceneVoxelPositions", "[", 
-  RowBox[{"$scene", ",", "\"\<InfiniTAM2DumpSceneVoxelPositions.obj\>\""}], 
+  RowBox[{"$scene", ",", "\"\<_InfiniTAM2DumpSceneVoxelPositions.obj\>\""}], 
   "]"}]], "Input",
- CellChangeTimes->{{3.6856171654024444`*^9, 3.685617171681636*^9}}],
+ CellChangeTimes->{{3.6856171654024444`*^9, 3.685617171681636*^9}, 
+   3.685709350584049*^9}],
 
 Cell[BoxData[
  RowBox[{"InfiniTAM2DumpSceneVoxelPositionsBlockwise", "[", 
   RowBox[{
-  "$scene", ",", "\"\<InfiniTAM2DumpSceneVoxelPositionsBlockwise.obj\>\""}], 
+  "$scene", ",", "\"\<_InfiniTAM2DumpSceneVoxelPositionsBlockwise.obj\>\""}], 
   "]"}]], "Input",
- CellChangeTimes->{{3.6856171751995707`*^9, 3.6856171776215324`*^9}}]
+ CellChangeTimes->{{3.6856171751995707`*^9, 3.6856171776215324`*^9}, 
+   3.6857093519178443`*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -13778,6 +14026,29 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"InfiniTAM2InitAD", "@", "$scene"}], ";"}]], "Input",
  CellChangeTimes->{{3.6856187106095457`*^9, 3.6856187219213543`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"InfiniTAM2SerializeScene", "[", 
+  RowBox[{"$scene", ",", "\"\<serial7_1ad.bin\>\""}], "]"}]], "Input",
+ CellChangeTimes->{{3.68569455436075*^9, 3.6856945545170107`*^9}}],
+
+Cell["run from here:", "Text",
+ CellChangeTimes->{{3.6859911228419847`*^9, 3.685991124638896*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"$scene", "=", 
+  RowBox[{
+  "InfiniTAM2DeserializeScene", "[", "\"\<serial7_1ad.bin\>\"", 
+   "]"}]}]], "Input",
+ CellChangeTimes->{{3.6856945556452227`*^9, 3.6856945557390156`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"InfiniTAM2Scene", "[", "0", "]"}]], "Output",
+ CellChangeTimes->{3.685698440567222*^9, 3.6859911424616833`*^9, 
+  3.685991339220247*^9}]
+}, Open  ]],
 
 Cell[BoxData[
  RowBox[{"InfiniTAM2MeshScene", "[", 
@@ -13799,45 +14070,12 @@ Cell[BoxData["2212.730712890625`"], "Output",
  CellChangeTimes->{{3.685618728795869*^9, 3.6856187573980827`*^9}}]
 }, Open  ]],
 
-Cell[CellGroupData[{
-
 Cell[BoxData[
  RowBox[{"InfiniTAM2Refine", "[", 
   RowBox[{"$scene", ",", 
    RowBox[{"1.", "~", "Table", "~", "4"}], ",", 
    RowBox[{"1.", "~", "Table", "~", "3"}]}], "]"}]], "Input",
  CellChangeTimes->{{3.6856187598119106`*^9, 3.6856187678753653`*^9}}],
-
-Cell[BoxData[
- TemplateBox[{
-  "LinkObject","linkd",
-   "\"Unable to communicate with closed link \
-\\!\\(\\*RowBox[{\\\"LinkObject\\\", \\\"[\\\", \
-RowBox[{\\\"\\\\\\\"\\\\\\\\\\\\\\\"C:\\\\\\\\\\\\\\\\Users\\\\\\\\\\\\\\\\\
-Paul'Masterxilo'\\\\\\\\\\\\\\\\Dropbox\\\\\\\\\\\\\\\\Paul\\\\\\\\\\\\\\\\\
-MasterarbeitShared\\\\\\\\\\\\\\\\Research\\\\\\\\\\\\\\\\InfiniTAM7\\\\\\\\\\\
-\\\\\\x64vs15\\\\\\\\\\\\\\\\Debug\\\\\\\\\\\\\\\\InfiniTAM7vs15.exe\\\\\\\\\\\
-\\\\\"\\\\\\\"\\\", \\\",\\\", \\\"2514\\\", \\\",\\\", \\\"6\\\"}], \
-\\\"]\\\"}]\\).\"",2,126,10,28171006189214509426,"Local"},
-  "MessageTemplate"]], "Message", "MSG",
- CellChangeTimes->{3.6856238100786734`*^9}],
-
-Cell[BoxData[
- TemplateBox[{
-  "UnexpectedMessages","msg",
-   "\"\\!\\(\\*TemplateBox[List[\\\"\\\\\\\"In InfiniTAM2Refine when called \
-as InfiniTAM2Refine[InfiniTAM2Scene[0], {1., 1., 1., 1.}, {1., 1., 1.}]. \\\\\
-\\\"\\\", \\\"\\\\\\\"\\\\\\\"\\\"], \
-\\\"RowDefault\\\"]\\)\\n\\!\\(\\*RowBox[{\\\"{\\\", \
-RowBox[{\\\"InfiniTAM2Refine\\\", \\\",\\\", \
-\\\"CatchMessagesAndTypeCheck\\\", \\\",\\\", \\\"MessageAbort\\\"}], \\\"}\\\
-\"}]\\)\"",2,126,11,28171006189214509426,"Local"},
-  "MessageTemplate"]], "Message", "MSG",
- CellChangeTimes->{3.685623810121705*^9}],
-
-Cell[BoxData["$Aborted"], "Output",
- CellChangeTimes->{3.685623810123706*^9}]
-}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -13851,61 +14089,343 @@ Cell[BoxData["2150.514892578125`"], "Output",
  CellChangeTimes->{3.685618846781918*^9, 3.68561924365373*^9}]
 }, Open  ]],
 
+Cell[BoxData[{
+ RowBox[{"InfiniTAM2SerializeScene", "[", 
+  RowBox[{"$scene", ",", "\"\<scene.refined2.bin\>\""}], 
+  "]"}], "\[IndentingNewLine]", 
+ RowBox[{"InfiniTAM2MeshScene", "[", 
+  RowBox[{
+  "$scene", ",", "\"\<scene.refined2.mesh_d_a\>\"", ",", "\"\<mesh_d_a\>\"", 
+   ",", "0."}], "]"}]}], "Input",
+ CellChangeTimes->{{3.6856188957210164`*^9, 3.685618915644787*^9}, 
+   3.6856932238910837`*^9, {3.6859911011379404`*^9, 3.6859911118619075`*^9}}]
+}, Open  ]],
+
 Cell[CellGroupData[{
+
+Cell["Data upload", "Chapter",
+ CellChangeTimes->{{3.6857030415046587`*^9, 3.685703043012046*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"$s3d", "=", 
+   RowBox[{
+    RowBox[{"Scene3DMake1Size32", "[", "]"}], "//", 
+    "Scene3DColorDimEnsure3"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.6857031603144817`*^9, 3.6857031618758307`*^9}, {
+   3.685703598784671*^9, 3.685703615892747*^9}, 3.6857044204238453`*^9, 
+   3.6857073630621767`*^9}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"$s3d", "//", "Scene3DCoordinateBounds"}]], "Input",
+ CellChangeTimes->{{3.6857031880180054`*^9, 3.685703189470212*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"0", ",", "31"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"0", ",", "31"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"0", ",", "31"}], "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{3.685703189727002*^9, 3.68570362206415*^9, 
+  3.6857073724475503`*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"$ssd", "=", 
+   RowBox[{"Scene3DToInfiniTAMSceneData", "[", 
+    RowBox[{"0.005", ",", "$s3d"}], "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.6857031954028044`*^9, 3.6857031980832396`*^9}, {
+   3.685703253799243*^9, 3.6857032558884745`*^9}, {3.6857035299562716`*^9, 
+   3.6857035461103296`*^9}, 3.6857036633893423`*^9, 3.685703893436301*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"$scene", "=", 
+   RowBox[{"InfiniTAM2CreateSceneFromSceneData", "@", "$ssd"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.6857039030498357`*^9, 3.685703908647398*^9}, {
+  3.6857039807223883`*^9, 3.6857039841220584`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"InfiniTAM2MeshScene", "[", 
+  RowBox[{"$scene", ",", "\"\<Scene3DMake1Size32\>\""}], "]"}]], "Input",
+ CellChangeTimes->{{3.6857040024471083`*^9, 3.6857040044627943`*^9}, 
+   3.6857073770158186`*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"InfiniTAM2InitAD", "@", "$scene"}], ";"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"InfiniTAM2SerializeScene", "[", 
+  RowBox[{"$scene", ",", "\"\<Scene3DMake1Size32ad.bin\>\""}], "]"}]], "Input",
+ CellChangeTimes->{3.685707446951562*^9}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"$scene", "=", 
+  RowBox[{
+  "InfiniTAM2DeserializeScene", "[", "\"\<Scene3DMake1Size32ad.bin\>\"", 
+   "]"}]}]], "Input",
+ CellChangeTimes->{3.6857074626601562`*^9}],
+
+Cell[BoxData[
+ RowBox[{"InfiniTAM2Scene", "[", "0", "]"}]], "Output",
+ CellChangeTimes->{3.685708180991516*^9, 3.6857082813967223`*^9, 
+  3.6857092200202026`*^9, 3.685709341950827*^9}]
+}, Open  ]],
 
 Cell[BoxData[
  RowBox[{"InfiniTAM2MeshScene", "[", 
   RowBox[{
-  "$scene", ",", "\"\<scene.refined.mesh_d_a\>\"", ",", "\"\<mesh_d_a\>\"", 
-   ",", "0."}], "]"}]], "Input",
- CellChangeTimes->{{3.6856188957210164`*^9, 3.685618915644787*^9}}],
+  "$scene", ",", "\"\<Scene3DMake1Size32ad.mesh_d_a\>\"", ",", 
+   "\"\<mesh_d_a\>\"", ",", "0."}], "]"}]], "Input"],
+
+Cell["\<\
+TODO this particular scene cannot be refined because the CG solver does not \
+converge on this input.\
+\>", "Text",
+ CellChangeTimes->{{3.6859889179878287`*^9, 3.685988935510397*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"InfiniTAM2Refine", "[", 
+  RowBox[{"$scene", ",", 
+   RowBox[{"1.", "~", "Table", "~", "4"}], ",", 
+   RowBox[{"1.", "~", "Table", "~", "3"}]}], "]"}], "\[IndentingNewLine]", 
+ RowBox[{"InfiniTAM2MeshScene", "[", 
+  RowBox[{
+  "$scene", ",", "\"\<Scene3DMake1Size32ad.refined.mesh_d_a\>\"", ",", 
+   "\"\<mesh_d_a\>\"", ",", "0."}], "]"}]}], "Input",
+ CellChangeTimes->{{3.6857074329593143`*^9, 3.685707433193674*^9}, {
+  3.6857074665826015`*^9, 3.685707488532363*^9}, {3.685708177363883*^9, 
+  3.685708177551388*^9}}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "LinkObject","linkd",
+   "\"Unable to communicate with closed link \
+\\!\\(\\*RowBox[{\\\"LinkObject\\\", \\\"[\\\", \
+RowBox[{\\\"\\\\\\\"\\\\\\\\\\\\\\\"C:\\\\\\\\\\\\\\\\Users\\\\\\\\\\\\\\\\\
+Paul\\\\\\\\\\\\\\\\Dropbox\\\\\\\\\\\\\\\\Paul\\\\\\\\\\\\\\\\\
+MasterarbeitShared\\\\\\\\\\\\\\\\Research\\\\\\\\\\\\\\\\InfiniTAM7\\\\\\\\\\\
+\\\\\\x64\\\\\\\\\\\\\\\\Debug\\\\\\\\\\\\\\\\InfiniTAM7.exe\\\\\\\\\\\\\\\"\\\
+\\\\\"\\\", \\\",\\\", \\\"4103841\\\", \\\",\\\", \\\"12\\\"}], \
+\\\"]\\\"}]\\).\"",2,349,52,25661037587355059239,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.6857078909358306`*^9, 3.685708225565874*^9, 
+  3.685708418205059*^9, 3.6857092793516026`*^9}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "UnexpectedMessages","msg",
+   "\"\\!\\(\\*TemplateBox[List[\\\"\\\\\\\"In InfiniTAM2Refine when called \
+as InfiniTAM2Refine[InfiniTAM2Scene[0], {1., 1., 1., 1.}, {1., 1., 1.}]. \\\\\
+\\\"\\\", \\\"\\\\\\\"\\\\\\\"\\\"], \
+\\\"RowDefault\\\"]\\)\\n\\!\\(\\*RowBox[{\\\"{\\\", \
+RowBox[{\\\"InfiniTAM2Refine\\\", \\\",\\\", \
+\\\"CatchMessagesAndTypeCheck\\\", \\\",\\\", \\\"MessageAbort\\\"}], \\\"}\\\
+\"}]\\)\"",2,349,53,25661037587355059239,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.6857078909358306`*^9, 3.685708225565874*^9, 
+  3.685708418205059*^9, 3.685709279367203*^9}],
+
+Cell[BoxData["$Aborted"], "Output",
+ CellChangeTimes->{3.685707890967099*^9, 3.685708225612751*^9, 
+  3.6857084182519155`*^9, 3.685709279398466*^9}],
 
 Cell[BoxData[
  TemplateBox[{
   "LinkObject","linkn",
    "\"Argument \\!\\(\\*RowBox[{\\\"LinkObject\\\", \\\"[\\\", RowBox[{\\\"\\\
-\\\\\"\\\\\\\\\\\\\\\"C:\\\\\\\\\\\\\\\\Users\\\\\\\\\\\\\\\\Paul'Masterxilo'\
-\\\\\\\\\\\\\\\\Dropbox\\\\\\\\\\\\\\\\Paul\\\\\\\\\\\\\\\\MasterarbeitShared\
-\\\\\\\\\\\\\\\\Research\\\\\\\\\\\\\\\\InfiniTAM7\\\\\\\\\\\\\\\\x64vs15\\\\\
-\\\\\\\\\\\\Debug\\\\\\\\\\\\\\\\InfiniTAM7vs15.exe\\\\\\\\\\\\\\\"\\\\\\\"\\\
-\", \\\",\\\", \\\"2514\\\", \\\",\\\", \\\"6\\\"}], \\\"]\\\"}]\\) in \\!\\(\
-\\*RowBox[{\\\"LinkWrite\\\", \\\"[\\\", RowBox[{RowBox[{\\\"LinkObject\\\", \
-\\\"[\\\", \
+\\\\\"\\\\\\\\\\\\\\\"C:\\\\\\\\\\\\\\\\Users\\\\\\\\\\\\\\\\Paul\\\\\\\\\\\\\
+\\\\Dropbox\\\\\\\\\\\\\\\\Paul\\\\\\\\\\\\\\\\MasterarbeitShared\\\\\\\\\\\\\
+\\\\Research\\\\\\\\\\\\\\\\InfiniTAM7\\\\\\\\\\\\\\\\x64\\\\\\\\\\\\\\\\\
+Debug\\\\\\\\\\\\\\\\InfiniTAM7.exe\\\\\\\\\\\\\\\"\\\\\\\"\\\", \\\",\\\", \
+\\\"4103841\\\", \\\",\\\", \\\"12\\\"}], \\\"]\\\"}]\\) in \\!\\(\\*RowBox[{\
+\\\"LinkWrite\\\", \\\"[\\\", RowBox[{RowBox[{\\\"LinkObject\\\", \\\"[\\\", \
 RowBox[{\\\"\\\\\\\"\\\\\\\\\\\\\\\"C:\\\\\\\\\\\\\\\\Users\\\\\\\\\\\\\\\\\
-Paul'Masterxilo'\\\\\\\\\\\\\\\\Dropbox\\\\\\\\\\\\\\\\Paul\\\\\\\\\\\\\\\\\
+Paul\\\\\\\\\\\\\\\\Dropbox\\\\\\\\\\\\\\\\Paul\\\\\\\\\\\\\\\\\
 MasterarbeitShared\\\\\\\\\\\\\\\\Research\\\\\\\\\\\\\\\\InfiniTAM7\\\\\\\\\\\
-\\\\\\x64vs15\\\\\\\\\\\\\\\\Debug\\\\\\\\\\\\\\\\InfiniTAM7vs15.exe\\\\\\\\\\\
-\\\\\"\\\\\\\"\\\", \\\",\\\", \\\"2514\\\", \\\",\\\", \\\"6\\\"}], \
-\\\"]\\\"}], \\\",\\\", RowBox[{\\\"CallPacket\\\", \\\"[\\\", RowBox[{\\\"11\
-\\\", \\\",\\\", RowBox[{\\\"{\\\", RowBox[{\\\"0\\\", \\\",\\\", \
-\\\"\\\\\\\"scene.refined.mesh_d_a\\\\\\\"\\\", \\\",\\\", RowBox[{\\\"\\\\\\\
-\"m\\\\\\\"\\\", \\\"\[Ellipsis]\\\", \\\"\\\\\\\"a\\\\\\\"\\\"}], \\\",\\\", \
-\\\"0.`\\\"}], \\\"}\\\"}]}], \\\"]\\\"}]}], \\\"]\\\"}]\\) has an invalid \
-LinkObject number; the link may be closed.\"",2,127,12,28171006189214509426,
-   "Local"},
+\\\\\\x64\\\\\\\\\\\\\\\\Debug\\\\\\\\\\\\\\\\InfiniTAM7.exe\\\\\\\\\\\\\\\"\\\
+\\\\\"\\\", \\\",\\\", \\\"4103841\\\", \\\",\\\", \\\"12\\\"}], \\\"]\\\"}], \
+\\\",\\\", RowBox[{\\\"CallPacket\\\", \\\"[\\\", RowBox[{\\\"11\\\", \\\",\\\
+\", RowBox[{\\\"{\\\", RowBox[{\\\"0\\\", \\\",\\\", \
+\\\"\\\\\\\"Scene3DMake1Size32ad.refined.mesh_d_a\\\\\\\"\\\", \\\",\\\", \
+\\\"\\\\\\\"mesh_d_a\\\\\\\"\\\", \\\",\\\", \\\"0.`\\\"}], \\\"}\\\"}]}], \\\
+\"]\\\"}]}], \\\"]\\\"}]\\) has an invalid LinkObject number; the link may be \
+closed.\"",2,350,54,25661037587355059239,"Local"},
   "MessageTemplate"]], "Message", "MSG",
- CellChangeTimes->{3.685623810187751*^9}],
+ CellChangeTimes->{3.6857078909358306`*^9, 3.685708225565874*^9, 
+  3.685708418205059*^9, 3.685709279398466*^9}],
 
 Cell[BoxData[
  TemplateBox[{
   "UnexpectedMessages","msg",
    "\"\\!\\(\\*TemplateBox[List[\\\"\\\\\\\"In InfiniTAM2MeshScene when \
-called as InfiniTAM2MeshScene[InfiniTAM2Scene[0], scene.refined.mesh_d_a, \
-mesh_d_a, 0.]. \\\\\\\"\\\", \\\"\\\\\\\"\\\\\\\"\\\"], \
+called as InfiniTAM2MeshScene[InfiniTAM2Scene[0], \
+Scene3DMake1Size32ad.refined.mesh_d_a, mesh_d_a, 0.]. \\\\\\\"\\\", \
+\\\"\\\\\\\"\\\\\\\"\\\"], \
 \\\"RowDefault\\\"]\\)\\n\\!\\(\\*RowBox[{\\\"{\\\", \
 RowBox[{\\\"InfiniTAM2MeshScene\\\", \\\",\\\", \\\"CatchMessagesAndTypeCheck\
-\\\", \\\",\\\", \\\"MessageAbort\\\"}], \\\"}\\\"}]\\)\"",2,127,13,
-   28171006189214509426,"Local"},
+\\\", \\\",\\\", \\\"MessageAbort\\\"}], \\\"}\\\"}]\\)\"",2,350,55,
+   25661037587355059239,"Local"},
   "MessageTemplate"]], "Message", "MSG",
- CellChangeTimes->{3.685623810205764*^9}],
+ CellChangeTimes->{3.6857078909358306`*^9, 3.685708225565874*^9, 
+  3.685708418205059*^9, 3.6857092794140806`*^9}],
 
 Cell[BoxData["$Aborted"], "Output",
- CellChangeTimes->{3.6856238102217774`*^9}]
+ CellChangeTimes->{3.685707890967099*^9, 3.685708225612751*^9, 
+  3.6857084182519155`*^9, 3.6857092794297037`*^9}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Coarse-to-fine", "Chapter",
+ CellChangeTimes->{{3.6859889495745296`*^9, 3.6859889524184*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"$cscene", "=", 
+   RowBox[{"InfiniTAM2CreateScene", "[", "0.005", "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"InfiniTAM2ProcessFramesAt", "[", 
+   RowBox[{"$cscene", ",", "$views"}], "]"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"InfiniTAM2InitAD", "[", "$cscene", "]"}], "\[IndentingNewLine]", 
+ RowBox[{"InfiniTAM2SerializeScene", "[", 
+  RowBox[{"$cscene", ",", "\"\<$cscene.bin\>\""}], "]"}]}], "Input",
+ CellChangeTimes->{{3.6859890267572355`*^9, 3.6859890842148504`*^9}, 
+   3.685989543341543*^9, 3.685989586636037*^9, {3.6859900499456215`*^9, 
+   3.6859900585250034`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"$fscene", "=", 
+     RowBox[{"InfiniTAM2CreateScene", "[", "0.0025", "]"}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"InfiniTAM2ProcessFramesAt", "[", 
+     RowBox[{"$fscene", ",", "$views"}], "]"}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{"InfiniTAM2InitAD", "[", "$fscene", "]"}], "\[IndentingNewLine]", 
+   RowBox[{"InfiniTAM2SerializeScene", "[", 
+    RowBox[{"$fscene", ",", "\"\<$fscene.bin\>\""}], "]"}]}]}]], "Input",
+ CellChangeTimes->{{3.6859900678763027`*^9, 3.6859900727289257`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"$cscene", "=", 
+  RowBox[{
+  "InfiniTAM2DeserializeScene", "[", "\"\<$cscene.bin\>\"", "]"}]}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"InfiniTAM2Scene", "[", "0", "]"}]], "Output",
+ CellChangeTimes->{3.6859905728337193`*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"$cscene", "=", 
+  RowBox[{
+  "InfiniTAM2DeserializeScene", "[", "\"\<$cscene.bin\>\"", 
+   "]"}]}], "\[IndentingNewLine]", 
+ RowBox[{"$fscene", "=", 
+  RowBox[{
+  "InfiniTAM2DeserializeScene", "[", "\"\<$fscene.bin\>\"", "]"}]}]}], "Input",
+ CellChangeTimes->{{3.6859898270753703`*^9, 3.6859898365389414`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"InfiniTAM2Scene", "[", "1", "]"}]], "Output",
+ CellChangeTimes->{3.6859905563012123`*^9, 3.6859907237977886`*^9}],
+
+Cell[BoxData[
+ RowBox[{"InfiniTAM2Scene", "[", "2", "]"}]], "Output",
+ CellChangeTimes->{3.6859905563012123`*^9, 3.685990724188431*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"InfiniTAM2MeshScene", "[", 
+  RowBox[{"$cscene", ",", "\"\<$cscene\>\""}], "]"}]], "Input",
+ CellChangeTimes->{{3.6859907593902736`*^9, 3.685990776036902*^9}}],
+
+Cell[BoxData[
+ RowBox[{"InfiniTAM2MeshScene", "[", 
+  RowBox[{"$fscene", ",", "\"\<$fscene\>\""}], "]"}]], "Input",
+ CellChangeTimes->{{3.6859907807089715`*^9, 3.685990781630885*^9}}],
+
+Cell[BoxData[
+ RowBox[{"InfiniTAM2MeshSceneAD", "[", 
+  RowBox[{"$cscene", ",", "\"\<$cscene.AD\>\""}], "]"}]], "Input",
+ CellChangeTimes->{{3.685990819145909*^9, 3.6859908226195984`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"InfiniTAM2MeshSceneAD", "[", 
+  RowBox[{"$fscene", ",", "\"\<$fscene.AD\>\""}], "]"}]], "Input",
+ CellChangeTimes->{{3.6859908283554096`*^9, 3.6859908305898633`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"InfiniTAM2InitFineADFromCoarseAD", "[", 
+  RowBox[{"$fscene", ",", "$cscene"}], "]"}]], "Input",
+ CellChangeTimes->{{3.6859890885900307`*^9, 3.6859890942159414`*^9}, 
+   3.6859894682903023`*^9, {3.6859895341483088`*^9, 3.6859895359064193`*^9}, 
+   3.685989600468131*^9, {3.685990833136859*^9, 3.685990840407527*^9}}],
+
+Cell[BoxData[
+ RowBox[{"InfiniTAM2MeshSceneAD", "[", 
+  RowBox[{
+  "$fscene", ",", "\"\<$fscene.InfiniTAM2InitFineADFromCoarseAD.ad\>\""}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.6859896120428267`*^9, 3.685989629792924*^9}, {
+  3.6859908069466705`*^9, 3.6859908080404673`*^9}}],
+
+Cell["init from refined", "Text",
+ CellChangeTimes->{{3.6859915758597417`*^9, 3.685991583235627*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"$cscene", "=", 
+  RowBox[{
+  "InfiniTAM2DeserializeScene", "[", "\"\<scene.refined2.bin\>\"", 
+   "]"}]}], "\[IndentingNewLine]", 
+ RowBox[{"$fscene", "=", 
+  RowBox[{
+  "InfiniTAM2DeserializeScene", "[", "\"\<$fscene.bin\>\"", 
+   "]"}]}], "\[IndentingNewLine]", 
+ RowBox[{"InfiniTAM2InitFineADFromCoarseAD", "[", 
+  RowBox[{"$fscene", ",", "$cscene"}], "]"}], "\[IndentingNewLine]", 
+ RowBox[{"InfiniTAM2MeshSceneAD", "[", 
+  RowBox[{
+  "$fscene", ",", 
+   "\"\<$fscene.scene.refined2.InfiniTAM2InitFineADFromCoarseAD.ad\>\""}], 
+  "]"}]}], "Input",
+ CellChangeTimes->{{3.685991588032705*^9, 3.685991622424358*^9}}],
+
+Cell[BoxData[
+ RowBox[{"InfiniTAM2Scene", "[", "1", "]"}]], "Output",
+ CellChangeTimes->{3.6859916360909595`*^9}],
+
+Cell[BoxData[
+ RowBox[{"InfiniTAM2Scene", "[", "2", "]"}]], "Output",
+ CellChangeTimes->{3.6859916364972296`*^9}]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]
 },
-WindowSize->{784, 794},
+WindowSize->{944, 991},
 WindowMargins->{{Automatic, 0}, {Automatic, 0}},
 FrontEndVersion->"11.0 for Microsoft Windows (64-bit) (July 28, 2016)",
 StyleDefinitions->"Default.nb"
@@ -13922,81 +14442,129 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[580, 22, 119, 1, 201, "Title"],
-Cell[702, 25, 118, 1, 35, "Text"],
+Cell[580, 22, 119, 1, 90, "Title"],
+Cell[702, 25, 118, 1, 30, "Text"],
 Cell[CellGroupData[{
-Cell[845, 30, 231, 5, 37, "Input"],
-Cell[1079, 37, 233, 3, 62, "Output"]
+Cell[845, 30, 231, 5, 30, "Input"],
+Cell[1079, 37, 265, 3, 30, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[1349, 45, 505, 13, 86, "Input"],
-Cell[1857, 60, 162, 3, 37, "Output"],
-Cell[2022, 65, 148, 3, 37, "Output"]
+Cell[1381, 45, 789, 21, 92, "Input"],
+Cell[2173, 68, 236, 4, 30, "Output"],
+Cell[2412, 74, 224, 4, 30, "Output"],
+Cell[2639, 80, 8179, 232, 72, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[2207, 73, 95, 1, 88, "Chapter"],
+Cell[10855, 317, 95, 1, 64, "Chapter"],
 Cell[CellGroupData[{
-Cell[2327, 78, 429, 11, 86, "Input"],
-Cell[2759, 91, 8410, 235, 81, "Output"],
-Cell[11172, 328, 8384, 234, 81, "Output"]
+Cell[10975, 322, 429, 11, 69, "Input"],
+Cell[11407, 335, 8487, 239, 72, "Output"],
+Cell[19897, 576, 8461, 238, 72, "Output"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[19605, 568, 95, 1, 88, "Chapter"],
-Cell[19703, 571, 239, 4, 37, "Input"]
+Cell[28407, 820, 95, 1, 64, "Chapter"],
+Cell[28505, 823, 239, 4, 30, "Input"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[19979, 580, 96, 1, 88, "Chapter"],
-Cell[20078, 583, 202, 4, 37, "Input"],
+Cell[28781, 832, 96, 1, 64, "Chapter"],
+Cell[28880, 835, 202, 4, 33, "Input"],
 Cell[CellGroupData[{
-Cell[20305, 591, 220, 5, 37, "Input"],
-Cell[20528, 598, 10896, 270, 229, "Output"]
+Cell[29107, 843, 220, 5, 33, "Input"],
+Cell[29330, 850, 10894, 270, 151, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[31461, 873, 135, 2, 37, "Input"],
-Cell[31599, 877, 864917, 12826, 449, "Output"]
+Cell[40261, 1125, 135, 2, 30, "Input"],
+Cell[40399, 1129, 864917, 12826, 374, "Output"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[896565, 13709, 100, 1, 88, "Chapter"],
-Cell[896668, 13712, 243, 4, 37, "Input"],
+Cell[905365, 13961, 100, 1, 64, "Chapter"],
+Cell[905468, 13964, 243, 4, 33, "Input"],
 Cell[CellGroupData[{
-Cell[896936, 13720, 202, 5, 37, "Input"],
-Cell[897141, 13727, 415, 6, 37, "Output"]
+Cell[905736, 13972, 202, 5, 30, "Input"],
+Cell[905941, 13979, 509, 7, 30, "Output"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[897605, 13739, 96, 1, 88, "Chapter"],
-Cell[CellGroupData[{
-Cell[897726, 13744, 240, 5, 62, "Input"],
-Cell[897969, 13751, 121, 3, 28, "Echo"]
-}, Open  ]],
-Cell[898105, 13757, 229, 4, 62, "Input"],
-Cell[898337, 13763, 252, 5, 62, "Input"]
+Cell[906499, 13992, 96, 1, 64, "Chapter"],
+Cell[906598, 13995, 269, 6, 33, "Input"],
+Cell[906870, 14003, 256, 5, 33, "Input"],
+Cell[907129, 14010, 281, 6, 33, "Input"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[898626, 13773, 112, 1, 88, "Chapter"],
-Cell[898741, 13776, 157, 3, 37, "Input"],
-Cell[898901, 13781, 229, 5, 37, "Input"],
+Cell[907447, 14021, 112, 1, 64, "Chapter"],
+Cell[907562, 14024, 157, 3, 30, "Input"],
+Cell[907722, 14029, 194, 3, 33, "Input"],
+Cell[907919, 14034, 98, 1, 30, "Text"],
 Cell[CellGroupData[{
-Cell[899155, 13790, 260, 5, 37, "Input"],
-Cell[899418, 13797, 113, 1, 37, "Output"]
+Cell[908042, 14039, 206, 5, 30, "Input"],
+Cell[908251, 14046, 160, 3, 30, "Output"]
+}, Open  ]],
+Cell[908426, 14052, 229, 5, 33, "Input"],
+Cell[CellGroupData[{
+Cell[908680, 14061, 260, 5, 33, "Input"],
+Cell[908943, 14068, 113, 1, 30, "Output"]
+}, Open  ]],
+Cell[909071, 14072, 255, 5, 33, "Input"],
+Cell[CellGroupData[{
+Cell[909351, 14081, 190, 4, 33, "Input"],
+Cell[909544, 14087, 108, 1, 30, "Output"]
+}, Open  ]],
+Cell[909667, 14091, 455, 9, 55, "Input"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[899568, 13803, 255, 5, 37, "Input"],
-Cell[899826, 13810, 678, 12, 71, "Message"],
-Cell[900507, 13824, 569, 11, 71, "Message"],
-Cell[901079, 13837, 77, 1, 37, "Output"]
+Cell[910159, 14105, 98, 1, 64, "Chapter"],
+Cell[910260, 14108, 335, 8, 30, "Input"],
+Cell[CellGroupData[{
+Cell[910620, 14120, 143, 2, 30, "Input"],
+Cell[910766, 14124, 323, 10, 30, "Output"]
+}, Open  ]],
+Cell[911104, 14137, 379, 7, 33, "Input"],
+Cell[911486, 14146, 256, 6, 30, "Input"],
+Cell[911745, 14154, 223, 4, 33, "Input"],
+Cell[911971, 14160, 87, 2, 30, "Input"],
+Cell[912061, 14164, 178, 3, 33, "Input"],
+Cell[CellGroupData[{
+Cell[912264, 14171, 189, 5, 30, "Input"],
+Cell[912456, 14178, 184, 3, 30, "Output"]
+}, Open  ]],
+Cell[912655, 14184, 179, 4, 33, "Input"],
+Cell[912837, 14190, 193, 4, 30, "Text"],
+Cell[CellGroupData[{
+Cell[913055, 14198, 543, 11, 55, "Input"],
+Cell[913601, 14211, 733, 13, 41, "Message"],
+Cell[914337, 14226, 640, 12, 41, "Message"],
+Cell[914980, 14240, 148, 2, 30, "Output"],
+Cell[915131, 14244, 1556, 23, 95, "Message"],
+Cell[916690, 14269, 676, 13, 59, "Message"],
+Cell[917369, 14284, 150, 2, 30, "Output"]
+}, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[901193, 13843, 190, 4, 37, "Input"],
-Cell[901386, 13849, 108, 1, 37, "Output"]
+Cell[917568, 14292, 99, 1, 64, "Chapter"],
+Cell[917670, 14295, 636, 13, 96, "Input"],
+Cell[918309, 14310, 600, 13, 115, "Input"],
+Cell[CellGroupData[{
+Cell[918934, 14327, 129, 3, 33, "Input"],
+Cell[919066, 14332, 113, 2, 30, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[901531, 13855, 240, 5, 62, "Input"],
-Cell[901774, 13862, 1559, 24, 181, "Message"],
-Cell[903336, 13888, 586, 11, 93, "Message"],
-Cell[903925, 13901, 79, 1, 37, "Output"]
+Cell[919216, 14339, 335, 8, 55, "Input"],
+Cell[919554, 14349, 137, 2, 30, "Output"],
+Cell[919694, 14353, 135, 2, 30, "Output"]
+}, Open  ]],
+Cell[919844, 14358, 183, 3, 33, "Input"],
+Cell[920030, 14363, 183, 3, 33, "Input"],
+Cell[920216, 14368, 188, 3, 33, "Input"],
+Cell[920407, 14373, 190, 3, 33, "Input"],
+Cell[920600, 14378, 340, 5, 33, "Input"],
+Cell[920943, 14385, 280, 6, 33, "Input"],
+Cell[921226, 14393, 101, 1, 30, "Text"],
+Cell[CellGroupData[{
+Cell[921352, 14398, 642, 16, 96, "Input"],
+Cell[921997, 14416, 113, 2, 30, "Output"],
+Cell[922113, 14420, 113, 2, 30, "Output"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]

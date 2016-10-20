@@ -140,6 +140,14 @@
 
 
 :Begin:
+:Function:       initFineADFromCoarseAD
+:Pattern:        initFineADFromCoarseAD[fineid_Integer?NonNegative, coarseid_Integer?NonNegative] /; fineid != coarseid
+:Arguments:      { fineid, coarseid }
+:ArgumentTypes:  { Integer, Integer }
+:ReturnType:     Manual
+:End:
+
+:Begin:
 :Function:       refineScene
 :Pattern:        refineScene[id_Integer, eg_Real, er_Real, es_Real, ea_Real, l : {__Real}]
 :Arguments:      { id, eg, er, es, ea, l }
