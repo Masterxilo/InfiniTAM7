@@ -30,6 +30,40 @@
 
 
 :Begin:
+:Function:       buildSphereScene
+:Pattern:        buildSphereScene[id_Integer?NonNegative, rad_Real]
+:Arguments:      { id, rad }
+:ArgumentTypes:  { Integer, Real }
+:ReturnType:     Manual
+:End:
+
+:Begin:
+:Function:       buildWallScene
+:Pattern:        buildWallScene[id_Integer?NonNegative]
+:Arguments:      { id }
+:ArgumentTypes:  { Integer }
+:ReturnType:     Manual
+:End:
+
+
+:Begin:
+:Function:       computeArtificialDirectionalLighting
+:Pattern:        computeArtificialDirectionalLighting[id_Integer?NonNegative, dir : {_,_,_}?NumericVectorQ]
+:Arguments:      { id, dir}
+:ArgumentTypes:  { Integer, RealList }
+:ReturnType:     Manual
+:End:
+
+
+:Begin:
+:Function:       computeArtificialSphericalHarmonic9Lighting
+:Pattern:        computeArtificialSphericalHarmonic9Lighting[id_Integer?NonNegative, l_?NumericVectorQ /; Length@l == 9]
+:Arguments:      { id, l }
+:ArgumentTypes:  { Integer, RealList }
+:ReturnType:     Manual
+:End:
+
+:Begin:
 :Function:       getSceneVoxelSize
 :Pattern:        getSceneVoxelSize[id_Integer?NonNegative]
 :Arguments:      { id }
@@ -138,11 +172,36 @@
 :End:
 
 
+:Begin:
+:Function:       perturbD
+:Pattern:        perturbD[id_Integer?NonNegative]
+:Arguments:      { id }
+:ArgumentTypes:  { Integer }
+:ReturnType:     Manual
+:End:
+
+:Begin:
+:Function:       smoothSDF
+:Pattern:        smoothSDF[id_Integer?NonNegative]
+:Arguments:      { id }
+:ArgumentTypes:  { Integer }
+:ReturnType:     Manual
+:End:
+
+
 
 :Begin:
 :Function:       initFineADFromCoarseAD
 :Pattern:        initFineADFromCoarseAD[fineid_Integer?NonNegative, coarseid_Integer?NonNegative] /; fineid != coarseid
 :Arguments:      { fineid, coarseid }
+:ArgumentTypes:  { Integer, Integer }
+:ReturnType:     Manual
+:End:
+
+:Begin:
+:Function:       initCoarseFromFine
+:Pattern:        initCoarseFromFine[coarseid_Integer?NonNegative, fineid_Integer?NonNegative] /; fineid != coarseid
+:Arguments:      { coarseid, fineid }
 :ArgumentTypes:  { Integer, Integer }
 :ReturnType:     Manual
 :End:
@@ -190,6 +249,14 @@
 :ReturnType:     Manual
 :End:
 
+
+:Begin:
+:Function:       estimateLighting
+:Pattern:        estimateLighting[id_Integer?NonNegative]
+:Arguments:      { id }
+:ArgumentTypes:  { Integer }
+:ReturnType:     Manual
+:End:
 
 :Evaluate: Protect@"InfiniTAM2`Private`*"
 :Evaluate: End[] 

@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     12284,        331]
-NotebookOptionsPosition[     11182,        289]
-NotebookOutlinePosition[     11523,        304]
-CellTagsIndexPosition[     11480,        301]
+NotebookDataLength[     13021,        346]
+NotebookOptionsPosition[     11811,        301]
+NotebookOutlinePosition[     12151,        316]
+CellTagsIndexPosition[     12108,        313]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -71,6 +71,9 @@ Cell["sigma is a bit more manual for now...", "Text",
  CellChangeTimes->{{3.685431286457404*^9, 3.68543129173882*^9}, {
   3.685431353434594*^9, 3.685431353887704*^9}}],
 
+Cell["This changes rarely: ", "Text",
+ CellChangeTimes->{{3.686570214633444*^9, 3.686570221763323*^9}}],
+
 Cell[CellGroupData[{
 
 Cell[BoxData[
@@ -88,6 +91,9 @@ Cell[BoxData["\<\"J:\\\\Masterarbeit\\\\Implementation\\\\InfiniTAM6\\\\$\
 CFormDefines.cpp\"\>"], "Output",
  CellChangeTimes->{3.685431846985518*^9}]
 }, Open  ]],
+
+Cell["Compute derivatives and export:", "Text",
+ CellChangeTimes->{{3.686570226309884*^9, 3.686570232258616*^9}}],
 
 Cell[CellGroupData[{
 
@@ -126,81 +132,81 @@ Cell[BoxData[{
    3.684220836576507*^9, 3.684220837463631*^9}, {3.685431809624558*^9, 
    3.6854318308911157`*^9}, 3.6856912465696325`*^9, 3.6856918480495405`*^9}],
 
-Cell[BoxData["\<\"C:\\\\Users\\\\Paul\\\\Dropbox\\\\Paul\\\\\
+Cell[BoxData["\<\"C:\\\\Users\\\\Paul'Masterxilo'\\\\Dropbox\\\\Paul\\\\\
 MasterarbeitShared\\\\Research\\\\InfiniTAM7\\\\sopd\\\\realf\\\\lengthz.cpp\"\
 \>"], "Output",
  CellChangeTimes->{{3.6841301881220856`*^9, 3.6841301936229587`*^9}, {
    3.6842201793071632`*^9, 3.6842201953211746`*^9}, 3.6854313729666286`*^9, 
    3.685431437270999*^9, 3.6854324391123185`*^9, 3.685436720370811*^9, 
-   3.685691341142951*^9, 3.685697978435849*^9}],
+   3.685691341142951*^9, 3.685697978435849*^9, 3.6865702372230825`*^9}],
 
-Cell[BoxData["\<\"C:\\\\Users\\\\Paul\\\\Dropbox\\\\Paul\\\\\
+Cell[BoxData["\<\"C:\\\\Users\\\\Paul'Masterxilo'\\\\Dropbox\\\\Paul\\\\\
 MasterarbeitShared\\\\Research\\\\InfiniTAM7\\\\sopd\\\\realf\\\\lengthfz.cpp\
 \"\>"], "Output",
  CellChangeTimes->{{3.6841301881220856`*^9, 3.6841301936229587`*^9}, {
    3.6842201793071632`*^9, 3.6842201953211746`*^9}, 3.6854313729666286`*^9, 
    3.685431437270999*^9, 3.6854324391123185`*^9, 3.685436720370811*^9, 
-   3.685691341142951*^9, 3.685697978467101*^9}],
+   3.685691341142951*^9, 3.685697978435849*^9, 3.6865702373510914`*^9}],
 
-Cell[BoxData["\<\"C:\\\\Users\\\\Paul\\\\Dropbox\\\\Paul\\\\\
+Cell[BoxData["\<\"C:\\\\Users\\\\Paul'Masterxilo'\\\\Dropbox\\\\Paul\\\\\
 MasterarbeitShared\\\\Research\\\\InfiniTAM7\\\\sopd\\\\realf\\\\f.cpp\"\>"], \
 "Output",
  CellChangeTimes->{{3.6841301881220856`*^9, 3.6841301936229587`*^9}, {
    3.6842201793071632`*^9, 3.6842201953211746`*^9}, 3.6854313729666286`*^9, 
    3.685431437270999*^9, 3.6854324391123185`*^9, 3.685436720370811*^9, 
-   3.685691341142951*^9, 3.685697978764004*^9}],
+   3.685691341142951*^9, 3.685697978435849*^9, 3.6865702377552357`*^9}],
 
 Cell[BoxData[
  TemplateBox[{
   "StringTrim","strse",
    "\"String or list of strings expected at position \\!\\(\\*RowBox[{\\\"1\\\
 \"}]\\) in \\!\\(\\*RowBox[{\\\"StringTrim\\\", \\\"[\\\", \\\"0\\\", \\\"]\\\
-\"}]\\).\"",2,173,23,25661037587355059239,"Local"},
+\"}]\\).\"",2,138,16,28177125501455299352,"Local"},
   "MessageTemplate"]], "Message", "MSG",
  CellChangeTimes->{3.6854313860130777`*^9, 3.6854314811670294`*^9, 
   3.685432535632387*^9, 3.685436762759601*^9, 3.68569147456299*^9, 
-  3.685698114325049*^9}],
+  3.685698114325049*^9, 3.686570632311038*^9}],
 
 Cell[BoxData[
  TemplateBox[{
   "StringTrim","strse",
    "\"String or list of strings expected at position \\!\\(\\*RowBox[{\\\"1\\\
 \"}]\\) in \\!\\(\\*RowBox[{\\\"StringTrim\\\", \\\"[\\\", \\\"1\\\", \\\"]\\\
-\"}]\\).\"",2,173,24,25661037587355059239,"Local"},
+\"}]\\).\"",2,138,17,28177125501455299352,"Local"},
   "MessageTemplate"]], "Message", "MSG",
  CellChangeTimes->{3.6854313860130777`*^9, 3.6854314811670294`*^9, 
   3.685432535632387*^9, 3.685436762759601*^9, 3.68569147456299*^9, 
-  3.685698114348078*^9}],
+  3.685698114325049*^9, 3.686570632389168*^9}],
 
 Cell[BoxData[
  TemplateBox[{
   "StringTrim","strse",
    "\"String or list of strings expected at position \\!\\(\\*RowBox[{\\\"1\\\
 \"}]\\) in \\!\\(\\*RowBox[{\\\"StringTrim\\\", \\\"[\\\", \\\"2\\\", \\\"]\\\
-\"}]\\).\"",2,173,25,25661037587355059239,"Local"},
+\"}]\\).\"",2,138,18,28177125501455299352,"Local"},
   "MessageTemplate"]], "Message", "MSG",
  CellChangeTimes->{3.6854313860130777`*^9, 3.6854314811670294`*^9, 
   3.685432535632387*^9, 3.685436762759601*^9, 3.68569147456299*^9, 
-  3.6856981143640976`*^9}],
+  3.685698114325049*^9, 3.6865706324047947`*^9}],
 
 Cell[BoxData[
  TemplateBox[{
   "General","stop",
    "\"Further output of \\!\\(\\*StyleBox[RowBox[{\\\"StringTrim\\\", \
 \\\"::\\\", \\\"strse\\\"}], \\\"MessageName\\\"]\\) will be suppressed \
-during this calculation.\"",2,173,26,25661037587355059239,"Local"},
+during this calculation.\"",2,138,19,28177125501455299352,"Local"},
   "MessageTemplate"]], "Message", "MSG",
  CellChangeTimes->{3.6854313860130777`*^9, 3.6854314811670294`*^9, 
   3.685432535632387*^9, 3.685436762759601*^9, 3.68569147456299*^9, 
-  3.685698114387127*^9}],
+  3.685698114325049*^9, 3.686570632420419*^9}],
 
-Cell[BoxData["\<\"C:\\\\Users\\\\Paul\\\\Dropbox\\\\Paul\\\\\
+Cell[BoxData["\<\"C:\\\\Users\\\\Paul'Masterxilo'\\\\Dropbox\\\\Paul\\\\\
 MasterarbeitShared\\\\Research\\\\InfiniTAM7\\\\sopd\\\\realf\\\\df.cpp\"\>"],\
  "Output",
  CellChangeTimes->{{3.6841301881220856`*^9, 3.6841301936229587`*^9}, {
    3.6842201793071632`*^9, 3.6842201953211746`*^9}, 3.6854313729666286`*^9, 
    3.685431437270999*^9, 3.6854324391123185`*^9, 3.685436720370811*^9, 
-   3.685691341142951*^9, 3.6856981144472017`*^9}]
+   3.685691341142951*^9, 3.685697978435849*^9, 3.686570632605773*^9}]
 }, Open  ]]
 }, Open  ]],
 
@@ -209,6 +215,12 @@ Cell[CellGroupData[{
 Cell["Generating *sigma* almost ready-to-use", "Chapter",
  CellChangeTimes->{{3.6842203810002427`*^9, 3.684220392736888*^9}, {
   3.685431279410179*^9, 3.6854312805196*^9}}],
+
+Cell["\<\
+This function changes rarely (...), so making this more efficient is low \
+priority.\
+\>", "Text",
+ CellChangeTimes->{{3.6865701315753765`*^9, 3.686570148587473*^9}}],
 
 Cell[CellGroupData[{
 
@@ -287,7 +299,7 @@ Cell[BoxData["\<\"J:\\\\Masterarbeit\\\\Implementation\\\\InfiniTAM6\\\\realf\
 }, Open  ]]
 }, Open  ]]
 },
-WindowSize->{944, 1021},
+WindowSize->{784, 794},
 WindowMargins->{{Automatic, 0}, {Automatic, 0}},
 FrontEndVersion->"11.0 for Microsoft Windows (64-bit) (July 28, 2016)",
 StyleDefinitions->"Default.nb"
@@ -304,33 +316,36 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[580, 22, 158, 2, 64, "Chapter"],
-Cell[741, 26, 1270, 33, 147, "Input"]
+Cell[580, 22, 158, 2, 88, "Chapter"],
+Cell[741, 26, 1270, 33, 182, "Input"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[2048, 64, 222, 3, 64, "Chapter"],
-Cell[2273, 69, 167, 2, 30, "Text"],
+Cell[2048, 64, 222, 3, 88, "Chapter"],
+Cell[2273, 69, 167, 2, 35, "Text"],
+Cell[2443, 73, 103, 1, 35, "Text"],
 Cell[CellGroupData[{
-Cell[2465, 75, 391, 9, 33, "Input"],
-Cell[2859, 86, 150, 2, 30, "Output"]
+Cell[2571, 78, 391, 9, 62, "Input"],
+Cell[2965, 89, 150, 2, 37, "Output"]
 }, Open  ]],
+Cell[3130, 94, 113, 1, 35, "Text"],
 Cell[CellGroupData[{
-Cell[3046, 93, 1500, 33, 118, "Input"],
-Cell[4549, 128, 425, 6, 30, "Output"],
-Cell[4977, 136, 426, 6, 30, "Output"],
-Cell[5406, 144, 419, 6, 30, "Output"],
-Cell[5828, 152, 464, 9, 22, "Message"],
-Cell[6295, 163, 464, 9, 22, "Message"],
-Cell[6762, 174, 466, 9, 22, "Message"],
-Cell[7231, 185, 464, 9, 22, "Message"],
-Cell[7698, 196, 422, 6, 30, "Output"]
+Cell[3268, 99, 1500, 33, 206, "Input"],
+Cell[4771, 134, 461, 6, 62, "Output"],
+Cell[5235, 142, 462, 6, 62, "Output"],
+Cell[5700, 150, 455, 6, 62, "Output"],
+Cell[6158, 158, 486, 9, 26, "Message"],
+Cell[6647, 169, 486, 9, 26, "Message"],
+Cell[7136, 180, 488, 9, 26, "Message"],
+Cell[7627, 191, 486, 9, 26, "Message"],
+Cell[8116, 202, 454, 6, 62, "Output"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[8169, 208, 172, 2, 64, "Chapter"],
+Cell[8619, 214, 172, 2, 88, "Chapter"],
+Cell[8794, 218, 176, 4, 35, "Text"],
 Cell[CellGroupData[{
-Cell[8366, 214, 2480, 64, 408, "Input"],
-Cell[10849, 280, 305, 5, 30, "Output"]
+Cell[8995, 226, 2480, 64, 494, "Input"],
+Cell[11478, 292, 305, 5, 37, "Output"]
 }, Open  ]]
 }, Open  ]]
 }

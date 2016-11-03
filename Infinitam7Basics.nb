@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[    926566,      14566]
-NotebookOptionsPosition[    922266,      14427]
-NotebookOutlinePosition[    922606,      14442]
-CellTagsIndexPosition[    922563,      14439]
+NotebookDataLength[    933001,      14693]
+NotebookOptionsPosition[    928237,      14541]
+NotebookOutlinePosition[    928577,      14556]
+CellTagsIndexPosition[    928534,      14553]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -38,7 +38,9 @@ Cell[BoxData[
 Cell[BoxData["\<\"C:\\\\Users\\\\Paul\\\\Dropbox\\\\Paul\\\\\
 MasterarbeitShared\\\\Research\\\\InfiniTAM7\\\\temp\"\>"], "Output",
  CellChangeTimes->{3.68562185236703*^9, 3.6856226053426995`*^9, 
-  3.685623011432378*^9, 3.685693155358943*^9, 3.685988881834386*^9}]
+  3.685623011432378*^9, 3.685693155358943*^9, 3.685988881834386*^9, 
+  3.6860640687882366`*^9, 3.6860641032336063`*^9, 3.68659200848468*^9, 
+  3.6865920638715906`*^9, 3.6866734809360695`*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -70,13 +72,13 @@ Cell[BoxData["\<\"relief\"\>"], "Output",
  CellChangeTimes->{
   3.685614184158842*^9, 3.685622608128334*^9, {3.6856230066412215`*^9, 
    3.6856230138918667`*^9}, {3.685693156147546*^9, 3.6856932002913446`*^9}, 
-   3.685988882240653*^9}],
+   3.685988882240653*^9, 3.6860641032446775`*^9, 3.686673481873608*^9}],
 
 Cell[BoxData["40"], "Output",
  CellChangeTimes->{
   3.685614184158842*^9, 3.685622608128334*^9, {3.6856230066412215`*^9, 
    3.6856230138918667`*^9}, {3.685693156147546*^9, 3.6856932002913446`*^9}, 
-   3.685988882662546*^9}],
+   3.685988882240653*^9, 3.6860641032446775`*^9, 3.68667348192048*^9}],
 
 Cell[BoxData[
  InterpretationBox[
@@ -297,20 +299,20 @@ Cell[BoxData[
     DynamicModuleValues:>{}], "]"}],
   TestResultObject[
    Association[
-   "TestIndex" -> 1, "TestID" -> None, "Outcome" -> "Success", "Input" -> 
+   "TestIndex" -> 5, "TestID" -> None, "Outcome" -> "Success", "Input" -> 
     HoldForm[
       Length[$CellContext`$views]], "ExpectedOutput" -> HoldForm[40], 
     "ActualOutput" -> HoldForm[40], "ExpectedMessages" -> {}, 
     "ActualMessages" -> {}, "AbsoluteTimeUsed" -> 
     Quantity[0``7.1505149978319915, "Seconds"], "CPUTimeUsed" -> 
-    Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[4120, "Bytes"]]],
+    Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[32, "Bytes"]]],
   Editable->False,
   SelectWithContents->True,
   Selectable->False]], "Output",
  CellChangeTimes->{
   3.685614184158842*^9, 3.685622608128334*^9, {3.6856230066412215`*^9, 
    3.6856230138918667`*^9}, {3.685693156147546*^9, 3.6856932002913446`*^9}, 
-   3.6859888834263277`*^9}]
+   3.685988882240653*^9, 3.6860641032446775`*^9, 3.6866734819673586`*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -323,7 +325,7 @@ Cell[CellGroupData[{
 Cell[BoxData[{
  RowBox[{
   RowBox[{"$scene", "=", 
-   RowBox[{"InfiniTAM2CreateScene", "[", "0.005", "]"}]}], 
+   RowBox[{"InfiniTAM2CreateScene", "[", "0.0025", "]"}]}], 
   ";"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{"InfiniTAM2SceneExistsQ", "@", 
@@ -331,7 +333,8 @@ Cell[BoxData[{
    "False"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{"InfiniTAM2SceneExistsQ", "@", "$scene"}], "~", "VerificationTest", 
-  "~", "True"}]}], "Input"],
+  "~", "True"}]}], "Input",
+ CellChangeTimes->{3.6866735828476753`*^9}],
 
 Cell[BoxData[
  InterpretationBox[
@@ -356,9 +359,8 @@ Cell[BoxData[
           
           ImageSize->
            Dynamic[{
-            Automatic, 
-             3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-              Magnification])}]], 
+            Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]}]], 
          GraphicsBox[InsetBox[
            PaneBox[
             
@@ -369,9 +371,8 @@ Cell[BoxData[
             
             ImageSize->
              Dynamic[{
-              Automatic, 
-               3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-                Magnification])}]]],
+              Automatic, 3.5 CurrentValue["FontCapHeight"]/
+               AbsoluteCurrentValue[Magnification]}]]],
           AspectRatio->1,
           Axes->False,
           Background->GrayLevel[0.93],
@@ -382,8 +383,8 @@ Cell[BoxData[
           FrameTicks->None,
           ImageSize->{Automatic, 
             Dynamic[
-            3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-              Magnification])]},
+            3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]]},
           PlotRange->{{0, 1}, {0, 1}}], GridBox[{
            {
             RowBox[{
@@ -428,9 +429,8 @@ Cell[BoxData[
           
           ImageSize->
            Dynamic[{
-            Automatic, 
-             3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-              Magnification])}]], 
+            Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]}]], 
          GraphicsBox[InsetBox[
            PaneBox[
             
@@ -440,9 +440,8 @@ Cell[BoxData[
             
             ImageSize->
              Dynamic[{
-              Automatic, 
-               3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-                Magnification])}]]],
+              Automatic, 3.5 CurrentValue["FontCapHeight"]/
+               AbsoluteCurrentValue[Magnification]}]]],
           AspectRatio->1,
           Axes->False,
           Background->GrayLevel[0.93],
@@ -453,8 +452,8 @@ Cell[BoxData[
           FrameTicks->None,
           ImageSize->{Automatic, 
             Dynamic[
-            3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-              Magnification])]},
+            3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]]},
           PlotRange->{{0, 1}, {0, 1}}], GridBox[{
            {
             RowBox[{
@@ -476,7 +475,7 @@ Cell[BoxData[
               PaneBox[
                TagBox[
                 RowBox[{"InfiniTAM2SceneExistsQ", "[", 
-                 RowBox[{"\[LeftSkeleton]", "1", "\[RightSkeleton]"}], "]"}],
+                 RowBox[{"InfiniTAM2Scene", "[", "2", "]"}], "]"}],
                 Short[#, 
                  Rational[2, 3]]& ],
                BaselinePosition->Baseline,
@@ -557,7 +556,7 @@ Cell[BoxData[
     DynamicModuleValues:>{}], "]"}],
   TestResultObject[
    Association[
-   "TestIndex" -> 5, "TestID" -> None, "Outcome" -> "Success", "Input" -> 
+   "TestIndex" -> 8, "TestID" -> None, "Outcome" -> "Success", "Input" -> 
     HoldForm[
       $CellContext`InfiniTAM2SceneExistsQ[
        $CellContext`InfiniTAM2Scene[2]]], "ExpectedOutput" -> HoldForm[False],
@@ -572,7 +571,8 @@ Cell[BoxData[
   3.68561448079055*^9, 3.685614535349715*^9, 3.6856146750534945`*^9, 
    3.6856147159387016`*^9, 3.6856226127510304`*^9, 3.685622707699164*^9, 
    3.6856227601104097`*^9, 3.6856228151476145`*^9, {3.6856229718393*^9, 
-   3.6856229965867844`*^9}, 3.6856232691193905`*^9}],
+   3.6856229965867844`*^9}, 3.6856232691193905`*^9, {3.68599216015073*^9, 
+   3.6859921669023094`*^9}, 3.686673528615343*^9, 3.686673584613369*^9}],
 
 Cell[BoxData[
  InterpretationBox[
@@ -597,9 +597,8 @@ Cell[BoxData[
           
           ImageSize->
            Dynamic[{
-            Automatic, 
-             3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-              Magnification])}]], 
+            Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]}]], 
          GraphicsBox[InsetBox[
            PaneBox[
             
@@ -610,9 +609,8 @@ Cell[BoxData[
             
             ImageSize->
              Dynamic[{
-              Automatic, 
-               3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-                Magnification])}]]],
+              Automatic, 3.5 CurrentValue["FontCapHeight"]/
+               AbsoluteCurrentValue[Magnification]}]]],
           AspectRatio->1,
           Axes->False,
           Background->GrayLevel[0.93],
@@ -623,8 +621,8 @@ Cell[BoxData[
           FrameTicks->None,
           ImageSize->{Automatic, 
             Dynamic[
-            3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-              Magnification])]},
+            3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]]},
           PlotRange->{{0, 1}, {0, 1}}], GridBox[{
            {
             RowBox[{
@@ -669,9 +667,8 @@ Cell[BoxData[
           
           ImageSize->
            Dynamic[{
-            Automatic, 
-             3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-              Magnification])}]], 
+            Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]}]], 
          GraphicsBox[InsetBox[
            PaneBox[
             
@@ -681,9 +678,8 @@ Cell[BoxData[
             
             ImageSize->
              Dynamic[{
-              Automatic, 
-               3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-                Magnification])}]]],
+              Automatic, 3.5 CurrentValue["FontCapHeight"]/
+               AbsoluteCurrentValue[Magnification]}]]],
           AspectRatio->1,
           Axes->False,
           Background->GrayLevel[0.93],
@@ -694,8 +690,8 @@ Cell[BoxData[
           FrameTicks->None,
           ImageSize->{Automatic, 
             Dynamic[
-            3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
-              Magnification])]},
+            3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+             Magnification]]},
           PlotRange->{{0, 1}, {0, 1}}], GridBox[{
            {
             RowBox[{
@@ -716,8 +712,7 @@ Cell[BoxData[
              TagBox[
               PaneBox[
                TagBox[
-                RowBox[{"InfiniTAM2SceneExistsQ", "[", 
-                 RowBox[{"\[LeftSkeleton]", "6", "\[RightSkeleton]"}], "]"}],
+                RowBox[{"InfiniTAM2SceneExistsQ", "[", "$scene", "]"}],
                 Short[#, 
                  Rational[2, 3]]& ],
                BaselinePosition->Baseline,
@@ -765,7 +760,7 @@ Cell[BoxData[
                TagBox[
                 
                 TemplateBox[{
-                 "0``7.1505149978319915","\"s\"","seconds","\"Seconds\""},
+                 "0``7.150514997831988","\"s\"","seconds","\"Seconds\""},
                  "Quantity"],
                 Short[#, 
                  Rational[2, 3]]& ],
@@ -798,12 +793,12 @@ Cell[BoxData[
     DynamicModuleValues:>{}], "]"}],
   TestResultObject[
    Association[
-   "TestIndex" -> 6, "TestID" -> None, "Outcome" -> "Success", "Input" -> 
+   "TestIndex" -> 9, "TestID" -> None, "Outcome" -> "Success", "Input" -> 
     HoldForm[
       $CellContext`InfiniTAM2SceneExistsQ[$CellContext`$scene]], 
     "ExpectedOutput" -> HoldForm[True], "ActualOutput" -> HoldForm[True], 
     "ExpectedMessages" -> {}, "ActualMessages" -> {}, "AbsoluteTimeUsed" -> 
-    Quantity[0``7.1505149978319915, "Seconds"], "CPUTimeUsed" -> 
+    Quantity[0``7.150514997831988, "Seconds"], "CPUTimeUsed" -> 
     Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[32, "Bytes"]]],
   Editable->False,
   SelectWithContents->True,
@@ -812,7 +807,8 @@ Cell[BoxData[
   3.68561448079055*^9, 3.685614535349715*^9, 3.6856146750534945`*^9, 
    3.6856147159387016`*^9, 3.6856226127510304`*^9, 3.685622707699164*^9, 
    3.6856227601104097`*^9, 3.6856228151476145`*^9, {3.6856229718393*^9, 
-   3.6856229965867844`*^9}, 3.685623269197517*^9}]
+   3.6856229965867844`*^9}, 3.6856232691193905`*^9, {3.68599216015073*^9, 
+   3.6859921669023094`*^9}, 3.686673528615343*^9, 3.686673584644621*^9}]
 }, Open  ]]
 }, Open  ]],
 
@@ -14011,10 +14007,11 @@ Cell[BoxData[
 Cell[BoxData[
  RowBox[{"InfiniTAM2DumpSceneVoxelPositionsBlockwise", "[", 
   RowBox[{
-  "$scene", ",", "\"\<_InfiniTAM2DumpSceneVoxelPositionsBlockwise.obj\>\""}], 
+  "$scene", ",", 
+   "\"\<_InfiniTAM2DumpSceneVoxelPositionsBlockwise_largetrunc.obj\>\""}], 
   "]"}]], "Input",
  CellChangeTimes->{{3.6856171751995707`*^9, 3.6856171776215324`*^9}, 
-   3.6857093519178443`*^9}]
+   3.6857093519178443`*^9, {3.6859921816227207`*^9, 3.685992184687042*^9}}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -14070,12 +14067,45 @@ Cell[BoxData["2212.730712890625`"], "Output",
  CellChangeTimes->{{3.685618728795869*^9, 3.6856187573980827`*^9}}]
 }, Open  ]],
 
+Cell[CellGroupData[{
+
 Cell[BoxData[
  RowBox[{"InfiniTAM2Refine", "[", 
   RowBox[{"$scene", ",", 
    RowBox[{"1.", "~", "Table", "~", "4"}], ",", 
    RowBox[{"1.", "~", "Table", "~", "3"}]}], "]"}]], "Input",
  CellChangeTimes->{{3.6856187598119106`*^9, 3.6856187678753653`*^9}}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "LinkObject","linkd",
+   "\"Unable to communicate with closed link \
+\\!\\(\\*RowBox[{\\\"LinkObject\\\", \\\"[\\\", \
+RowBox[{\\\"\\\\\\\"\\\\\\\\\\\\\\\"C:\\\\\\\\\\\\\\\\Users\\\\\\\\\\\\\\\\\
+Paul\\\\\\\\\\\\\\\\Dropbox\\\\\\\\\\\\\\\\Paul\\\\\\\\\\\\\\\\\
+MasterarbeitShared\\\\\\\\\\\\\\\\Research\\\\\\\\\\\\\\\\InfiniTAM7\\\\\\\\\\\
+\\\\\\x64cuda\\\\\\\\\\\\\\\\Debug\\\\\\\\\\\\\\\\InfiniTAM7Cuda.exe\\\\\\\\\\\
+\\\\\"\\\\\\\"\\\", \\\",\\\", \\\"432633\\\", \\\",\\\", \\\"10\\\"}], \\\"]\
+\\\"}]\\).\"",2,140,26,25662928399304609925,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.6859923660579767`*^9}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "UnexpectedMessages","msg",
+   "\"\\!\\(\\*TemplateBox[List[\\\"\\\\\\\"In InfiniTAM2Refine when called \
+as InfiniTAM2Refine[InfiniTAM2Scene[0], {1., 1., 1., 1.}, {1., 1., 1.}]. \\\\\
+\\\"\\\", \\\"\\\\\\\"\\\\\\\"\\\"], \
+\\\"RowDefault\\\"]\\)\\n\\!\\(\\*RowBox[{\\\"{\\\", \
+RowBox[{\\\"InfiniTAM2Refine\\\", \\\",\\\", \
+\\\"CatchMessagesAndTypeCheck\\\", \\\",\\\", \\\"MessageAbort\\\"}], \\\"}\\\
+\"}]\\)\"",2,140,27,25662928399304609925,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.6859923660892286`*^9}],
+
+Cell[BoxData["$Aborted"], "Output",
+ CellChangeTimes->{3.6859923660892286`*^9}]
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -14089,6 +14119,8 @@ Cell[BoxData["2150.514892578125`"], "Output",
  CellChangeTimes->{3.685618846781918*^9, 3.68561924365373*^9}]
 }, Open  ]],
 
+Cell[CellGroupData[{
+
 Cell[BoxData[{
  RowBox[{"InfiniTAM2SerializeScene", "[", 
   RowBox[{"$scene", ",", "\"\<scene.refined2.bin\>\""}], 
@@ -14098,7 +14130,89 @@ Cell[BoxData[{
   "$scene", ",", "\"\<scene.refined2.mesh_d_a\>\"", ",", "\"\<mesh_d_a\>\"", 
    ",", "0."}], "]"}]}], "Input",
  CellChangeTimes->{{3.6856188957210164`*^9, 3.685618915644787*^9}, 
-   3.6856932238910837`*^9, {3.6859911011379404`*^9, 3.6859911118619075`*^9}}]
+   3.6856932238910837`*^9, {3.6859911011379404`*^9, 3.6859911118619075`*^9}}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "LinkObject","linkn",
+   "\"Argument \\!\\(\\*RowBox[{\\\"LinkObject\\\", \\\"[\\\", RowBox[{\\\"\\\
+\\\\\"\\\\\\\\\\\\\\\"C:\\\\\\\\\\\\\\\\Users\\\\\\\\\\\\\\\\Paul\\\\\\\\\\\\\
+\\\\Dropbox\\\\\\\\\\\\\\\\Paul\\\\\\\\\\\\\\\\MasterarbeitShared\\\\\\\\\\\\\
+\\\\Research\\\\\\\\\\\\\\\\InfiniTAM7\\\\\\\\\\\\\\\\x64cuda\\\\\\\\\\\\\\\\\
+Debug\\\\\\\\\\\\\\\\InfiniTAM7Cuda.exe\\\\\\\\\\\\\\\"\\\\\\\"\\\", \
+\\\",\\\", \\\"432633\\\", \\\",\\\", \\\"10\\\"}], \\\"]\\\"}]\\) in \
+\\!\\(\\*RowBox[{\\\"LinkWrite\\\", \\\"[\\\", RowBox[{RowBox[{\\\"LinkObject\
+\\\", \\\"[\\\", \
+RowBox[{\\\"\\\\\\\"\\\\\\\\\\\\\\\"C:\\\\\\\\\\\\\\\\Users\\\\\\\\\\\\\\\\\
+Paul\\\\\\\\\\\\\\\\Dropbox\\\\\\\\\\\\\\\\Paul\\\\\\\\\\\\\\\\\
+MasterarbeitShared\\\\\\\\\\\\\\\\Research\\\\\\\\\\\\\\\\InfiniTAM7\\\\\\\\\\\
+\\\\\\x64cuda\\\\\\\\\\\\\\\\Debug\\\\\\\\\\\\\\\\InfiniTAM7Cuda.exe\\\\\\\\\\\
+\\\\\"\\\\\\\"\\\", \\\",\\\", \\\"432633\\\", \\\",\\\", \\\"10\\\"}], \\\"]\
+\\\"}], \\\",\\\", RowBox[{\\\"CallPacket\\\", \\\"[\\\", RowBox[{\\\"5\\\", \
+\\\",\\\", RowBox[{\\\"{\\\", RowBox[{\\\"0\\\", \\\",\\\", \
+\\\"\\\\\\\"scene.refined2.bin\\\\\\\"\\\"}], \\\"}\\\"}]}], \\\"]\\\"}]}], \
+\\\"]\\\"}]\\) has an invalid LinkObject number; the link may be closed.\"",2,
+   141,28,25662928399304609925,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.685992366182982*^9}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "UnexpectedMessages","msg",
+   "\"\\!\\(\\*TemplateBox[List[\\\"\\\\\\\"In InfiniTAM2SerializeScene when \
+called as InfiniTAM2SerializeScene[InfiniTAM2Scene[0], scene.refined2.bin]. \
+\\\\\\\"\\\", \\\"\\\\\\\"\\\\\\\"\\\"], \
+\\\"RowDefault\\\"]\\)\\n\\!\\(\\*RowBox[{\\\"{\\\", \
+RowBox[{\\\"InfiniTAM2SerializeScene\\\", \\\",\\\", \
+\\\"CatchMessagesAndTypeCheck\\\", \\\",\\\", \\\"MessageAbort\\\"}], \\\"}\\\
+\"}]\\)\"",2,141,29,25662928399304609925,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.685992366182982*^9}],
+
+Cell[BoxData["$Aborted"], "Output",
+ CellChangeTimes->{3.6859923662142324`*^9}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "LinkObject","linkn",
+   "\"Argument \\!\\(\\*RowBox[{\\\"LinkObject\\\", \\\"[\\\", RowBox[{\\\"\\\
+\\\\\"\\\\\\\\\\\\\\\"C:\\\\\\\\\\\\\\\\Users\\\\\\\\\\\\\\\\Paul\\\\\\\\\\\\\
+\\\\Dropbox\\\\\\\\\\\\\\\\Paul\\\\\\\\\\\\\\\\MasterarbeitShared\\\\\\\\\\\\\
+\\\\Research\\\\\\\\\\\\\\\\InfiniTAM7\\\\\\\\\\\\\\\\x64cuda\\\\\\\\\\\\\\\\\
+Debug\\\\\\\\\\\\\\\\InfiniTAM7Cuda.exe\\\\\\\\\\\\\\\"\\\\\\\"\\\", \
+\\\",\\\", \\\"432633\\\", \\\",\\\", \\\"10\\\"}], \\\"]\\\"}]\\) in \
+\\!\\(\\*RowBox[{\\\"LinkWrite\\\", \\\"[\\\", RowBox[{RowBox[{\\\"LinkObject\
+\\\", \\\"[\\\", \
+RowBox[{\\\"\\\\\\\"\\\\\\\\\\\\\\\"C:\\\\\\\\\\\\\\\\Users\\\\\\\\\\\\\\\\\
+Paul\\\\\\\\\\\\\\\\Dropbox\\\\\\\\\\\\\\\\Paul\\\\\\\\\\\\\\\\\
+MasterarbeitShared\\\\\\\\\\\\\\\\Research\\\\\\\\\\\\\\\\InfiniTAM7\\\\\\\\\\\
+\\\\\\x64cuda\\\\\\\\\\\\\\\\Debug\\\\\\\\\\\\\\\\InfiniTAM7Cuda.exe\\\\\\\\\\\
+\\\\\"\\\\\\\"\\\", \\\",\\\", \\\"432633\\\", \\\",\\\", \\\"10\\\"}], \\\"]\
+\\\"}], \\\",\\\", RowBox[{\\\"CallPacket\\\", \\\"[\\\", RowBox[{\\\"11\\\", \
+\\\",\\\", RowBox[{\\\"{\\\", RowBox[{\\\"0\\\", \\\",\\\", \
+\\\"\\\\\\\"scene.refined2.mesh_d_a\\\\\\\"\\\", \\\",\\\", \
+\\\"\\\\\\\"mesh_d_a\\\\\\\"\\\", \\\",\\\", \\\"0.`\\\"}], \\\"}\\\"}]}], \\\
+\"]\\\"}]}], \\\"]\\\"}]\\) has an invalid LinkObject number; the link may be \
+closed.\"",2,142,30,25662928399304609925,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.6859923662142324`*^9}],
+
+Cell[BoxData[
+ TemplateBox[{
+  "UnexpectedMessages","msg",
+   "\"\\!\\(\\*TemplateBox[List[\\\"\\\\\\\"In InfiniTAM2MeshScene when \
+called as InfiniTAM2MeshScene[InfiniTAM2Scene[0], scene.refined2.mesh_d_a, \
+mesh_d_a, 0.]. \\\\\\\"\\\", \\\"\\\\\\\"\\\\\\\"\\\"], \
+\\\"RowDefault\\\"]\\)\\n\\!\\(\\*RowBox[{\\\"{\\\", \
+RowBox[{\\\"InfiniTAM2MeshScene\\\", \\\",\\\", \\\"CatchMessagesAndTypeCheck\
+\\\", \\\",\\\", \\\"MessageAbort\\\"}], \\\"}\\\"}]\\)\"",2,142,31,
+   25662928399304609925,"Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.6859923662298594`*^9}],
+
+Cell[BoxData["$Aborted"], "Output",
+ CellChangeTimes->{3.6859923662455015`*^9}]
+}, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -14446,125 +14560,138 @@ Cell[580, 22, 119, 1, 90, "Title"],
 Cell[702, 25, 118, 1, 30, "Text"],
 Cell[CellGroupData[{
 Cell[845, 30, 231, 5, 30, "Input"],
-Cell[1079, 37, 265, 3, 30, "Output"]
+Cell[1079, 37, 388, 5, 30, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[1381, 45, 789, 21, 92, "Input"],
-Cell[2173, 68, 236, 4, 30, "Output"],
-Cell[2412, 74, 224, 4, 30, "Output"],
-Cell[2639, 80, 8179, 232, 72, "Output"]
+Cell[1504, 47, 789, 21, 92, "Input"],
+Cell[2296, 70, 282, 4, 30, "Output"],
+Cell[2581, 76, 269, 4, 30, "Output"],
+Cell[2853, 82, 8223, 232, 72, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[10855, 317, 95, 1, 64, "Chapter"],
+Cell[11113, 319, 95, 1, 64, "Chapter"],
 Cell[CellGroupData[{
-Cell[10975, 322, 429, 11, 69, "Input"],
-Cell[11407, 335, 8487, 239, 72, "Output"],
-Cell[19897, 576, 8461, 238, 72, "Output"]
+Cell[11233, 324, 474, 12, 69, "Input"],
+Cell[11710, 338, 8494, 236, 72, "Output"],
+Cell[20207, 576, 8416, 234, 72, "Output"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[28407, 820, 95, 1, 64, "Chapter"],
-Cell[28505, 823, 239, 4, 30, "Input"]
+Cell[28672, 816, 95, 1, 64, "Chapter"],
+Cell[28770, 819, 239, 4, 30, "Input"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[28781, 832, 96, 1, 64, "Chapter"],
-Cell[28880, 835, 202, 4, 33, "Input"],
+Cell[29046, 828, 96, 1, 64, "Chapter"],
+Cell[29145, 831, 202, 4, 33, "Input"],
 Cell[CellGroupData[{
-Cell[29107, 843, 220, 5, 33, "Input"],
-Cell[29330, 850, 10894, 270, 151, "Output"]
+Cell[29372, 839, 220, 5, 33, "Input"],
+Cell[29595, 846, 10894, 270, 151, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[40261, 1125, 135, 2, 30, "Input"],
-Cell[40399, 1129, 864917, 12826, 374, "Output"]
+Cell[40526, 1121, 135, 2, 30, "Input"],
+Cell[40664, 1125, 864917, 12826, 374, "Output"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[905365, 13961, 100, 1, 64, "Chapter"],
-Cell[905468, 13964, 243, 4, 33, "Input"],
+Cell[905630, 13957, 100, 1, 64, "Chapter"],
+Cell[905733, 13960, 243, 4, 33, "Input"],
 Cell[CellGroupData[{
-Cell[905736, 13972, 202, 5, 30, "Input"],
-Cell[905941, 13979, 509, 7, 30, "Output"]
+Cell[906001, 13968, 202, 5, 30, "Input"],
+Cell[906206, 13975, 509, 7, 30, "Output"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[906499, 13992, 96, 1, 64, "Chapter"],
-Cell[906598, 13995, 269, 6, 33, "Input"],
-Cell[906870, 14003, 256, 5, 33, "Input"],
-Cell[907129, 14010, 281, 6, 33, "Input"]
+Cell[906764, 13988, 96, 1, 64, "Chapter"],
+Cell[906863, 13991, 269, 6, 33, "Input"],
+Cell[907135, 13999, 256, 5, 33, "Input"],
+Cell[907394, 14006, 344, 7, 33, "Input"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[907447, 14021, 112, 1, 64, "Chapter"],
-Cell[907562, 14024, 157, 3, 30, "Input"],
-Cell[907722, 14029, 194, 3, 33, "Input"],
-Cell[907919, 14034, 98, 1, 30, "Text"],
+Cell[907775, 14018, 112, 1, 64, "Chapter"],
+Cell[907890, 14021, 157, 3, 30, "Input"],
+Cell[908050, 14026, 194, 3, 33, "Input"],
+Cell[908247, 14031, 98, 1, 30, "Text"],
 Cell[CellGroupData[{
-Cell[908042, 14039, 206, 5, 30, "Input"],
-Cell[908251, 14046, 160, 3, 30, "Output"]
+Cell[908370, 14036, 206, 5, 30, "Input"],
+Cell[908579, 14043, 160, 3, 30, "Output"]
 }, Open  ]],
-Cell[908426, 14052, 229, 5, 33, "Input"],
+Cell[908754, 14049, 229, 5, 33, "Input"],
 Cell[CellGroupData[{
-Cell[908680, 14061, 260, 5, 33, "Input"],
-Cell[908943, 14068, 113, 1, 30, "Output"]
-}, Open  ]],
-Cell[909071, 14072, 255, 5, 33, "Input"],
-Cell[CellGroupData[{
-Cell[909351, 14081, 190, 4, 33, "Input"],
-Cell[909544, 14087, 108, 1, 30, "Output"]
-}, Open  ]],
-Cell[909667, 14091, 455, 9, 55, "Input"]
+Cell[909008, 14058, 260, 5, 33, "Input"],
+Cell[909271, 14065, 113, 1, 30, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[910159, 14105, 98, 1, 64, "Chapter"],
-Cell[910260, 14108, 335, 8, 30, "Input"],
-Cell[CellGroupData[{
-Cell[910620, 14120, 143, 2, 30, "Input"],
-Cell[910766, 14124, 323, 10, 30, "Output"]
+Cell[909421, 14071, 255, 5, 33, "Input"],
+Cell[909679, 14078, 669, 12, 41, "Message"],
+Cell[910351, 14092, 571, 11, 41, "Message"],
+Cell[910925, 14105, 79, 1, 30, "Output"]
 }, Open  ]],
-Cell[911104, 14137, 379, 7, 33, "Input"],
-Cell[911486, 14146, 256, 6, 30, "Input"],
-Cell[911745, 14154, 223, 4, 33, "Input"],
-Cell[911971, 14160, 87, 2, 30, "Input"],
-Cell[912061, 14164, 178, 3, 33, "Input"],
 Cell[CellGroupData[{
-Cell[912264, 14171, 189, 5, 30, "Input"],
-Cell[912456, 14178, 184, 3, 30, "Output"]
+Cell[911041, 14111, 190, 4, 33, "Input"],
+Cell[911234, 14117, 108, 1, 30, "Output"]
 }, Open  ]],
-Cell[912655, 14184, 179, 4, 33, "Input"],
-Cell[912837, 14190, 193, 4, 30, "Text"],
 Cell[CellGroupData[{
-Cell[913055, 14198, 543, 11, 55, "Input"],
-Cell[913601, 14211, 733, 13, 41, "Message"],
-Cell[914337, 14226, 640, 12, 41, "Message"],
-Cell[914980, 14240, 148, 2, 30, "Output"],
-Cell[915131, 14244, 1556, 23, 95, "Message"],
-Cell[916690, 14269, 676, 13, 59, "Message"],
-Cell[917369, 14284, 150, 2, 30, "Output"]
+Cell[911379, 14123, 455, 9, 55, "Input"],
+Cell[911837, 14134, 1412, 22, 95, "Message"],
+Cell[913252, 14158, 581, 11, 41, "Message"],
+Cell[913836, 14171, 79, 1, 30, "Output"],
+Cell[913918, 14174, 1489, 23, 95, "Message"],
+Cell[915410, 14199, 589, 11, 59, "Message"],
+Cell[916002, 14212, 79, 1, 30, "Output"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[917568, 14292, 99, 1, 64, "Chapter"],
-Cell[917670, 14295, 636, 13, 96, "Input"],
-Cell[918309, 14310, 600, 13, 115, "Input"],
+Cell[916130, 14219, 98, 1, 64, "Chapter"],
+Cell[916231, 14222, 335, 8, 30, "Input"],
 Cell[CellGroupData[{
-Cell[918934, 14327, 129, 3, 33, "Input"],
-Cell[919066, 14332, 113, 2, 30, "Output"]
+Cell[916591, 14234, 143, 2, 30, "Input"],
+Cell[916737, 14238, 323, 10, 30, "Output"]
+}, Open  ]],
+Cell[917075, 14251, 379, 7, 33, "Input"],
+Cell[917457, 14260, 256, 6, 30, "Input"],
+Cell[917716, 14268, 223, 4, 33, "Input"],
+Cell[917942, 14274, 87, 2, 30, "Input"],
+Cell[918032, 14278, 178, 3, 33, "Input"],
+Cell[CellGroupData[{
+Cell[918235, 14285, 189, 5, 30, "Input"],
+Cell[918427, 14292, 184, 3, 30, "Output"]
+}, Open  ]],
+Cell[918626, 14298, 179, 4, 33, "Input"],
+Cell[918808, 14304, 193, 4, 30, "Text"],
+Cell[CellGroupData[{
+Cell[919026, 14312, 543, 11, 55, "Input"],
+Cell[919572, 14325, 733, 13, 41, "Message"],
+Cell[920308, 14340, 640, 12, 41, "Message"],
+Cell[920951, 14354, 148, 2, 30, "Output"],
+Cell[921102, 14358, 1556, 23, 95, "Message"],
+Cell[922661, 14383, 676, 13, 59, "Message"],
+Cell[923340, 14398, 150, 2, 30, "Output"]
+}, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[919216, 14339, 335, 8, 55, "Input"],
-Cell[919554, 14349, 137, 2, 30, "Output"],
-Cell[919694, 14353, 135, 2, 30, "Output"]
-}, Open  ]],
-Cell[919844, 14358, 183, 3, 33, "Input"],
-Cell[920030, 14363, 183, 3, 33, "Input"],
-Cell[920216, 14368, 188, 3, 33, "Input"],
-Cell[920407, 14373, 190, 3, 33, "Input"],
-Cell[920600, 14378, 340, 5, 33, "Input"],
-Cell[920943, 14385, 280, 6, 33, "Input"],
-Cell[921226, 14393, 101, 1, 30, "Text"],
+Cell[923539, 14406, 99, 1, 64, "Chapter"],
+Cell[923641, 14409, 636, 13, 96, "Input"],
+Cell[924280, 14424, 600, 13, 115, "Input"],
 Cell[CellGroupData[{
-Cell[921352, 14398, 642, 16, 96, "Input"],
-Cell[921997, 14416, 113, 2, 30, "Output"],
-Cell[922113, 14420, 113, 2, 30, "Output"]
+Cell[924905, 14441, 129, 3, 33, "Input"],
+Cell[925037, 14446, 113, 2, 30, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[925187, 14453, 335, 8, 55, "Input"],
+Cell[925525, 14463, 137, 2, 30, "Output"],
+Cell[925665, 14467, 135, 2, 30, "Output"]
+}, Open  ]],
+Cell[925815, 14472, 183, 3, 33, "Input"],
+Cell[926001, 14477, 183, 3, 33, "Input"],
+Cell[926187, 14482, 188, 3, 33, "Input"],
+Cell[926378, 14487, 190, 3, 33, "Input"],
+Cell[926571, 14492, 340, 5, 33, "Input"],
+Cell[926914, 14499, 280, 6, 33, "Input"],
+Cell[927197, 14507, 101, 1, 30, "Text"],
+Cell[CellGroupData[{
+Cell[927323, 14512, 642, 16, 96, "Input"],
+Cell[927968, 14530, 113, 2, 30, "Output"],
+Cell[928084, 14534, 113, 2, 30, "Output"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]

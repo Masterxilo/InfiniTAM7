@@ -1,0 +1,127 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 11.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      4290,        119]
+NotebookOptionsPosition[      4011,        105]
+NotebookOutlinePosition[      4352,        120]
+CellTagsIndexPosition[      4309,        117]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"{", "\[IndentingNewLine]", 
+      RowBox[{
+      "void", "\[IndentingNewLine]", ",", "assertrestricted", 
+       "\[IndentingNewLine]", ",", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"{", 
+            RowBox[{"void", " ", ",", "const", ",", 
+             RowBox[{"*", 
+              RowBox[{",", "const"}]}]}], "}"}], ",", " ", "a"}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"{", 
+            RowBox[{"void", ",", " ", "const", ",", 
+             RowBox[{"*", 
+              RowBox[{",", "const"}]}]}], " ", "}"}], ",", "b"}], "}"}]}], 
+        "}"}], ",", 
+       "\"\<Basic check for __restrict annotated arguments: Run this for \
+every pair of pointer arguments where either (or both) are \
+__restrict'ed\>\""}]}], ")"}], " ", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"assert", "[", 
+       RowBox[{
+        RowBox[{"a", "\[NotEqual]", "b"}], ",", 
+        "\"\<Pointers where assumed to be different (__restrict'ed even for \
+their lifetime), but where the same (initially). Undefined behaviour would \
+result: %p %p\>\"", ",", "a", ",", "b"}], "]"}], ";"}], "}"}]}], 
+   "\[IndentingNewLine]"}], "}"}]], "Input",
+ CellChangeTimes->{{3.6860580505792265`*^9, 3.686058098015315*^9}, {
+  3.6860581344918213`*^9, 3.6860581925915036`*^9}, {3.6860582852923985`*^9, 
+  3.6860582859486575`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"<|", "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{"\"\<outtype\>\"", "->", "void"}], "\[IndentingNewLine]", ",", 
+   RowBox[{"\"\<intype\>\"", "->", "LAUNCHKERNEL"}], "\[IndentingNewLine]", 
+   ",", 
+   RowBox[{"\"\<args\>\"", "->", 
+    RowBox[{"{", 
+     RowBox[{
+     "kernelFunction", ",", "gridDim", ",", "blockDim", ",", "VAARGS"}], 
+     "}"}]}], "\[IndentingNewLine]", ",", 
+   RowBox[{
+   "\"\<description\>\"", "\[Rule]", 
+    "\"\<Runs the CUDA-kernel kernelFunction with the given launch \
+configuration, passing VAARGS.\>\""}], "\[IndentingNewLine]", ",", 
+   RowBox[{"\"\<code\>\"", "->", 
+    RowBox[{"{", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"t0", "=", 
+       RowBox[{"clock", "[", "]"}]}], ";", 
+      RowBox[{"CUDALaunch", "[", 
+       RowBox[{
+       "kernelFunction", " ", ",", "gridDim", ",", "blockDim", ",", 
+        "VAARGS"}], "]"}], ";", 
+      RowBox[{"cudaDeviceSynchronize", "[", "]"}], ";", 
+      RowBox[{"printf", "[", 
+       RowBox[{"\"\<%s finished in %f s\\n\>\"", ",", 
+        RowBox[{"stringify", "[", "kernelFunction", "]"}], ",", 
+        RowBox[{
+         RowBox[{"toDouble", "[", 
+          RowBox[{
+           RowBox[{"clock", "[", "]"}], "-", "t0"}], "]"}], "/", 
+         RowBox[{"CLOCKSPERSEC", "[", "]"}]}]}], "]"}], ";", 
+      RowBox[{"cudaCheckLaunch", "[", 
+       RowBox[{
+        RowBox[{"stringify", "[", "kernelFunction", "]"}], ",", " ", 
+        "gridDim", " ", ",", " ", "blockDim", " ", ",", "FILE", ",", "LINE"}],
+        "]"}], ";"}], "\[IndentingNewLine]", "}"}]}]}], "\[IndentingNewLine]",
+   "|>"}]], "Input",
+ CellChangeTimes->{{3.686058515626212*^9, 3.6860586234479637`*^9}, {
+  3.686058655605195*^9, 3.686058696525818*^9}, {3.6860587372105503`*^9, 
+  3.686058767942519*^9}, {3.6860588394177322`*^9, 3.6860588670447617`*^9}, {
+  3.6860588996400223`*^9, 3.6860589719366236`*^9}, {3.6860590070381145`*^9, 
+  3.68605912331211*^9}, {3.6860610091287107`*^9, 3.68606104664592*^9}}]
+},
+WindowSize->{944, 591},
+WindowMargins->{{Automatic, 0}, {74, Automatic}},
+FrontEndVersion->"11.0 for Microsoft Windows (64-bit) (July 28, 2016)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 1463, 38, 202, "Input"],
+Cell[2024, 60, 1983, 43, 259, "Input"]
+}
+]
+*)
+

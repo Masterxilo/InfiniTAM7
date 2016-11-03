@@ -6,29 +6,27 @@ InfiniTAM 7
 * removes rendering and tracking
 * Compiles with and without CUDA (make it a C++ file to compile as c++).
 
-All cpu functionality is not thread-safe.
+All cpu functionality not labeled PURITY_PURE is not thread-safe.
+	And event
 For vs13/15 x64 and optionally CUDA 7.0, sm50.
 
 */
 
+// Ensure we are in a known environment
+#if !defined(_WIN64) || (_MSC_VER != 1800 && _MSC_VER != 1900) || !defined(_M_X64)
+#error Compile for windows intel x64, tested with visual studio 2013 and 2015. Also, cuda unified and __managed__ memory requires 64 bits.
+#endif
 
-// Custom headers
+#if defined(__CUDACC__)
+#if defined(__CUDA_ARCH__) && __CUDA_ARCH__ != 500
+#error Tested with sm5 only. In general, always use the latest cuda arch. Old versions dont support any amount of thread blocks being submitted at once.
+#endif
+#endif
+
 #include <paul.h>
 #include "cpputil.h"
 
-
-
-
-#if !defined(_WIN64) || _MSC_VER < 1800
-#error Compile for windows x64, tested with visual studio 2013 and up. Cuda __managed__ memory requires 64 bits.
-#endif
-
-
 #ifdef __CUDACC__
-
-#if defined(__CUDA_ARCH__) && __CUDA_ARCH__ < 500
-#error Always use the latest cuda arch. Old versions dont support any amount of thread blocks being submitted at once.
-#endif
 
 // CUDA Kernel launch and error reporting framework
 
@@ -50,10 +48,6 @@ dim3 _lastLaunch_gridDim, _lastLaunch_blockDim;
     cudaSafeCall(cudaDeviceSynchronize()); /* TODO synchronizing greatly alters the execution logic */\
     cudaSafeCall(cudaGetLastError());\
 }
-
-
-
-
 
 
 CPU_FUNCTION(void, reportCudaError, (cudaError err, const char * const expr, const char * const file, const int line), "") {
@@ -85,6 +79,7 @@ CPU_FUNCTION(void, reportCudaError, (cudaError err, const char * const expr, con
     }
 
 }
+
 CPU_FUNCTION(void, cudaCheckLaunch, (const char* const launchCommand, const char * const file, const int line), "") {
     auto err = cudaGetLastError();
     if (err == cudaSuccess) return;
@@ -143,11 +138,6 @@ CPU_FUNCTION(bool, cudaSafeCallImpl, (cudaError err, const char * const expr, co
 
 
 #endif
-
-
-// HACK to make intellisense shut up about illegal C++ 
-//#define LAUNCH_KERNEL(kernelFunction, gridDim, blockDim, arguments, ...) ((void)0)
-
 
 
 // Device agnostic atomics
@@ -217,7 +207,7 @@ FUNCTION(
 	void,
 	assert_restricted,
 	(void const* const a, void const* const b),
-	"") {
+	"Basic check for __restrict annotated arguments: Run this for every pair of pointer arguments where either (or both) are __restrict'ed") {
 	assert(a != b, "Pointers where assumed to be different (__restrict'ed even for their lifetime), but where the same (initially). Undefined behaviour would result: %p %p", a, b);
 }
 
@@ -352,6 +342,19 @@ FUNCTION(
 
 
 // Serialization infrastructure
+
+
+CPU_FUNCTION(FILE*, fopenrb, (const char* const fn), "does not close file") {
+    FILE* f; fopen_s(&f, fn, "rb");
+    assert(f, "failed to open %s for reading", fn);
+    return f;
+}
+
+CPU_FUNCTION(FILE*, fopenwb, (const char* const fn), "does not close file") {
+    FILE* f; fopen_s(&f, fn, "wb");
+    assert(f, "failed to open %s for writing", fn);
+    return f;
+}
 
 template<typename T>
 CPU_FUNCTION(void, binwrite, (ofstream& f, const T* const x), "") {
@@ -580,94 +583,6 @@ FUNCTION(void, assertApproxEqual, (
 
 
 
-template<typename T>
-CPU_FUNCTION(
-    bool
-    ,assertEachInRange
-    ,(
-    const vector<T>& v
-    , const T& min
-    , const T& max
-    )
-    ,"true if each element of v (of length len) is >= min, <= max, undefined otherwise"
-    , PURITY_PURE
-    ) {
-    for (const auto& x : v) {
-        assert(min <= x && x <= max, "assertEachInRange: out-of-range element found");
-    }
-    return true;
-}
-
-template<typename T>
-FUNCTION(
-	bool,
-	assertEachInRange,
-	(
-		_In_reads_(len) const T* v,
-		size_t len,
-		const T min,
-		const T max
-		),
-	"true if each element of v (of length len) is >= min, <= max, undefined otherwise"
-	, PURITY_PURE) {
-	assert(v);
-	while (len--) { // Note: len reduced once more, gets gigantic if len was already 0
-        assert(min <= *v && *v <= max, "assertEachInRange: out-of-range element found");
-		v++;
-	}
-	return true;
-}
-
-template<typename T>
-FUNCTION(
-	bool,
-	assertLessEqual,
-	(
-		_In_reads_(len) const T* v,
-		_In_ size_t len, // not const for implementation
-		const T max
-		),
-	"v <= max"
-	, PURITY_PURE) {
-	assert(v);
-	while (len--) { // Note: len reduced once more, gets gigantic if len was already 0
-		assert(*v <= max);
-		v++;
-	}
-	return true;
-}
-
-template<typename T>
-FUNCTION(
-	bool,
-	assertLess,
-	(
-		_In_reads_(len) const T* v,
-		size_t len,
-		const T max
-		),
-	"v < max"
-	, PURITY_PURE) {
-	assert(v);
-	while (len--) { // Note: len reduced once more, gets gigantic if len was already 0
-		assert(*v < max, "%d %d", *v, max);
-		v++;
-	}
-	return true;
-}
-
-template<typename T>
-CPU_FUNCTION(
-	void,
-	assertLess,
-	(
-		_In_ const vector<T>& v,
-		const T max
-		),
-	"v < max"
-	, PURITY_PURE) {
-	assertLess(v.data(), v.size(), max);
-}
 
 
 
@@ -764,7 +679,7 @@ FUNCTION(void, extract, (
 	"target = source[[sourceIndices]]. "
 	""
 	"Note that all of target is initialized (_Out_writes_all_)."
-	"All sourceIndices must be < sourceLength"
+	"All sourceIndices must be < sourceLength. sourceIndices does not need to be a permutation (injective), indices can repeat."
 	"target, source and sourceIndices must be different and nonoverlapping"
 	, PURITY_OUTPUT_POINTERS) {
 	assert_restricted(target, source);
@@ -824,17 +739,16 @@ http://people.sc.fsu.edu/~jburkardt/c_src/csparse/csparse.html
 CSparse Version 1.2.0 Copyright (c) Timothy A. Davis, 2006
 
 reduced to only the things needed for sparse conjugate gradient method
+and for running on CUDA, with a user-supplied memory-pool
 
 by Paul Frischknecht, August 2016
 
-and for running on CUDA, with a user-supplied memory-pool
-
-modified & used without permission
+modified & used without checking for permission...
 */
 
 
 /* --- primary CSparse routines and data structures ------------------------- */
-struct cs    /* matrix in compressed-column or triplet form . must be aligned on 8 bytes */
+struct cs    /* matrix in compressed-column or triplet form . must be aligned on 8 bytes boundary, assuming 64 bit pointers and tight packing for CUDA */
 {
 	unsigned int nzmax;	/* maximum number of entries allocated for triplet. Actual number of entries for compressed col. > 0 */
 	unsigned int m;	    /* number of rows > 0 */
@@ -867,7 +781,7 @@ FUNCTION(bool, cs_is_compressed_col, (const cs * const A), "whether A is a cromp
 
 
 FUNCTION(unsigned int, cs_x_used_entries, (const cs * const A), "how many entries of the x vector are actually used", PURITY_PURE) {
-	assert(cs_is_triplet(A) != /*xor*/ cs_is_compressed_col(A));
+	assert(cs_is_triplet(A) != /*xor*/ cs_is_compressed_col(A)); // sanity check
 	return cs_is_triplet(A) ? A->nz : A->nzmax;
 }
 
@@ -893,13 +807,13 @@ FUNCTION(char*, cs_malloc_, (MEMPOOL, unsigned int sz /* use unsigned int?*/),
 
 #define cs_malloc(varname, sz) {(varname) = (decltype(varname))cs_malloc_(MEMPOOLPARAM, (sz));}
 
-FUNCTION(void, cs_free_, (char*& memoryPool, int& memory_size, unsigned int sz), "free the last allocated thing of given size") {
+FUNCTION(void, cs_free_, (char*& memoryPool, int& memory_size, const unsigned int sz), "free the last allocated thing of given size", PURITY_OUTPUT_POINTERS) {
 	// assert(sz < INT_MAX) // TODO to be 100% correct, we'd have to check that memory_size + sz doesn't overflow
 	assert(divisible(sz, 8));
 	assert(aligned(memoryPool, 8));
 	memoryPool -= sz;
 	memory_size += (int)sz;
-	assert(memory_size >= 0);
+	assert(memory_size >= 0); // check for overflow // TODO this is actually undefined behaviour, cannot be sure ti will wrap around -- otoh we are expecting msvc on intel/cuda where this is a given
 }
 
 #define cs_free(sz) {cs_free_(MEMPOOLPARAM, (sz));}
@@ -1216,6 +1130,53 @@ CPU_FUNCTION(void, cs_dump2, (const cs * const A, FILE* f), "like cs_dump but wi
 }
 
 
+CPU_FUNCTION(void, cs_dump_mtx, (const cs * const A, FILE* f), "like cs_dump but with the .mtx file format Import-able in Mathematica"
+    , PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS) {
+    assert(f);
+
+    unsigned int p, j, m, n, nzmax;
+    unsigned int *Ap, *Ai;
+    float *Ax;
+    m = A->m; n = A->n; Ap = A->p; Ai = A->i; Ax = A->x;
+
+    assert(A->nzmax > 0);
+    assert(Ax);
+
+    fputs("%%MatrixMarket matrix coordinate real general\n", f);
+    fputs("%Created by InfiniTAM7 cs_dump_mtx\n", f);
+    fprintf(f, "%u %u ", m, n);
+    assert(m > 0 && n > 0);
+
+    if (cs_is_compressed_col(A))
+    {
+        fprintf(f, "%u\n", A->nzmax);
+        for (j = 0; j < n; j++)
+        {
+            for (p = Ap[j]; p < Ap[j + 1]; p++)
+            {
+                assert(Ai[p] < m);
+                fprintf(f, "%u %u %.18g\n", Ai[p] + 1, j + 1, assertFinite(Ax[p])); // note: 1 based indices
+            }
+        }
+    }
+    else
+    {
+        auto nz = A->nz;
+        assert(nz <= (int)A->nzmax);
+        assert(nz > 0);
+
+        fprintf(f, "%u\n", nz);
+
+        for (p = 0; p < (unsigned int)nz; p++)
+        {
+            assert(Ai[p] < m);
+            assert(Ap[p] < n);
+            fprintf(f, "%u %u %.18g\n", Ai[p] + 1, Ap[p] + 1, assertFinite(Ax[p]));
+        }
+    }
+}
+
+
 CPU_FUNCTION(
     cs *
     , cs_undump2
@@ -1394,10 +1355,18 @@ FUNCTION(fvector, vector_allocate_malloc, (const unsigned int n), "Create a new 
     return v;
 }
 
+FUNCTION(fvector, vector_allocate_malloc_copy, (_In_ const vector<float>& copy), "Note: purse except malloc") {
+    fvector v = vector_allocate_malloc(restrictSize(copy.size()));
+    memcpy(v.x, copy.data(), sizeof(float) * v.n);
+    assert(v.n);
+    assertFinite(v);
+    return v;
+}
+
 FUNCTION(fvector, vector_copy, (const fvector& other, MEMPOOL), "create a copy of other") {
 	fvector v;
 	v.n = other.n;
-	cs_malloc(v.x, sizeof(float) * nextEven(v.n));
+	cs_malloc(v.x, sizeof(float) * nextEven(v.n)); // must use nextEven cuz cs_malloc needs it for pointer alignment reasons
 	memcpy(v.x, other.x, sizeof(float) * v.n);
 	assertFinite(v);
 	return v;
@@ -1425,7 +1394,7 @@ CPU_FUNCTION(
     assert(f);
     fprintf(f, "%u\n", v.n);
     FOREACHC(y, v.x, v.n)
-        fprintf(f, "%g\n", y);
+        fprintf(f, "%.18g\n", y);
 }
 
 CPU_FUNCTION(
@@ -1492,16 +1461,14 @@ CPU_FUNCTION(
     return v;
 }
 
+
 CPU_FUNCTION(
     fvector
     , undump
     , (const char* const fn)
     , "variant syntax for undump takes a file name. USE ONLY FOR DEBUGGING TODO."
     , PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS) {
-
-    FILE* f; fopen_s(&f, fn, "rb"); // TODO does not close file
-    assert(f, "failed to undump %s", fn);
-    return undump(f);
+    return undump(fopenrb(fn)); // TODO does not close file
 }
 
 
@@ -1518,6 +1485,76 @@ CPU_FUNCTION(
     return undump_vector_float(f);
 }
 
+CPU_FUNCTION(
+    void
+    , dump2
+    , (_In_ const fvector v, _Inout_ FILE* const  f)
+    ,
+    "dump a vector of floats as a newline separated list. Note that it does not store the length, so the file must end after this. Suitable for Flatten@Import[,\"Table\"] in Mathematica"
+    , PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS /* Note: modifies f */) {
+    assert(f);
+    FOREACHC(y, v.x, v.n)
+        fprintf(f, "%.18g\n", y);
+}
+
+CPU_FUNCTION(
+    void
+    , dump3
+    , (_In_ const fvector v, _Inout_ FILE* const  f)
+    ,
+    "dump a vector of floats as a space separated list. Note that it does not store the length, so the file must end after this. Suitable for Flatten@Import[,\"Table\"] in Mathematica"
+    , PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS /* Note: modifies f */) {
+    assert(f);
+    FOREACHC(y, v.x, v.n)
+        fprintf(f, "%.18g ", y);
+}
+
+CPU_FUNCTION(
+    void
+    , dump2_vector_float
+    , (_In_ const vector<float> & v, _Inout_ FILE* const  f)
+    ,
+    "dump a vector of floats as a newline separated list. Note that it does not store the length, so the file must end after this. Suitable for Import[,\"Table\"] in Mathematica"
+    , PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS /* Note: modifies f */) {
+    assert(f);
+    for (auto y : v)
+        fprintf(f, "%.18g\n", y);
+}
+
+CPU_FUNCTION(
+    vector<float>
+    , undump23_vector_float
+    , (_Inout_ FILE* const f)
+    ,"undo dump2/3_vector_float, the file must end after this"
+    , PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS /* modifies f */) {
+
+    assert(f);
+
+    vector<float> v;
+    while (true) {
+        float y;
+        fscanf_s(f, "%g", &y);
+        if (feof(f) || ferror(f)) break;
+        assertFinite(y);
+        v.push_back(y);
+    }
+
+    assert(v.size());
+    return v;
+}
+
+CPU_FUNCTION(
+    fvector
+    , undump23
+    , (_Inout_ FILE* const f)
+    , "undo dump2/3, the file must end after this"
+    , PURITY_ENVIRONMENT_DEPENDENT | PURITY_OUTPUT_POINTERS /* modifies f */) {
+    return vector_allocate_malloc_copy(undump23_vector_float(f));
+}
+
+TEST(tdump23) {
+    // TODO
+}
 
 
 struct matrix {
@@ -3314,7 +3351,7 @@ namespace vecmath {
 					{
 						cholesky[c + r * size] = assertFinite(val);
 						if (val == 0) { rank = r; }
-						inv_diag = 1.0f / val;
+						inv_diag = 1.0f / val; // potential division by 0 if matrix does not satisfy conditions, e.g. if it is not positive definite -- can add small (random) perturbations to avoid this (in most cases?)
 					}
 					else
 					{
@@ -5248,7 +5285,8 @@ namespace memory {
 
 
     /// Linearized pixel index
-    FUNCTION(unsigned int, pixelLocId, (const unsigned int x, const unsigned int y, const Vector2ui &imgSize), "undefined where overflows occur", PURITY_PURE) {
+    FUNCTION(unsigned int, pixelLocId, (const unsigned int x, const unsigned int y, const Vector2ui &imgSize), "undefined where overflows occur or coordinate is outisde of image", PURITY_PURE) {
+        assert(x < imgSize.x && y < imgSize.y);
         return x + y * imgSize.x;
     }
 
@@ -5411,15 +5449,25 @@ const Vector2ui & imgSize), "", PURITY_PURE) {
             imgSize)];
 }
 
-/// Whether interpolation should return an illegal color when holes make interpolation impossible
 #define WITH_HOLES true
-/// Sample 4 channel image with bilinear interpolation (T_IN::toFloat must return Vector4f)
-/// IF withHoles == WITH_HOLES: returns makeIllegalColor<OUT>() when any of the four surrounding pixels is illegal (has negative w).
-template<typename T_OUT, //!< Vector4f or float
-    bool withHoles = false, typename T_IN> 
-FUNCTION(Vector4f, interpolateBilinear,(
-    const T_IN * const source,
-    const Vector2f & position, const Vector2ui & imgSize), "", PURITY_PURE)
+template<
+    typename T_OUT, //!< Vector4f or float
+    bool withHoles = false, 
+    typename T_IN
+> 
+FUNCTION(
+    Vector4f
+    , interpolateBilinear
+    ,(
+        _In_ const T_IN * const source
+        , _In_ const Vector2f & position
+        , _In_ const Vector2ui & imgSize
+    )
+    , "Sample 4 channel image with bilinear interpolation (T_IN::toFloat must return Vector4f)"
+    "IF withHoles == WITH_HOLES: returns makeIllegalColor<OUT>() when any of the four surrounding pixels is illegal (has negative w)."
+    "withHoles specifies whether interpolation should return an illegal color (isLegalColor, IllegalColor<T_OUT>::make()) when holes (illegal colors) make interpolation impossible"
+    , PURITY_PURE
+    )
 {
     T_OUT result;
     Vector2ui p; Vector2f delta;
@@ -5473,7 +5521,7 @@ static KERNEL forEachPixelNoImage_device(Vector2ui imgSize) {
 #define forEachPixelNoImage_process() static FUNCTION(void, process,(const unsigned int x, const unsigned int y, const unsigned int locId), "")
 
 /** apply
-F::process(int x, int y, int locId)
+F::process(int x, int y, int locId) [ forEachPixelNoImage_process() ]
 to each (hypothetical) pixel in the image
 
 locId runs through values generated by pixelLocId(x, y, imgSize);
@@ -5557,13 +5605,13 @@ struct filterSubsample {
         auto imageData_out = (T * const)_imageData_out;
         // 
 
-        unsigned int src_pos_x = x * 2, src_pos_y = y * 2;
-        T pixel_out = 0.0f, pixel_in;
-        float no_good_pixels = 0.0f;
+        const unsigned int src_pos_x = x * 2, src_pos_y = y * 2;
+        /*mutable*/ T pixel_out = 0.0f;
+        /*mutable*/ float no_good_pixels = 0.0f;
 
 #define sample(dx,dy) \
-    pixel_in = imageData_in[(src_pos_x + dx) + (src_pos_y + dy) * oldDims.x]; \
-	if (!withHoles || isLegalColor(pixel_in)) { pixel_out += pixel_in; no_good_pixels++; }
+    {const T pixel_in = imageData_in[(src_pos_x + dx) + (src_pos_y + dy) * oldDims.x]; \
+	if (!withHoles || isLegalColor(pixel_in)) { pixel_out += pixel_in; no_good_pixels++; }}
 
         sample(0, 0);
         sample(1, 0);
@@ -6340,11 +6388,12 @@ return a unique nonzero value for key.
 
 *Allocation is not guaranteed in only one requestAllocation(key) -> performAllocations() cycle*
 At most one entry will be allocated per hash(key) in one such cycle.
+This strategy allows parallel kernels to request allocation without having to check whether this has already been done.
 
 c.f. ismar15infinitam.pdf
 
 Note: As getSequenceId(key) reads from global memory it might be advisable to cache results,
-especially when it is expected that the same entry is accessed multiple times from the same thread.
+especially when it is expected that the same entry is accessed multiple times from the same thread (block).
 
 In particular, when you index into a custom large datastructure with the result of this, you might want to copy
 the accessed data to __shared__ memory for optimum performance.
@@ -7190,9 +7239,10 @@ Stores the information of a single voxel in the volume
 */
 class ITMVoxel
 {
-private:
+//private:
     // signed distance, fixed comma 16 bit int, converted to snorm [-1, 1] range as described by OpenGL standard (?)/terminology as in DirectX11
     // saving storage
+public:
     short sdf;  // aka. 'doriginal, D()'
 public:
     /** Value of the truncated signed distance transformation, in [-1, 1] (scaled by truncation distance mu when storing) */
@@ -7862,7 +7912,7 @@ namespace TestScene {
             assert(radiusInWorldCoordinates > 0);
 
             // world-space coordinate position of current voxel
-            Vector3f voxelGlobalPos = globalPoint.location;
+            const Vector3f voxelGlobalPos = globalPoint.location;
 
             // Compute distance to origin
             const float distanceToOrigin = length(voxelGlobalPos);
@@ -7901,12 +7951,12 @@ namespace TestScene {
 #ifdef __CUDACC__
             const dim3 count(counti, counti, counti);
             LAUNCH_KERNEL(buildBlockRequests, count, 1, offset);
+
+			Scene::performCurrentSceneAllocations();
 #else
             XYZ_over(counti, counti, counti)
-                Scene::requestCurrentSceneVoxelBlockAllocation(VoxelBlockPos(x, y, z));
+				Scene::getCurrentScene()->performVoxelBlockAllocation(VoxelBlockPos(x+ offseti, y + offseti, z + offseti));
 #endif
-
-            Scene::performCurrentSceneAllocations();
         } while (Scene::getCurrentScene()->countVoxelBlocks() != counti*counti*counti);
 
         // Then set up the voxels to represent a sphere
@@ -7937,13 +7987,13 @@ namespace TestScene {
 
 #ifdef __CUDACC__
         LAUNCH_KERNEL(buildBlockRequests, dim3(10, 10, 1), 1, Vector3i(0, 0, 0));
+		Scene::performCurrentSceneAllocations();
 #else
         XYZ_over(10, 10, 1)
-            Scene::requestCurrentSceneVoxelBlockAllocation(VoxelBlockPos(x, y, z));
+			Scene::getCurrentScene()->performVoxelBlockAllocation(VoxelBlockPos(x, y, z));
 #endif
 
 
-        Scene::performCurrentSceneAllocations();
 
         Scene::getCurrentScene()->doForEachAllocatedVoxel<BuildWall>();
     }
@@ -8266,12 +8316,17 @@ FUNCTION(UnitVector, computeSingleNormalFromSDFByForwardDifference,(
         lookup(0, 1, 0) - sdf0,
         lookup(0, 0, 1) - sdf0
         );
+	if (length(n) < 1e-6) {
+		isFound = false;
+		return Vector3f();
+	}
     return n.normalised(); // TODO in a distance field, normalization should not be necessary? But this is not a true distance field.
 }
 
 /// Compute SDF normal by interpolated symmetric differences
 /// Used in processPixelGrey
 // Note: this gets the localVBA list, not just a *single* voxel block.
+// TODO should return a UnitVector, no?
 FUNCTION(Vector3f, computeSingleNormalFromSDF, (
     const Vector3f &point), "", PURITY_ENVIRONMENT_DEPENDENT)
 {
@@ -8426,7 +8481,7 @@ FUNCTION(Vector3f, computeSingleNormalFromSDF, (
 #undef COMPUTE_COEFF_POS_FROM_POINT
 #undef lookup
 
-FUNCTION(void, assertApproximatelyUnitVector, (UnitVector normal), "undefined if v does not have unit length") {
+FUNCTION(void, assertApproximatelyUnitVector, (Vector3f normal), "undefined if v does not have unit length") {
     assert(abs(length(normal) - 1) < 0.01, "invalid normal n = (%f %f %f), |n| = %f", xyz(normal), length(normal));
 }
 
@@ -9273,7 +9328,7 @@ Beyond that a sliding average is computed.
             {
                 // "take the block coordinates of voxels on this line segment"
                 const VoxelBlockPos blockPos = TO_SHORT_FLOOR3(point.location);
-                Scene::requestCurrentSceneVoxelBlockAllocation(blockPos);
+                Scene::requestCurrentSceneVoxelBlockAllocation(blockPos); // note that the same block will be requested many times for neighboring pixels
 
                 point = point + direction;
             }
@@ -9947,18 +10002,17 @@ namespace sopd {
 #if !GPU_CODE && DUMP_LS
         if (J->n > 1000) {
             {
-                puts("dumping to J2.txt\n");
-                FILE* file; fopen_s(&file, "J2.txt", "wb");
-                assert(file, "could not open J2.txt");
-                cs_dump2(J, file);
+                puts("dumping to J2.mtx\n");
+                FILE* file; fopen_s(&file, "J2.mtx", "wb");
+                assert(file, "could not open J2.mtx");
+                cs_dump_mtx(J, file);
                 mustSucceed(0 == fclose(file));
             }
 
         {
-            puts("dumping to minusFx.txt\n");
-            FILE* file; fopen_s(&file, "minusFx.txt", "wb");
-            assert(file, "could not open minusFx.txt");
-            dump(vector_wrapper(sop->minusFx, sop->lengthFx), file);
+            puts("dumping to minusFx.dump3(fvector).txt\n");
+            FILE* file = fopenwb("minusFx.dump3(fvector).txt");
+            dump3(vector_wrapper(sop->minusFx, sop->lengthFx), file);
             mustSucceed(0 == fclose(file));
         }
         }
@@ -9972,10 +10026,9 @@ namespace sopd {
 
 #if !GPU_CODE && DUMP_LS
         {
-            puts("dumping least squares solution to h.txt\n");
-            FILE* file; fopen_s(&file, "h.txt", "wb");
-            assert(file, "could not open h.txt");
-            dump(vector_wrapper(sop->h, sop->lengthY), file);
+            puts("dumping least squares solution to h.dump(fvector).txt\n");
+            FILE* file = fopenwb("h.dump3(fvector).txt");
+            dump3(vector_wrapper(sop->h, sop->lengthY), file);
             mustSucceed(0 == fclose(file));
         }
 #endif
@@ -11528,7 +11581,7 @@ TEST(getOptimizationBlocks1) {
 
 
 
-
+// Initialize A D for hierarchical optimization
 
 struct InitAD {
     doForEachAllocatedVoxel_process() {
@@ -11537,7 +11590,7 @@ struct InitAD {
     }
 };
 
-void initAD(Scene* scene) {
+CPU_FUNCTION(void, initAD, (Scene* scene), "initialize Drefined to D and albedo to 1", PURITY_OUTPUT_POINTERS) {
     assert(scene);
     CURRENT_SCENE_SCOPE(scene);
 
@@ -11557,6 +11610,148 @@ void initAD(Scene* scene) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Random perturbation of D, necessary because of Cholesky solver in lighting estimation for too-precise-data // TODO really?!
+
+GLOBAL(float, perturbFactor, 0.f, "");
+
+struct PerturbD {
+    doForEachAllocatedVoxel_process() {
+        // pseudorandom based on position _perturbFactor ignored
+        unsigned int ri = 1 & Z3Hasher<Vector3i>::hash(globalPos);
+
+        if (ri && v->sdf != SHRT_MIN) v->sdf -= 1;
+
+        /*
+        // pseudorandom based on position
+        unsigned int ri = 0x7fffffu & Z3Hasher<Vector3i>::hash(globalPos); // the first 23 bits
+        ri |= (127u << (32-1-8)); // use the right exponent: 0
+        const float r = *(float*)&ri - 1.f; // change 1 - 2 range to 0-1 range
+        assert(r >= 0.f && r <= 1.f);
+
+        v->setSDF(CLAMP(v->getSDF() + r * perturbFactor, -1.f, 1.f));
+        */
+    }
+};
+
+CPU_FUNCTION(void, perturbD, (Scene* scene, const float _perturbFactor), "", PURITY_OUTPUT_POINTERS) {
+    assert(_perturbFactor > 0);
+    perturbFactor = _perturbFactor;
+    assert(scene);
+    CURRENT_SCENE_SCOPE(scene);
+
+    scene->doForEachAllocatedVoxel<PerturbD>();
+}
+
+TEST(perturbD1) {
+    Scene* s = new Scene;
+
+    VoxelBlockPos p(0, 0, 0);
+    s->performVoxelBlockAllocation(p);
+    const float old = s->getVoxel(Vector3i(1, 0, 0))->getSDF(); // voxel 0,0,0 will stay unchanged with the current hasher..
+
+    perturbD(s, 1.f);
+
+    const float newv = s->getVoxel(Vector3i(1, 0, 0))->getSDF();
+    assert(old != newv);
+    delete s;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Smooth unrefined SDF, useful for faking over-regularized data
+// Undoes the optimization we are trying to do
+struct SmoothSDF {
+	doForEachAllocatedVoxel_process() {
+		const Vector3i gp = globalPos;
+		float aSDF = 0.f;
+		float count = 0.f;
+		// compute average of 3^3 block
+		XYZ_over(3,3,3) { // xyz from 0 to 2
+			auto const v = Scene::getCurrentSceneVoxel(
+				gp
+				/*globalPos COMPILER ERROR? FOR SOME REASON THIS VALUE IS MESSED UP HERE, MUST USE COPY
+				maybe its just the debugger displaying it incorrectly*/
+				+ Vector3i((int)x - 1, (int)y - 1, (int)z - 1)
+				);
+
+			if (!v) continue;
+			aSDF += v->getSDF();
+			count += 1.f;
+		}
+		assert(count > 0 && count <= (3*3*3));
+		assert(abs(aSDF) <= (3 * 3 * 3)); // getSDF will return values between -1 and 1, so the sum of 9 of them is lesseq 9
+		aSDF /= count;
+
+		v->setSDF(aSDF);
+	}
+};
+
+CPU_FUNCTION(void, smoothSDF, (Scene* const scene), "set all sdf values to the average of their 1-neighborhood", PURITY_OUTPUT_POINTERS) {
+	assert(scene);
+	CURRENT_SCENE_SCOPE(scene);
+
+	scene->doForEachAllocatedVoxel<SmoothSDF>();
+}
+
+
+TEST(smoothSDF1) {
+	Scene* s = new Scene;
+
+	VoxelBlockPos p(0, 0, 0);
+	s->performVoxelBlockAllocation(p);
+	s->getVoxelBlock(p)->resetVoxels();
+
+	s->getVoxel(Vector3i(0, 0, 0))->setSDF(0.f);
+	assert(s->getVoxel(Vector3i(1, 0, 0))->getSDF() == 1.f);
+
+	smoothSDF(s);
+
+	const float newv = s->getVoxel(Vector3i(0, 0, 0))->getSDF();
+	assert(newv > 0.f && newv < 1.f);
+
+	// immediate neighborhood should also change
+	const float newv2 = s->getVoxel(Vector3i(1, 0, 0))->getSDF();
+	assert(newv2 > 0.f && newv2 < 1.f);
+	assert(newv2 > newv);
+
+	delete s;
+}
 
 
 
@@ -12004,6 +12199,8 @@ struct fSigmaSimpleMoveZ {
 
 template<typename fSigma>
 void testSigmaFor(const vector<float>& i) {
+	// Calls fSigma::f and fSigma::df for each derivative with input i.
+
     assertFinite(i);
     assert(fSigma::lengthz == i.size());
     vector<float> o;
@@ -12011,7 +12208,7 @@ void testSigmaFor(const vector<float>& i) {
     o = fconst(fSigma::lengthfz, INFINITY);
     fSigma::f(i.data(), o.data());
     assertFinite(o);
-    assertEachInRange(o, -1.e5f, 1.e5f); // large values will lead to problems while solving
+    assertEachInRange(o, -1.e5f, 1.e5f); // large values will lead to problems (ill conditioning) while solving
 
     DO(j, fSigma::lengthz) {
         printf("j %u\n", j);
@@ -12110,12 +12307,16 @@ struct fSigmaReal {
 
 
 TEST(fSigmaReal1) {
+    // TODO taking all derivatives is not needed: my energy will never be derived by certain variables, so it does not need to be shoehorned to support these derivatives
+
+    /*
 	testSigma<fSigmaReal>(false // intensity should not be -1 by how gamma is defined, c.f. SceneXEnergyf
 		// TODO should be able to formally specify constraints, maybe even solve with considering them
 		);
 
     // example input that might have large derivatives
-    testSigmaFor<fSigmaReal>(undump_vector_float("../TestFixtures/fSigmaRealInputZ.txt"));
+    testSigmaFor<fSigmaReal>(undump_vector_float("../TestFixtures/fSigmaRealInputZ.dump(fvector).txt"));
+    */
 }
 
 
@@ -12269,29 +12470,49 @@ TEST(refineScene1) {
 /// c.f. chapter "Lighting Estimation with Signed Distance Fields"
 namespace Lighting {
 
-    struct LightingModel {
-        static const int b2 = 9;
+    // SphericalHarmonic9 lighting model
+    // we do not CHANGE/update this, make a copy if we need something different
+    // Instances can live in GPU memory
+    struct SphericalHarmonic9LightingModel : public Managed {
+
+        // 9
+        static const unsigned int b2 = 9;
 
         /// \f[a \sum_{m = 1}^{b^2} l_m H_m(n)\f]
         /// \f$v\f$ is some voxel (inside the truncation band)
         // TODO wouldn't the non-refined voxels interfere with the updated, refined voxels, 
         // if we just cut them off hard from the computation?
-        CPU_MEMBERFUNCTION(float, getReflectedIrradiance, (float albedo, //!< \f$a(v)\f$
+        MEMBERFUNCTION(
+            float
+            , getReflectedIrradiance
+            
+            , (float albedo, //!< \f$a(v)\f$
             Vector3f normal //!< \f$n(v)\f$
-            ) const, "", PURITY_PURE){
+            ) const
+            , ""
+            , PURITY_PURE) {
+
             assert(albedo >= 0);
-            float o = 0;
-            for (int m = 0; m < b2; m++) {
+            /*mutable */ float o = 0;
+            DO(m, b2) {
                 o += l[m] * sphericalHarmonicHi(m, normal);
             }
-            return albedo * o;
+
+            return assertFinite(albedo * o);
         }
 
         // original paper uses svd to compute the solution to the linear system, but how this is done should not matter
-        LightingModel(std::array<float, b2>& l) : l(l){
-            assert(l[0] > 0); // constant term should be positive - otherwise the lighting will be negative in some places (?)
+        SphericalHarmonic9LightingModel(std::array<float, b2>& l_) {
+            assert(l_.size() == b2);
+            DO(i, b2) l[i] = l_[i];
+
+            assertFinite(l, b2);
+            //assert(l[0] > 0); // constant term should be positive - otherwise the lighting will be negative in some places (?)
         }
-        LightingModel(const LightingModel& m) : l(m.l){}
+        SphericalHarmonic9LightingModel(const SphericalHarmonic9LightingModel& m)  {
+            DO(i, b2) l[i] = m.l[i];
+            assertFinite(l, b2);
+        }
 
         static FUNCTION(float, sphericalHarmonicHi, (const int i, const Vector3f& n), "", PURITY_PURE) {
             assert(i >= 0 && i < b2);
@@ -12304,7 +12525,7 @@ namespace Lighting {
             case 5: return n.y * n.z;
             case 6: return -n.x * n.x - n.y * n.y + 2.f * n.z * n.z;
             case 7: return n.z * n.x;
-            case 8: return n.x - n.y * n.y;
+            case 8: return n.x * n.x - n.y * n.y;
 
             default: fatalError("sphericalHarmonicHi not defined for i = %d", i);
             }
@@ -12312,10 +12533,10 @@ namespace Lighting {
         }
 
 
-        const std::array<float, b2> l;
+        /* const */ float l[b2];
 
-        OSTREAM(LightingModel) {
-            for (auto & x : o.l) os << x << ", ";
+        OSTREAM(SphericalHarmonic9LightingModel) {
+            DO(i, SphericalHarmonic9LightingModel::b2) os << o.l[i] << ", ";
             return os;
         }
     };
@@ -12323,7 +12544,7 @@ namespace Lighting {
     /// for constructAndSolve
     struct ConstructLightingModelEquationRow {
         // Amount of columns, should be small
-        static const unsigned int m = LightingModel::b2;
+        static const unsigned int m = SphericalHarmonic9LightingModel::b2;
 
         /*not really needed */
         struct ExtraData {
@@ -12411,8 +12632,8 @@ namespace Lighting {
             assertApproximatelyUnitVector(normal);
 
             // i-th (voxel-th) row of A shall contain H_{0..b^2-1}(n(v))
-            DO(j, LightingModel::b2) {
-                out_ai[j] = LightingModel::sphericalHarmonicHi(j, normal);
+            DO(j, SphericalHarmonic9LightingModel::b2) {
+                out_ai[j] = SphericalHarmonic9LightingModel::sphericalHarmonicHi(j, normal);
             }
 
             // corresponding entry of b is I(v) / a(v)
@@ -12430,7 +12651,7 @@ namespace Lighting {
 
     // todo should we really discard the existing lighting model the next time? maybe we could use it as an initialization
     // when solving
-    LightingModel estimateLightingModel() {
+    SphericalHarmonic9LightingModel estimateLightingModel() {
         assert(Scene::getCurrentScene());
         // Maximum number of entries
 
@@ -12445,14 +12666,14 @@ namespace Lighting {
         ConstructLightingModelEquationRow::ExtraData extra_count;
         const auto l_harmonicCoefficients = LeastSquares::constructAndSolve<ConstructLightingModelEquationRow>(n, gridDim, blockDim, extra_count);
         assert(extra_count.count > 0 && extra_count.count <= n); // sanity check
-        assert(l_harmonicCoefficients.size() == LightingModel::b2);
+        assert(l_harmonicCoefficients.size() == SphericalHarmonic9LightingModel::b2);
 
         // VectorX to std::array
-        std::array<float, LightingModel::b2> l_harmonicCoefficients_a;
-        DO(i, LightingModel::b2)
+        std::array<float, SphericalHarmonic9LightingModel::b2> l_harmonicCoefficients_a;
+        DO(i, SphericalHarmonic9LightingModel::b2)
             l_harmonicCoefficients_a[i] = assertFinite(l_harmonicCoefficients[i]);
 
-        LightingModel lightingModel(l_harmonicCoefficients_a);
+        SphericalHarmonic9LightingModel lightingModel(l_harmonicCoefficients_a);
         return lightingModel;
     }
 
@@ -12463,7 +12684,7 @@ namespace Lighting {
     struct ComputeLighting {
         doForEachAllocatedVoxel_process() {
             // skip voxels without computable normal
-            bool found = true;
+            /*mutable */ bool found = true;
             const UnitVector normal = computeSingleNormalFromSDFByForwardDifference(globalPos, found);
             if (!found) return;
 
@@ -12473,18 +12694,9 @@ namespace Lighting {
         }
     };
 
-    // Artificial lighting 'shaders'
-    GLOBAL_UNINITIALIZED(Vector3f, lightNormal, "Direction towards directional light source");
-    struct DirectionalArtificialLighting {
-        static FUNCTION(Vector3u, operate,(UnitVector normal), "") {
-            const float cos = MAX(0.f, dot(normal, lightNormal));
-            assertFinite(cos);
-            assert(cos >= 0.f && cos <= 1.001f);
-            return Vector3u(cos * 255, cos * 255, cos * 255);
-        }
-    };
 
-    // compute voxel color according to given functor f from normal
+    // compute & override voxel color according to given functor F from normal
+    // note that the existing color is completely discarded and the computation can only depend on the normal, not any other attributes of the voxel
     // c(v) := F::operate(n(v))
     // 'lighting shader baking' (lightmapping)
     template<typename F>
@@ -12494,12 +12706,46 @@ namespace Lighting {
         Scene::getCurrentScene()->doForEachAllocatedVoxel<ComputeLighting<F>>();
     }
 
-    CPU_FUNCTION(void, computeArtificialDirectionalLighting, (Scene* scene, Vector3f _lightNormal), "", PURITY_OUTPUT_POINTERS){
+    // Artificial lighting 'shaders'
+    GLOBAL_UNINITIALIZED(Vector3f, lightNormal, "Direction towards directional light source");
+    struct DirectionalArtificialLighting {
+        static FUNCTION(Vector3u, operate, (UnitVector normal), "") {
+            const float cos = MAX(0.f, dot(normal, lightNormal));
+            assertFinite(cos);
+            assert(cos >= 0.f && cos <= 1.001f);
+            return Vector3u(cos * 255, cos * 255, cos * 255);
+        }
+    };
+
+    CPU_FUNCTION(void, computeArtificialDirectionalLighting, (_Inout_ Scene* const scene, _In_ Vector3f const _lightNormal), "", PURITY_OUTPUT_POINTERS){
         lightNormal = _lightNormal;
-        assert(abs(length(lightNormal) - 1) < 0.001f);
+        assertApproximatelyUnitVector(lightNormal);
 
         CURRENT_SCENE_SCOPE(scene);
         computeArtificialLighting<DirectionalArtificialLighting>();
+    }
+
+    GLOBAL(SphericalHarmonic9LightingModel*, sphModel, 0, "used by SphericalHarmonic9ArtificialLighting");
+    struct SphericalHarmonic9ArtificialLighting {
+        static FUNCTION(Vector3u, operate, (UnitVector normal), "") {
+
+            const float reflected = CLAMP(sphModel->getReflectedIrradiance(1.f // TODO give a way to shade -with- albedo
+                , normal), 0.f, 1.f);
+            assertFinite(reflected);
+
+            return Vector3u(reflected * 255, reflected * 255, reflected * 255);
+        }
+    };
+
+    CPU_FUNCTION(void, computeArtificialSphericalHarmonic9Lighting, (_Inout_ Scene* const scene, _In_ SphericalHarmonic9LightingModel& const _sphModel), "", PURITY_OUTPUT_POINTERS){
+        sphModel = new SphericalHarmonic9LightingModel(_sphModel);
+        cout << "computing artificial lighting with SphericalHarmonic9LightingModel with coefficients " << *sphModel << endl;
+
+        CURRENT_SCENE_SCOPE(scene);
+        computeArtificialLighting<SphericalHarmonic9ArtificialLighting>();
+
+        delete sphModel;
+        sphModel = 0;
     }
 }
 
@@ -12522,7 +12768,7 @@ namespace Lighting {
 
 
 namespace resample {
-    GLOBAL(Scene const *, coarse, 0);
+    GLOBAL(Scene*, coarse, 0);
     GLOBAL(Scene*, fine, 0);
 
 
@@ -12595,10 +12841,10 @@ namespace resample {
 
 
     template<typename T>
-    CPU_FUNCTION(void, initFineFromCoarseGen, (_Inout_ Scene * const fine_, _In_ Scene const * const coarse_), "") {
+    CPU_FUNCTION(void, initFineFromCoarseGen, (_Inout_ Scene * const fine_, _In_ Scene const * const coarse_), "", PURITY_OUTPUT_POINTERS) {
         assert(fine_ != coarse_);
-        coarse = coarse_;
-        fine = fine_;
+        coarse = (Scene*)coarse_;
+        fine = (Scene*)fine_;
 
         assert(fine, "%p", fine); assert(coarse, "%p", coarse);
         assert(coarse->getVoxelSize() > fine->getVoxelSize());
@@ -12621,12 +12867,93 @@ namespace resample {
         initFineFromCoarseGen<CoarseToFineAD>(fine_, coarse_);
         printf("initFineADFromCoarseAD ends\n");
     }
+
+
+	/*
+	A doForEachAllocatedVoxel_process-handler that downsamples the current fine scene's color 
+	and sdf values into coarse, which must be the 'current scene'.
+	This uses simple nearest neightbor lookup to find voxels in the fine grid corresponding to allocated
+	voxels in the coarse grid. It does not allocate new voxels.
+
+	Call with current scene == coarse and fine and coarse pointers initialized correctly.
+	*/
+	struct FineToCoarseColorAndD {
+		doForEachAllocatedVoxel_process() {
+			assert(Scene::getCurrentScene() == coarse);
+			assert(fine != Scene::getCurrentScene());
+
+			const float fineMu = voxelSize_to_mu(fine->getVoxelSize());
+			const float coarseMu = voxelSize_to_mu(coarse->getVoxelSize()); // mu
+
+			const auto fineVoxelCoord = fine->voxelCoordinates_->convert(globalPoint);
+			const Vector3f finePoint = fineVoxelCoord.location;
+			const ITMVoxel* const fineVoxel = fine->getVoxel(finePoint.toIntFloor());
+
+			if (!fineVoxel) return; // cannot do anything without data
+
+			float rsdf = fineVoxel->getSDF() * fineMu;
+			rsdf /= coarseMu;
+			rsdf = CLAMP(rsdf, -1.f, 1.f); 
+
+			v->setSDF(rsdf);
+			v->w_depth = 1;
+
+			v->clr = fineVoxel->clr;
+			v->w_color = 1;
+		}
+	};
+
+	CPU_FUNCTION(void, initCoarseFromFine, (_Inout_ Scene * const coarse_, _In_ Scene const * const fine_), "", PURITY_OUTPUT_POINTERS) {
+		assert(fine_ != coarse_);
+		coarse = (Scene*)coarse_;
+		fine = (Scene*)fine_;
+
+		assert(fine, "%p", fine); assert(coarse, "%p", coarse);
+		assert(coarse->getVoxelSize() > fine->getVoxelSize());
+
+		CURRENT_SCENE_SCOPE(coarse);
+		coarse->doForEachAllocatedVoxel<FineToCoarseColorAndD>();
+	}
 }
 
 
 
-// INSERTIONPOINT
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// INSERTIONPOINT
+// Keep this point always at the boundary between the InfiniTAM implementation and its interface(s)
 
 
 
@@ -12796,7 +13123,9 @@ namespace WSTP {
     }
 
     // putFloatList rather
-    void putFloatArray(const float* a, const int n) {
+    void putFloatArray(const float* a, const unsigned int n) {
+        assertFinite(a, n);
+
         int dims[] = {n};
         const char* heads[] = {"List"};
         WSPutReal32Array(stdlink, a, dims, heads, 1); // use List function
@@ -12945,6 +13274,18 @@ extern "C" {
     int createScene(double voxelSize_) {
         return addScene(new Scene(voxelSize_));
     }
+
+	void buildWallScene(int id) {
+		CURRENT_SCENE_SCOPE(getScene(id));
+		TestScene::buildWallScene();
+		WL_RETURN_VOID();
+	}
+
+	void buildSphereScene(int id, double rad) {
+		CURRENT_SCENE_SCOPE(getScene(id));
+		TestScene::buildSphereScene(rad);
+		WL_RETURN_VOID();
+	}
 
     int sceneExistsQ(int id) {
         return id >= 0 && id < scenes.size();
@@ -13102,6 +13443,19 @@ extern "C" {
         WL_RETURN_VOID();
     }
 
+    void perturbD(int id) {
+        assert(id >= 0);
+        perturbD(getScene(id), 1.f);
+        WL_RETURN_VOID();
+    }
+
+	void smoothSDF(int id) {
+		assert(id >= 0);
+		smoothSDF(getScene(id));
+		WL_RETURN_VOID();
+	}
+	
+    
 
     // init fine d(refined) and a by supersampling coarse
     void initFineADFromCoarseAD(int idFine, int idCoarse) {
@@ -13111,6 +13465,14 @@ extern "C" {
 
         WL_RETURN_VOID();
     }
+
+	void initCoarseFromFine(int idCoarse, int idFine) {
+		assert(idFine != idCoarse);
+
+		resample::initCoarseFromFine(getScene(idCoarse), getScene(idFine));
+
+		WL_RETURN_VOID();
+	}
 
     void refineScene(int id,
         // energy term weights // TODO make more generic
@@ -13174,6 +13536,40 @@ extern "C" {
 
         WL_RETURN_VOID();
     }
+
+	void computeArtificialDirectionalLighting(int id, double* dir, long n) {
+		assert(n == 3);
+
+		using namespace Lighting;
+		Vector3f lightNormal = Vector3f(comp012(dir)).normalised();
+		computeArtificialDirectionalLighting(getScene(id), lightNormal);
+
+		WL_RETURN_VOID();
+	}
+
+    void computeArtificialSphericalHarmonic9Lighting(int id, double* l, long n) {
+
+        using namespace Lighting;
+        assert(n == SphericalHarmonic9LightingModel::b2);
+        std::array<float, SphericalHarmonic9LightingModel::b2> lf;
+        DO(i, SphericalHarmonic9LightingModel::b2) lf[i] = assertFinite(l[i]);
+
+        SphericalHarmonic9LightingModel lightingModel(lf);
+        computeArtificialSphericalHarmonic9Lighting(getScene(id), lightingModel);
+
+        WL_RETURN_VOID();
+    }
+	
+
+    void estimateLighting(int id) {
+
+        using namespace Lighting;
+        CURRENT_SCENE_SCOPE(getScene(id));
+        SphericalHarmonic9LightingModel l = estimateLightingModel();
+
+        assertFinite(l.l, SphericalHarmonic9LightingModel::b2);
+        putFloatArray(l.l, SphericalHarmonic9LightingModel::b2);
+    }
 }
 
 
@@ -13200,9 +13596,13 @@ void preWsMain() {
 
 void preWsExit() {
     //boosthello();
+    /*
+    
+    int s = createScene(1.);
+    deserializeScene(s, "serial7_1ad.bin");
+    double l[] = {1, 1, 1};
+    refineScene(s, 1., 1., 1., 1., l, 3);
 
-
-   
     
     // this does not currently converge
     // Arises in demo scene...
